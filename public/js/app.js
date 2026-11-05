@@ -415,19 +415,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     openFileHub();
   });
 
-  // Update educator profile in sidebar from state
+  // Update educator profile in sidebar and header from state (Strict blank default compliance)
   const updateSidebarProfile = () => {
-    const s = store.getSettings();
+    const prof = store.getEducatorProfile ? store.getEducatorProfile() : store.getSettings()?.educatorProfile;
     const nameEl = document.getElementById('sidebar-educator-name');
     const instEl = document.getElementById('sidebar-educator-inst');
     const headerNameEl = document.getElementById('header-educator-name');
-    if (nameEl) nameEl.textContent = s.educatorProfile?.name || 'Dr. Maria Santos';
-    if (instEl) instEl.textContent = s.educatorProfile?.institution || 'College of Education';
-    if (headerNameEl) headerNameEl.textContent = s.educatorProfile?.name || 'Dr. Maria Santos';
+    const hasName = Boolean(prof?.name && prof.name.trim().length > 0);
+    const hasInst = Boolean(prof?.institution && prof.institution.trim().length > 0);
+
+    if (nameEl) nameEl.textContent = hasName ? prof.name : 'Educator Profile';
+    if (instEl) instEl.textContent = hasInst ? prof.institution : 'Institution Not Set';
+    if (headerNameEl) headerNameEl.textContent = hasName ? prof.name : 'Educator';
   };
   updateSidebarProfile();
   store.subscribe((evt) => {
-    if (evt === 'settingsUpdated') {
+    if (evt === 'settingsUpdated' || evt === 'profileUpdated' || evt === 'userSwitched') {
       updateSidebarProfile();
       updateApiStatusIndicator();
       updateHeaderPalette();

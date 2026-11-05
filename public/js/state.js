@@ -6,8 +6,23 @@ const STORAGE_KEYS = {
   DESIGNS: 'pedaia_saved_designs_v1',
   TEMPLATES: 'pedaia_prompt_templates_v1',
   SETTINGS: 'pedaia_settings_v1',
-  ACTIVE_BUILDER_STATE: 'pedaia_active_builder_state_v1'
+  ACTIVE_BUILDER_STATE: 'pedaia_active_builder_state_v1',
+  USER_PROFILES: 'pedaia_user_profiles_v1',
+  ACTIVE_USER: 'pedaia_active_user_id_v1',
+  MATERIALS_GENERATED: 'pedaia_materials_generated_count'
 };
+
+export const BLANK_EDUCATOR_PROFILE = Object.freeze({
+  name: '',
+  title: '',
+  institution: '',
+  department: '',
+  educationalLevel: '',
+  specialization: '',
+  bio: '',
+  email: '',
+  avatarUrl: ''
+});
 
 export const DEFAULT_PROVIDERS = {
   gemini: { apiKey: '', model: 'gemini-2.5-flash' },
@@ -35,13 +50,7 @@ const DEFAULT_SETTINGS = {
   model: 'gemini-2.5-flash',
   temperature: 0.7,
   providers: DEFAULT_PROVIDERS,
-  educatorProfile: {
-    name: 'Dr. Maria Santos',
-    institution: 'College of Teacher Education',
-    defaultSubject: 'Science',
-    defaultLevel: 'Junior High School',
-    defaultModality: 'Face-to-Face'
-  }
+  educatorProfile: { ...BLANK_EDUCATOR_PROFILE }
 };
 
 class StateStore {
@@ -251,9 +260,26 @@ class StateStore {
           model: parsed.model || 'gemini-2.5-flash'
         };
       }
+
+      // Respect strict blank default requirement: purge legacy sample identity
+      let educatorProfile = parsed.educatorProfile;
+      if (educatorProfile && educatorProfile.name === 'Dr. Maria Santos') {
+        educatorProfile = { ...BLANK_EDUCATOR_PROFILE };
+      } else if (!educatorProfile) {
+        educatorProfile = { ...BLANK_EDUCATOR_PROFILE };
+      }
+
+      // Check user-isolated profile store for active user
+      const activeUid = this.getCurrentUserId();
+      const isolatedProfile = this.getEducatorProfile(activeUid);
+      if (isolatedProfile) {
+        educatorProfile = isolatedProfile;
+      }
+
       return {
         ...DEFAULT_SETTINGS,
         ...parsed,
+        educatorProfile,
         activeProvider: parsed.activeProvider || 'gemini',
         providers: mergedProviders
       };
@@ -268,6 +294,137 @@ class StateStore {
     localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(updated));
     this.notify('settingsUpdated', updated);
     return updated;
+  }
+
+  // --- Protected Multi-User Educator Profile System ---
+  getCurrentUserId() {
+    try {
+      let uid = localStorage.getItem(STORAGE_KEYS.ACTIVE_USER);
+      if (!uid) {
+        uid = 'usr_default';
+        localStorage.setItem(STORAGE_KEYS.ACTIVE_USER, uid);
+      }
+      return uid;
+    } catch {
+      return 'usr_default';
+    }
+  }
+
+  switchUser(userId) {
+    if (!userId || typeof userId !== 'string') return;
+    const cleanId = userId.trim();
+    localStorage.setItem(STORAGE_KEYS.ACTIVE_USER, cleanId);
+    const profile = this.getEducatorProfile(cleanId);
+    this.notify('userSwitched', { userId: cleanId, profile });
+    this.notify('profileUpdated', profile);
+    return profile;
+  }
+
+  getEducatorProfile(userId) {
+    const targetUid = userId || this.getCurrentUserId();
+    try {
+      const allProfilesStr = localStorage.getItem(STORAGE_KEYS.USER_PROFILES);
+      const allProfiles = allProfilesStr ? JSON.parse(allProfilesStr) : {};
+      const userProfile = allProfiles[targetUid];
+
+      if (userProfile && typeof userProfile === 'object') {
+        // Sanitize legacy placeholder if present
+        if (userProfile.name === 'Dr. Maria Santos') {
+          return { ...BLANK_EDUCATOR_PROFILE };
+        }
+        return {
+          ...BLANK_EDUCATOR_PROFILE,
+          ...userProfile
+        };
+      }
+
+      // Legacy fallback ONLY for the default user if no profile was saved yet
+      if (targetUid === 'usr_default' && !allProfiles['usr_default']) {
+        const settingsStr = localStorage.getItem(STORAGE_KEYS.SETTINGS);
+        if (settingsStr) {
+          const parsed = JSON.parse(settingsStr);
+          if (parsed.educatorProfile && parsed.educatorProfile.name && parsed.educatorProfile.name !== 'Dr. Maria Santos') {
+            return {
+              ...BLANK_EDUCATOR_PROFILE,
+              ...parsed.educatorProfile
+            };
+          }
+        }
+      }
+
+      // Default for any new user: 100% blank profile (Section 8.A)
+      return { ...BLANK_EDUCATOR_PROFILE };
+    } catch {
+      return { ...BLANK_EDUCATOR_PROFILE };
+    }
+  }
+
+  saveEducatorProfile(profileData, userId) {
+    const targetUid = userId || this.getCurrentUserId();
+    const cleanProfile = {
+      ...BLANK_EDUCATOR_PROFILE,
+      ...(profileData || {})
+    };
+
+    // Trim string fields
+    for (const key of Object.keys(cleanProfile)) {
+      if (typeof cleanProfile[key] === 'string') {
+        cleanProfile[key] = cleanProfile[key].trim();
+      }
+    }
+
+    try {
+      const allProfilesStr = localStorage.getItem(STORAGE_KEYS.USER_PROFILES);
+      const allProfiles = allProfilesStr ? JSON.parse(allProfilesStr) : {};
+      allProfiles[targetUid] = cleanProfile;
+      localStorage.setItem(STORAGE_KEYS.USER_PROFILES, JSON.stringify(allProfiles));
+
+      // Synchronize with settings for backward compatibility ONLY if targetUid is active user
+      if (targetUid === this.getCurrentUserId()) {
+        const currentSettings = this.getSettings();
+        currentSettings.educatorProfile = cleanProfile;
+        localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(currentSettings));
+        this.notify('settingsUpdated', currentSettings);
+      }
+
+      this.notify('profileUpdated', cleanProfile);
+      return cleanProfile;
+    } catch (e) {
+      console.error('Failed to save educator profile:', e);
+      return cleanProfile;
+    }
+  }
+
+  resetEducatorProfile(userId) {
+    const targetUid = userId || this.getCurrentUserId();
+    return this.saveEducatorProfile({ ...BLANK_EDUCATOR_PROFILE }, targetUid);
+  }
+
+  // --- Dynamic Genuine Statistics Tracking ---
+  getGeneratedMaterialsCount() {
+    try {
+      const designs = this.getDesigns();
+      // Count total actual versions created across all designs
+      const designVersions = designs.reduce((sum, d) => {
+        const hist = (d.versionHistory && Array.isArray(d.versionHistory)) ? d.versionHistory.length : 0;
+        return sum + Math.max(1, hist + 1);
+      }, 0);
+      const tracked = parseInt(localStorage.getItem(STORAGE_KEYS.MATERIALS_GENERATED) || '0', 10);
+      return Math.max(designVersions, tracked);
+    } catch {
+      return this.getDesigns().length;
+    }
+  }
+
+  recordMaterialGenerated() {
+    try {
+      const current = this.getGeneratedMaterialsCount();
+      const next = current + 1;
+      localStorage.setItem(STORAGE_KEYS.MATERIALS_GENERATED, next.toString());
+      return next;
+    } catch {
+      return 0;
+    }
   }
 
   getActiveProvider() {

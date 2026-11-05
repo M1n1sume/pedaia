@@ -716,10 +716,11 @@ export function setupOutputWorkspaceListeners(container, navigateToWorkspace, sh
 // =========================================================================
 
 function renderManuscriptMasthead(design) {
-  const educator = store.getSettings()?.educatorProfile || {
-    name: 'Dr. Maria Santos',
-    institution: 'College of Teacher Education'
-  };
+  const educator = (store.getEducatorProfile ? store.getEducatorProfile() : store.getSettings()?.educatorProfile) || {};
+  const hasInst = Boolean(educator.institution && educator.institution.trim().length > 0);
+  const hasName = Boolean(educator.name && educator.name.trim().length > 0);
+  const institutionLabel = hasInst ? educator.institution : 'Teacher Education Curriculum';
+  const designerLabel = hasName ? educator.name : 'Faculty Practitioner';
 
   return `
     <div class="mb-8 pb-6 border-b-2 border-slate-200/90 dark:border-slate-750 relative overflow-hidden">
@@ -728,7 +729,7 @@ function renderManuscriptMasthead(design) {
       <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 gap-2 text-[11px]">
         <div class="flex items-center gap-2 text-indigo-700 dark:text-indigo-400 font-bold uppercase tracking-wider text-[10px]">
           <span class="px-1.5 py-0.5 rounded bg-indigo-100 dark:bg-indigo-950 font-mono text-[9px] border border-indigo-200 dark:border-indigo-800">PEDAIA FOLIO</span>
-          <span class="text-slate-700 dark:text-slate-300">${escapeHtml(educator.institution || 'College of Teacher Education')}</span>
+          <span class="text-slate-700 dark:text-slate-300">${escapeHtml(institutionLabel)}</span>
           <span class="text-slate-300 dark:text-slate-600">•</span>
           <span class="text-slate-500 dark:text-slate-400">Curricular Dossier</span>
         </div>
@@ -758,7 +759,7 @@ function renderManuscriptMasthead(design) {
         </div>
         <div>
           <span class="text-[10px] uppercase font-bold tracking-wider text-slate-400 block">Faculty Designer</span>
-          <span class="font-semibold text-slate-800 dark:text-slate-200 truncate block">${escapeHtml(educator.name || 'Faculty Practitioner')}</span>
+          <span class="font-semibold text-slate-800 dark:text-slate-200 truncate block">${escapeHtml(designerLabel)}</span>
         </div>
       </div>
 

@@ -6,6 +6,7 @@ import { PEDAIA_BRAND, THEME_MODES } from '../palette.js';
 import { SUBJECT_OPTIONS, EDUCATIONAL_LEVEL_OPTIONS } from './sharedContext.js';
 import { lmsService } from '../lmsService.js';
 import { openExtensionModal } from './extensionModal.js';
+import { renderEducatorProfileView, setupEducatorProfileListeners } from './educatorProfile.js';
 
 let activeSettingsTab = 'ai-providers'; // 'general' | 'ai-providers' | 'lms' | 'prompt-preferences' | 'appearance' | 'privacy' | 'import-export' | 'extension'
 
@@ -31,13 +32,7 @@ export function renderSettingsView() {
   const activeModel = provSettings.model || activeProvider.defaultModel;
   const activeEndpoint = provSettings.endpoint || activeProvider.defaultEndpoint || '';
 
-  const educator = settings.educatorProfile || {
-    name: 'Dr. Maria Santos',
-    institution: 'College of Teacher Education',
-    defaultSubject: 'Science',
-    defaultLevel: 'Junior High School',
-    defaultModality: 'Face-to-Face'
-  };
+  const educator = (store.getEducatorProfile ? store.getEducatorProfile() : settings.educatorProfile) || {};
 
   return `
     <div class="space-y-6 max-w-5xl mx-auto animate-fade-in pb-16">
@@ -128,103 +123,9 @@ function renderTabContent(tab, ctx) {
   }
 }
 
-// TAB 1: ACCOUNT PROFILE SETTINGS
-function renderGeneralAndAccountSettings({ educator }) {
-  const designs = store.getDesigns ? store.getDesigns() : [];
-  const templates = store.getTemplates ? store.getTemplates() : [];
-  const lmsHistory = (lmsService && lmsService.getPublishedHistory) ? lmsService.getPublishedHistory() : [];
-  const initials = (educator.name || 'Educator Profile')
-    .split(' ')
-    .filter(Boolean)
-    .map(w => w[0])
-    .slice(0, 2)
-    .join('')
-    .toUpperCase() || 'EP';
-
-  return `
-    <div class="space-y-6">
-      
-      <!-- Account Profile Card -->
-      <div class="bg-white dark:bg-slate-850 rounded-2xl border border-slate-200/80 dark:border-slate-750 p-6 shadow-2xs space-y-6">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-750 gap-4">
-          <div class="flex items-center gap-4">
-            <div class="w-14 h-14 rounded-2xl bg-indigo-600 text-white flex items-center justify-center font-bold text-lg font-scholarly shadow-md border-2 border-indigo-400/30 shrink-0">
-              ${initials}
-            </div>
-            <div>
-              <div class="flex items-center gap-2">
-                <h2 class="text-base font-bold text-slate-900 dark:text-white">${escapeHtml(educator.name || 'Educator Profile')}</h2>
-                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60">
-                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Verified Educator
-                </span>
-              </div>
-              <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">${escapeHtml(educator.institution || 'Teacher Education Institute')}</p>
-            </div>
-          </div>
-          
-          <button id="edit-profile-btn" class="px-3.5 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-750 border border-slate-200 dark:border-slate-700 rounded-xl transition-colors flex items-center gap-1.5 self-start sm:self-auto shadow-2xs">
-            <svg class="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-            </svg>
-            <span>Edit Profile</span>
-          </button>
-        </div>
-
-        <!-- Collapsible Edit Profile Drawer (hidden by default) -->
-        <div id="profile-edit-drawer" class="hidden p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-3">
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Educator Full Name</label>
-              <input type="text" id="set-educator-name" class="w-full text-xs p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:border-indigo-500 outline-none" value="${escapeHtml(educator.name || '')}">
-            </div>
-            <div>
-              <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">School / Institution</label>
-              <input type="text" id="set-educator-inst" class="w-full text-xs p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:border-indigo-500 outline-none" value="${escapeHtml(educator.institution || '')}">
-            </div>
-          </div>
-          <div class="flex items-center justify-end gap-2 pt-1">
-            <button id="cancel-edit-profile-btn" class="px-3 py-1.5 text-xs text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 font-medium">Cancel</button>
-            <button id="save-general-settings-btn" class="px-4 py-1.5 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-xs transition-colors">Save Profile</button>
-          </div>
-        </div>
-
-        <!-- Portfolio Activity & Studio Metrics -->
-        <div>
-          <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-3">Portfolio & Studio Activity</h3>
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
-            <div class="p-3.5 rounded-xl border border-slate-200/80 dark:border-slate-750 bg-slate-50/50 dark:bg-slate-800/50">
-              <span class="block text-2xl font-bold font-scholarly text-indigo-600 dark:text-indigo-400">${designs.length}</span>
-              <span class="text-[11px] font-semibold text-slate-600 dark:text-slate-300">Saved Designs</span>
-            </div>
-            <div class="p-3.5 rounded-xl border border-slate-200/80 dark:border-slate-750 bg-slate-50/50 dark:bg-slate-800/50">
-              <span class="block text-2xl font-bold font-scholarly text-purple-600 dark:text-purple-400">${templates.length}</span>
-              <span class="text-[11px] font-semibold text-slate-600 dark:text-slate-300">Prompt Templates</span>
-            </div>
-            <div class="p-3.5 rounded-xl border border-slate-200/80 dark:border-slate-750 bg-slate-50/50 dark:bg-slate-800/50">
-              <span class="block text-2xl font-bold font-scholarly text-teal-600 dark:text-teal-400">15</span>
-              <span class="text-[11px] font-semibold text-slate-600 dark:text-slate-300">Supported AI Engines</span>
-            </div>
-            <div class="p-3.5 rounded-xl border border-slate-200/80 dark:border-slate-750 bg-slate-50/50 dark:bg-slate-800/50">
-              <span class="block text-2xl font-bold font-scholarly text-amber-600 dark:text-amber-400">${lmsHistory.length}</span>
-              <span class="text-[11px] font-semibold text-slate-600 dark:text-slate-300">LMS Publications</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Instructional Philosophy Dossier -->
-        <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-750/80 text-xs text-slate-600 dark:text-slate-300 space-y-1">
-          <div class="flex items-center gap-1.5 font-bold text-slate-800 dark:text-slate-100">
-            <svg class="w-4 h-4 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-            </svg>
-            <span>Instructional Designer Portfolio Statement:</span>
-          </div>
-          <p class="leading-relaxed">Curriculum design dossier synthesized with PEDAIA Studio. Standards-aligned instructional architectures across Junior High School, Senior High School, and Teacher Education Disciplines.</p>
-        </div>
-      </div>
-
-    </div>
-  `;
+// TAB 1: PROTECTED EDUCATOR PROFILE & PORTFOLIO SETTINGS
+function renderGeneralAndAccountSettings(ctx) {
+  return renderEducatorProfileView(ctx);
 }
 
 // TAB 2: AI PROVIDERS & MODELS CATALOG
@@ -1153,38 +1054,13 @@ export function setupSettingsListeners(container, showToast) {
     }
   });
 
-  // Account Profile Edit Drawer & Save Listeners
-  const editProfileBtn = container.querySelector('#edit-profile-btn');
-  const editDrawer = container.querySelector('#profile-edit-drawer');
-  const cancelEditBtn = container.querySelector('#cancel-edit-profile-btn');
-
-  editProfileBtn?.addEventListener('click', () => {
-    if (editDrawer) {
-      editDrawer.classList.toggle('hidden');
+  // Protected Educator Profile Listeners (View/Edit mode, Live Preview, AI statement, Cancel, Save)
+  setupEducatorProfileListeners(container, {
+    showToast,
+    reRenderParent: () => {
+      container.innerHTML = renderSettingsView();
+      setupSettingsListeners(container, showToast);
     }
-  });
-
-  cancelEditBtn?.addEventListener('click', () => {
-    if (editDrawer) {
-      editDrawer.classList.add('hidden');
-    }
-  });
-
-  container.querySelector('#save-general-settings-btn')?.addEventListener('click', () => {
-    const name = container.querySelector('#set-educator-name')?.value || '';
-    const inst = container.querySelector('#set-educator-inst')?.value || '';
-
-    store.updateSettings({
-      educatorProfile: {
-        ...(store.getSettings().educatorProfile || {}),
-        name,
-        institution: inst
-      }
-    });
-
-    showToast('✓ Educator profile updated successfully!', 'success');
-    container.innerHTML = renderSettingsView();
-    setupSettingsListeners(container, showToast);
   });
   
   // Appearance Mode Toggles (Light / Dark / System)
