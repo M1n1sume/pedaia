@@ -1,0 +1,981 @@
+/* PEDAIA — AI-Powered Instructional Design Studio Stylesheet */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;0,6..72,700;1,6..72,400&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap');
+
+:root {
+  /* Official PEDAIA Brand Design Tokens */
+  --brand-primary: #312E81; /* Primary Indigo */
+  --brand-primary-rgb: 49, 46, 129;
+  --brand-secondary: #7C3AED; /* Secondary Violet */
+  --brand-secondary-rgb: 124, 58, 237;
+  --brand-accent: #14B8A6; /* Accent Teal */
+  --brand-accent-rgb: 20, 184, 166;
+
+  /* Interactive States */
+  --brand-hover: #4338CA;
+  --brand-active: #3730A3;
+  --brand-secondary-hover: #6D28D9;
+  --brand-accent-hover: #0D9488;
+  --brand-tint: #EEF2FF;
+  --brand-ring: rgba(49, 46, 129, 0.25);
+  --focus-ring: rgba(124, 58, 237, 0.35);
+
+  /* Light Mode Semantic Surfaces */
+  --color-bg: #F8FAFC;
+  --color-surface: #FFFFFF;
+  --color-surface-elevated: #F1F5F9;
+  --color-border: #E2E8F0;
+  --color-border-subtle: #F1F5F9;
+
+  /* Light Mode Semantic Typography */
+  --color-text-primary: #0F172A;
+  --color-text-secondary: #334155;
+  --color-text-muted: #64748B;
+
+  /* Functional Colors */
+  --color-success: #10B981;
+  --color-warning: #F59E0B;
+  --color-error: #EF4444;
+  --color-info: #38BDF8;
+
+  /* Component States */
+  --disabled-bg: #F1F5F9;
+  --disabled-text: #94A3B8;
+  --disabled-border: #E2E8F0;
+
+  /* Backward Compatibility Aliases */
+  --color-midnight: #312E81;
+  --color-indigo: var(--brand-primary);
+  --color-indigo-hover: var(--brand-hover);
+  --color-lavender: var(--brand-tint);
+  --color-slate: var(--color-text-secondary);
+  --color-muted: var(--color-text-muted);
+  --color-teal: var(--brand-accent);
+  --color-accent: var(--brand-secondary);
+
+  --brand-50: 238 242 255;
+  --brand-100: 224 231 255;
+  --brand-200: 199 210 254;
+  --brand-300: 165 180 252;
+  --brand-400: 129 140 248;
+  --brand-500: 99 102 241;
+  --brand-600: 79 70 229;
+  --brand-700: 67 56 202;
+  --brand-800: 55 48 163;
+  --brand-900: 49 46 129;
+  --brand-950: 30 27 75;
+}
+
+.dark, html.dark {
+  color-scheme: dark !important;
+
+  /* Dark Mode Semantic Surfaces */
+  --color-bg: #0F172A;
+  --color-surface: #1E293B;
+  --color-surface-elevated: #273449;
+  --color-border: #334155;
+  --color-border-subtle: #1E293B;
+
+  /* Dark Mode Semantic Typography */
+  --color-text-primary: #F8FAFC;
+  --color-text-secondary: #CBD5E1;
+  --color-text-muted: #94A3B8;
+
+  /* Functional Colors Adapted for Dark Mode */
+  --color-success: #10B981;
+  --color-warning: #F59E0B;
+  --color-error: #EF4444;
+  --color-info: #38BDF8;
+
+  /* Component States */
+  --disabled-bg: #1E293B;
+  --disabled-text: #64748B;
+  --disabled-border: #334155;
+  --focus-ring: rgba(124, 58, 237, 0.45);
+
+  /* Overrides for Header & Panels */
+  --dark-header-bg: #1E293B;
+  --dark-border-override: #334155;
+  --dark-bg-override: #0F172A;
+  --dark-surface-override: #1E293B;
+
+  --color-slate: var(--color-text-secondary);
+  --color-muted: var(--color-text-muted);
+}
+
+/* Base Body Surface & Full Dark Mode Background Guarantee */
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: var(--color-bg, #F8FAFC);
+  color: var(--color-text-primary, #0F172A);
+  font-size: 14.5px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+html.dark body, body.dark {
+  background-color: #0F172A !important;
+  color: #F8FAFC !important;
+}
+
+/* ========================================================================= */
+/* TYPOGRAPHY STANDARDS ACCORDING TO PEDAIA INSTRUCTIONAL DESIGN SPECS       */
+/* - Page Titles: 24–28px                                                   */
+/* - Section Headings: 16–18px                                              */
+/* - Field Labels: 13–14px                                                  */
+/* - Body Text: 14–15px                                                     */
+/* - Helper Text: 12–13px                                                   */
+/* - Prompt Preview Text: 13–14px                                           */
+/* ========================================================================= */
+.pedaia-page-title {
+  font-size: 1.65rem; /* 26.4px */
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.25;
+}
+
+.pedaia-section-heading {
+  font-size: 1.05rem; /* ~17px */
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.35;
+}
+
+.pedaia-label {
+  font-size: 0.845rem; /* 13.5px */
+  font-weight: 600;
+  letter-spacing: -0.005em;
+}
+
+.pedaia-body {
+  font-size: 0.915rem; /* 14.6px */
+  line-height: 1.6;
+}
+
+.pedaia-helper {
+  font-size: 0.785rem; /* 12.5px */
+  line-height: 1.5;
+}
+
+.pedaia-prompt-text {
+  font-family: 'JetBrains Mono', 'Fira Code', Menlo, Consolas, monospace;
+  font-size: 0.845rem; /* 13.5px */
+  line-height: 1.65;
+}
+
+/* ========================================================================= */
+/* TOP MASTHEAD / HEADER DARK MODE RULES (Guarantees Top Part is Dark)       */
+/* ========================================================================= */
+header, #top-masthead {
+  background-color: rgba(255, 255, 255, 0.96);
+  border-bottom: 1px solid var(--color-border, #E2E8F0);
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+html.dark header, 
+html.dark #top-masthead,
+.dark header, 
+.dark #top-masthead {
+  background-color: rgba(30, 41, 59, 0.95) !important;
+  border-bottom: 1px solid var(--dark-border-override, #334155) !important;
+}
+
+/* Header interactive child controls in dark mode */
+html.dark #header-studio-switcher,
+.dark #header-studio-switcher {
+  background-color: rgba(15, 23, 42, 0.7) !important;
+  border-color: var(--dark-border-override, #334155) !important;
+}
+
+html.dark #header-file-hub-btn,
+html.dark #header-api-status-btn,
+html.dark #header-palette-btn,
+html.dark #theme-toggle-btn,
+html.dark #mobile-drawer-toggle-btn,
+.dark #header-file-hub-btn,
+.dark #header-api-status-btn,
+.dark #header-palette-btn,
+.dark #theme-toggle-btn,
+.dark #mobile-drawer-toggle-btn {
+  background-color: var(--dark-header-bg, #1E293B) !important;
+  border-color: var(--dark-border-override, #334155) !important;
+  color: #F8FAFC !important;
+}
+
+html.dark #header-file-hub-btn:hover,
+html.dark #header-api-status-btn:hover,
+html.dark #header-palette-btn:hover,
+html.dark #theme-toggle-btn:hover,
+html.dark #mobile-drawer-toggle-btn:hover,
+.dark #header-file-hub-btn:hover,
+.dark #header-api-status-btn:hover,
+.dark #header-palette-btn:hover,
+.dark #theme-toggle-btn:hover,
+.dark #mobile-drawer-toggle-btn:hover {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.font-scholarly {
+  font-family: 'Newsreader', Georgia, Cambria, 'Times New Roman', serif;
+}
+
+h1, h2, h3, h4, h5, h6, .font-heading {
+  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+}
+
+/* Horizontal Top Navigation Tabs */
+.nav-item {
+  position: relative;
+  transition: all 0.15s ease-in-out;
+}
+.nav-item.active {
+  background-color: var(--brand-primary, #312E81) !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 1px 3px 0 var(--brand-ring, rgba(49, 46, 129, 0.25));
+}
+.nav-item.active svg {
+  color: #FFFFFF !important;
+  stroke: #FFFFFF !important;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #D1D5DB;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #9CA3AF;
+}
+.dark ::-webkit-scrollbar-thumb, html.dark ::-webkit-scrollbar-thumb {
+  background: #374151;
+}
+.dark ::-webkit-scrollbar-thumb:hover, html.dark ::-webkit-scrollbar-thumb:hover {
+  background: #4B5563;
+}
+
+/* Selection Cards & Interactive Pills */
+.selection-card {
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.selection-card:hover {
+  border-color: rgba(var(--brand-400), 0.7);
+  transform: translateY(-1px);
+}
+.selection-card.active {
+  border-color: var(--brand-primary, #7C3AED);
+  background-color: var(--brand-tint, #F5F3FF);
+  box-shadow: 0 0 0 1px var(--brand-primary, #7C3AED);
+}
+.dark .selection-card:hover, html.dark .selection-card:hover {
+  border-color: rgba(var(--brand-400), 0.8);
+}
+.dark .selection-card.active, html.dark .selection-card.active {
+  background-color: rgba(var(--brand-950), 0.6);
+  border-color: var(--brand-primary, #7C3AED);
+  box-shadow: 0 0 0 1px var(--brand-primary, #7C3AED);
+}
+
+/* Multi-select Chip */
+.chip-btn {
+  transition: all 0.15s ease-in-out;
+}
+.chip-btn.active {
+  background-color: var(--brand-primary, #7C3AED);
+  color: #FFFFFF;
+  border-color: var(--brand-primary, #7C3AED);
+}
+.chip-btn.active svg {
+  stroke: #FFFFFF;
+}
+
+/* Prompt Preview Terminal / Paper (Scholarly Dual-Mode) */
+.prompt-paper {
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  color: #0F172A;
+  font-family: 'JetBrains Mono', 'Fira Code', Menlo, Consolas, monospace;
+  font-size: 0.84rem;
+  line-height: 1.6;
+}
+.dark .prompt-paper, html.dark .prompt-paper {
+  background: #0B1120;
+  border-color: #334155;
+  color: #F8FAFC;
+}
+
+/* Prompt Preview & Review Workspace */
+.prompt-review-surface {
+  background-color: #F8FAFC;
+  color: #0F172A;
+  border-color: #E2E8F0;
+}
+.dark .prompt-review-surface, html.dark .prompt-review-surface {
+  background-color: #0B1120;
+  color: #F8FAFC;
+  border-color: #334155;
+}
+
+/* Rendered Output Markdown Academic Typography (Dual-Mode) */
+.prose-academic {
+  color: #1E293B;
+  font-size: 0.95rem;
+  line-height: 1.75;
+}
+.dark .prose-academic, html.dark .prose-academic {
+  color: #E2E8F0;
+}
+
+.prose-academic h1 {
+  font-family: 'Newsreader', Georgia, serif;
+  font-size: 1.85rem;
+  font-weight: 700;
+  color: var(--brand-primary, #312E81);
+  margin-top: 1.5rem;
+  margin-bottom: 0.8rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 2px solid #E2E8F0;
+  letter-spacing: -0.015em;
+}
+.dark .prose-academic h1, html.dark .prose-academic h1 {
+  color: #F8FAFC;
+  border-bottom: 2px solid #334155;
+}
+
+.prose-academic h2 {
+  font-family: 'Newsreader', Georgia, serif;
+  font-size: 1.45rem;
+  font-weight: 600;
+  color: var(--brand-primary, #312E81);
+  margin-top: 1.6rem;
+  margin-bottom: 0.6rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  letter-spacing: -0.01em;
+}
+.dark .prose-academic h2, html.dark .prose-academic h2 {
+  color: #F1F5F9;
+}
+
+.prose-academic h3 {
+  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #1E293B;
+  margin-top: 1.25rem;
+  margin-bottom: 0.4rem;
+}
+.dark .prose-academic h3, html.dark .prose-academic h3 {
+  color: #E2E8F0;
+}
+
+.prose-academic h4 {
+  font-size: 1.0rem;
+  font-weight: 600;
+  color: #475569;
+  margin-top: 0.9rem;
+  margin-bottom: 0.3rem;
+}
+.dark .prose-academic h4, html.dark .prose-academic h4 {
+  color: #94A3B8;
+}
+
+.prose-academic p {
+  margin-bottom: 0.85rem;
+}
+
+.prose-academic ul {
+  list-style-type: disc;
+  padding-left: 1.5rem;
+  margin-bottom: 0.9rem;
+}
+.prose-academic ol {
+  list-style-type: decimal;
+  padding-left: 1.5rem;
+  margin-bottom: 0.9rem;
+}
+.prose-academic li {
+  margin-bottom: 0.35rem;
+}
+
+.prose-academic blockquote {
+  border-left: 4px solid var(--brand-secondary, #7C3AED);
+  background: #F5F3FF;
+  padding: 0.85rem 1.15rem;
+  border-radius: 0 0.75rem 0.75rem 0;
+  margin: 1.25rem 0;
+  color: #312E81;
+}
+.dark .prose-academic blockquote, html.dark .prose-academic blockquote {
+  border-left-color: var(--brand-secondary, #7C3AED);
+  background: rgba(124, 58, 237, 0.12);
+  color: #F8FAFC;
+}
+
+.prose-academic table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.25rem 0;
+  font-size: 0.88rem;
+}
+.prose-academic th {
+  background-color: #F3F4F6;
+  color: #1E293B;
+  font-weight: 600;
+  text-align: left;
+  padding: 0.65rem 0.85rem;
+  border: 1px solid #D1D5DB;
+}
+.dark .prose-academic th, html.dark .prose-academic th {
+  background-color: #1F2937;
+  color: #F8FAFC;
+  border: 1px solid #374151;
+}
+
+.prose-academic td {
+  padding: 0.65rem 0.85rem;
+  border: 1px solid #D1D5DB;
+  vertical-align: top;
+}
+.dark .prose-academic td, html.dark .prose-academic td {
+  border: 1px solid #374151;
+  color: #E2E8F0;
+}
+
+.prose-academic tr:nth-child(even) {
+  background-color: #F9FAFB;
+}
+.dark .prose-academic tr:nth-child(even), html.dark .prose-academic tr:nth-child(even) {
+  background-color: rgba(255, 255, 255, 0.02);
+}
+
+.prose-academic strong {
+  font-weight: 600;
+  color: #0F172A;
+}
+.dark .prose-academic strong, html.dark .prose-academic strong {
+  color: #FFFFFF;
+}
+
+.prose-academic hr {
+  border: 0;
+  height: 1px;
+  background: #E5E7EB;
+  margin: 1.5rem 0;
+}
+.dark .prose-academic hr, html.dark .prose-academic hr {
+  background: #374151;
+}
+
+.prose-academic code {
+  background-color: #F3F4F6;
+  color: var(--brand-hover, #6D28D9);
+  padding: 0.15rem 0.4rem;
+  border-radius: 0.25rem;
+  font-family: monospace;
+  font-size: 0.85em;
+}
+.dark .prose-academic code, html.dark .prose-academic code {
+  background-color: #1F2937;
+  color: #DDD6FE;
+}
+
+/* Callout badge tags */
+.academic-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.65rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+/* Workspace State Indicators & Pedagogical Sequence Controls */
+.ws-state-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.ws-state-pill.prompt-preview {
+  background-color: rgba(49, 46, 129, 0.08);
+  color: #312E81;
+  border: 1px solid rgba(49, 46, 129, 0.22);
+}
+.dark .ws-state-pill.prompt-preview, html.dark .ws-state-pill.prompt-preview {
+  background-color: rgba(124, 58, 237, 0.16);
+  color: #C4B5FD;
+  border-color: rgba(124, 58, 237, 0.38);
+}
+
+.ws-state-pill.generating {
+  background-color: rgba(245, 158, 11, 0.12);
+  color: #D97706;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.ws-state-pill.generated-output {
+  background-color: rgba(16, 185, 129, 0.12);
+  color: #059669;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.ws-state-pill.editing {
+  background-color: rgba(139, 92, 246, 0.12);
+  color: #7C3AED;
+  border: 1px solid rgba(139, 92, 246, 0.3);
+}
+
+.ws-state-pill.error-state {
+  background-color: rgba(239, 68, 68, 0.12);
+  color: #DC2626;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+/* Lifecycle Status Badges for Designs */
+.status-pill-draft {
+  background-color: rgba(100, 116, 139, 0.12);
+  color: #475569;
+  border: 1px solid rgba(100, 116, 139, 0.25);
+}
+.dark .status-pill-draft {
+  background-color: rgba(148, 163, 184, 0.12);
+  color: #CBD5E1;
+  border-color: rgba(148, 163, 184, 0.25);
+}
+
+.status-pill-prompt-saved {
+  background-color: rgba(99, 102, 241, 0.12);
+  color: #4F46E5;
+  border: 1px solid rgba(99, 102, 241, 0.3);
+}
+.dark .status-pill-prompt-saved {
+  background-color: rgba(129, 140, 248, 0.15);
+  color: #A5B4FC;
+  border-color: rgba(129, 140, 248, 0.3);
+}
+
+.status-pill-output-generated {
+  background-color: rgba(16, 185, 129, 0.12);
+  color: #059669;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+.dark .status-pill-output-generated {
+  background-color: rgba(52, 211, 153, 0.15);
+  color: #6EE7B7;
+  border-color: rgba(52, 211, 153, 0.3);
+}
+
+.status-pill-reviewed {
+  background-color: rgba(168, 85, 247, 0.12);
+  color: #9333EA;
+  border: 1px solid rgba(168, 85, 247, 0.3);
+}
+.dark .status-pill-reviewed {
+  background-color: rgba(192, 132, 252, 0.15);
+  color: #D8B4FE;
+  border-color: rgba(192, 132, 252, 0.3);
+}
+
+.status-pill-completed {
+  background-color: rgba(245, 158, 11, 0.12);
+  color: #D97706;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+.dark .status-pill-completed {
+  background-color: rgba(251, 191, 36, 0.15);
+  color: #FCD34D;
+  border-color: rgba(251, 191, 36, 0.3);
+}
+
+/* ========================================================================= */
+/* BULLETPROOF INSTRUCTIONAL CATEGORY BADGES & CARDS (LIGHT & DARK MODE)     */
+/* Preserves the 4 Studio Module Accents on Unified PEDAIA Surfaces          */
+/* ========================================================================= */
+.category-pill-lp,
+.category-pill-lesson-planning {
+  background-color: #EEF2FF !important;
+  color: #312E81 !important;
+  border: 1px solid #C7D2FE !important;
+}
+html.dark .category-pill-lp,
+html.dark .category-pill-lesson-planning,
+.dark .category-pill-lp,
+.dark .category-pill-lesson-planning {
+  background-color: rgba(49, 46, 129, 0.4) !important;
+  color: #C7D2FE !important;
+  border: 1px solid rgba(99, 102, 241, 0.4) !important;
+}
+
+.category-pill-ad,
+.category-pill-activity-design {
+  background-color: #F0FDFA !important;
+  color: #0F766E !important;
+  border: 1px solid #99F6E4 !important;
+}
+html.dark .category-pill-ad,
+html.dark .category-pill-activity-design,
+.dark .category-pill-ad,
+.dark .category-pill-activity-design {
+  background-color: rgba(20, 184, 166, 0.25) !important;
+  color: #5EEAD4 !important;
+  border: 1px solid rgba(20, 184, 166, 0.4) !important;
+}
+
+.category-pill-q,
+.category-pill-questioning {
+  background-color: #FFFBEB !important;
+  color: #B45309 !important;
+  border: 1px solid #FDE68A !important;
+}
+html.dark .category-pill-q,
+html.dark .category-pill-questioning,
+.dark .category-pill-q,
+.dark .category-pill-questioning {
+  background-color: rgba(245, 158, 11, 0.25) !important;
+  color: #FCD34D !important;
+  border: 1px solid rgba(245, 158, 11, 0.4) !important;
+}
+
+.category-pill-diff,
+.category-pill-differentiation {
+  background-color: #F5F3FF !important;
+  color: #6D28D9 !important;
+  border: 1px solid #DDD6FE !important;
+}
+html.dark .category-pill-diff,
+html.dark .category-pill-differentiation,
+.dark .category-pill-diff,
+.dark .category-pill-differentiation {
+  background-color: rgba(124, 58, 237, 0.25) !important;
+  color: #DDD6FE !important;
+  border: 1px solid rgba(124, 58, 237, 0.4) !important;
+}
+
+.category-pill-assessment,
+.category-pill-assessment-design {
+  background-color: #ECFDF5 !important;
+  color: #047857 !important;
+  border: 1px solid #A7F3D0 !important;
+}
+html.dark .category-pill-assessment,
+html.dark .category-pill-assessment-design,
+.dark .category-pill-assessment,
+.dark .category-pill-assessment-design {
+  background-color: rgba(16, 185, 129, 0.25) !important;
+  color: #6EE7B7 !important;
+  border: 1px solid rgba(16, 185, 129, 0.4) !important;
+}
+
+.category-pill-classroom,
+.category-pill-classroom-management {
+  background-color: #F0F9FF !important;
+  color: #0369A1 !important;
+  border: 1px solid #BAE6FD !important;
+}
+html.dark .category-pill-classroom,
+html.dark .category-pill-classroom-management,
+.dark .category-pill-classroom,
+.dark .category-pill-classroom-management {
+  background-color: rgba(56, 189, 248, 0.2) !important;
+  color: #7DD3FC !important;
+  border: 1px solid rgba(56, 189, 248, 0.4) !important;
+}
+
+.category-pill-default {
+  background-color: #F1F5F9 !important;
+  color: #334155 !important;
+  border: 1px solid #E2E8F0 !important;
+}
+html.dark .category-pill-default,
+.dark .category-pill-default {
+  background-color: #1E293B !important;
+  color: #CBD5E1 !important;
+  border: 1px solid #334155 !important;
+}
+
+/* Category Quick-Launch Hero Cards in Dark Mode */
+html.dark #quick-launch-lp-btn,
+.dark #quick-launch-lp-btn {
+  background-color: rgba(49, 46, 129, 0.25) !important;
+  border-color: rgba(99, 102, 241, 0.35) !important;
+}
+html.dark #quick-launch-act-btn,
+.dark #quick-launch-act-btn {
+  background-color: rgba(20, 184, 166, 0.15) !important;
+  border-color: rgba(20, 184, 166, 0.35) !important;
+}
+html.dark #quick-launch-quest-btn,
+.dark #quick-launch-quest-btn {
+  background-color: rgba(245, 158, 11, 0.15) !important;
+  border-color: rgba(245, 158, 11, 0.35) !important;
+}
+html.dark #quick-launch-diff-btn,
+.dark #quick-launch-diff-btn {
+  background-color: rgba(124, 58, 237, 0.15) !important;
+  border-color: rgba(124, 58, 237, 0.35) !important;
+}
+
+/* Category Studio Workshop Action Buttons in Dark Mode */
+html.dark button[data-dest="lesson-planning"],
+.dark button[data-dest="lesson-planning"] {
+  background-color: rgba(49, 46, 129, 0.35) !important;
+  color: #C7D2FE !important;
+}
+html.dark button[data-dest="lesson-planning"]:hover,
+.dark button[data-dest="lesson-planning"]:hover {
+  background-color: rgba(49, 46, 129, 0.6) !important;
+  color: #EEF2FF !important;
+}
+
+html.dark button[data-dest="activity-design"],
+.dark button[data-dest="activity-design"] {
+  background-color: rgba(20, 184, 166, 0.2) !important;
+  color: #5EEAD4 !important;
+}
+html.dark button[data-dest="activity-design"]:hover,
+.dark button[data-dest="activity-design"]:hover {
+  background-color: rgba(20, 184, 166, 0.4) !important;
+  color: #CCFBF1 !important;
+}
+
+html.dark button[data-dest="questioning"],
+.dark button[data-dest="questioning"] {
+  background-color: rgba(245, 158, 11, 0.2) !important;
+  color: #FCD34D !important;
+}
+html.dark button[data-dest="questioning"]:hover,
+.dark button[data-dest="questioning"]:hover {
+  background-color: rgba(245, 158, 11, 0.4) !important;
+  color: #FEF3C7 !important;
+}
+
+html.dark button[data-dest="differentiation"],
+.dark button[data-dest="differentiation"] {
+  background-color: rgba(124, 58, 237, 0.2) !important;
+  color: #DDD6FE !important;
+}
+html.dark button[data-dest="differentiation"]:hover,
+.dark button[data-dest="differentiation"]:hover {
+  background-color: rgba(124, 58, 237, 0.4) !important;
+  color: #F3E8FF !important;
+}
+
+/* Global Safety Overrides: In Dark Mode, Prevent Any Pastel / Light Tint Leakage */
+html.dark .bg-teal-50,
+html.dark .bg-teal-50\/50,
+html.dark .bg-teal-50\/60,
+html.dark .bg-teal-50\/70,
+html.dark .bg-teal-50\/80,
+.dark .bg-teal-50,
+.dark .bg-teal-50\/50,
+.dark .bg-teal-50\/60,
+.dark .bg-teal-50\/70,
+.dark .bg-teal-50\/80 {
+  background-color: rgba(4, 47, 46, 0.75) !important;
+}
+
+html.dark .bg-amber-50,
+html.dark .bg-amber-50\/50,
+html.dark .bg-amber-50\/60,
+html.dark .bg-amber-50\/70,
+html.dark .bg-amber-50\/80,
+.dark .bg-amber-50,
+.dark .bg-amber-50\/50,
+.dark .bg-amber-50\/60,
+.dark .bg-amber-50\/70,
+.dark .bg-amber-50\/80 {
+  background-color: rgba(69, 26, 3, 0.75) !important;
+}
+
+html.dark .bg-purple-50,
+html.dark .bg-purple-50\/50,
+html.dark .bg-purple-50\/60,
+html.dark .bg-purple-50\/70,
+html.dark .bg-purple-50\/80,
+.dark .bg-purple-50,
+.dark .bg-purple-50\/50,
+.dark .bg-purple-50\/60,
+.dark .bg-purple-50\/70,
+.dark .bg-purple-50\/80 {
+  background-color: rgba(59, 7, 100, 0.75) !important;
+}
+
+html.dark .bg-indigo-50,
+html.dark .bg-indigo-50\/50,
+html.dark .bg-indigo-50\/60,
+html.dark .bg-indigo-50\/70,
+html.dark .bg-indigo-50\/80,
+.dark .bg-indigo-50,
+.dark .bg-indigo-50\/50,
+.dark .bg-indigo-50\/60,
+.dark .bg-indigo-50\/70,
+.dark .bg-indigo-50\/80 {
+  background-color: rgba(30, 27, 75, 0.75) !important;
+}
+
+html.dark .bg-emerald-50,
+html.dark .bg-emerald-50\/50,
+html.dark .bg-emerald-50\/60,
+html.dark .bg-emerald-50\/70,
+html.dark .bg-emerald-50\/80,
+.dark .bg-emerald-50,
+.dark .bg-emerald-50\/50,
+.dark .bg-emerald-50\/60,
+.dark .bg-emerald-50\/70,
+.dark .bg-emerald-50\/80 {
+  background-color: rgba(2, 44, 34, 0.75) !important;
+}
+
+html.dark .bg-sky-50,
+html.dark .bg-sky-50\/50,
+html.dark .bg-sky-50\/60,
+html.dark .bg-sky-50\/70,
+html.dark .bg-sky-50\/80,
+.dark .bg-sky-50,
+.dark .bg-sky-50\/50,
+.dark .bg-sky-50\/60,
+.dark .bg-sky-50\/70,
+.dark .bg-sky-50\/80 {
+  background-color: rgba(8, 47, 73, 0.75) !important;
+}
+
+/* Ensure text on dark surfaces is bright and readable */
+html.dark .text-teal-700,
+html.dark .text-teal-800,
+html.dark .text-teal-900,
+html.dark .text-teal-950,
+.dark .text-teal-700,
+.dark .text-teal-800,
+.dark .text-teal-900,
+.dark .text-teal-950 {
+  color: #5EEAD4 !important;
+}
+
+html.dark .text-amber-700,
+html.dark .text-amber-800,
+html.dark .text-amber-900,
+html.dark .text-amber-950,
+.dark .text-amber-700,
+.dark .text-amber-800,
+.dark .text-amber-900,
+.dark .text-amber-950 {
+  color: #FCD34D !important;
+}
+
+html.dark .text-purple-700,
+html.dark .text-purple-800,
+html.dark .text-purple-900,
+html.dark .text-purple-950,
+.dark .text-purple-700,
+.dark .text-purple-800,
+.dark .text-purple-900,
+.dark .text-purple-950 {
+  color: #D8B4FE !important;
+}
+
+html.dark .text-indigo-700,
+html.dark .text-indigo-800,
+html.dark .text-indigo-900,
+html.dark .text-indigo-950,
+.dark .text-indigo-700,
+.dark .text-indigo-800,
+.dark .text-indigo-900,
+.dark .text-indigo-950 {
+  color: #C7D2FE !important;
+}
+
+html.dark .text-emerald-700,
+html.dark .text-emerald-800,
+html.dark .text-emerald-900,
+html.dark .text-emerald-950,
+.dark .text-emerald-700,
+.dark .text-emerald-800,
+.dark .text-emerald-900,
+.dark .text-emerald-950 {
+  color: #6EE7B7 !important;
+}
+
+html.dark .text-sky-700,
+html.dark .text-sky-800,
+html.dark .text-sky-900,
+html.dark .text-sky-950,
+.dark .text-sky-700,
+.dark .text-sky-800,
+.dark .text-sky-900,
+.dark .text-sky-950 {
+  color: #7DD3FC !important;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in {
+  animation: fadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Print Stylesheet for PDF and Printing */
+@media print {
+  body {
+    background-color: #FFFFFF !important;
+    color: #000000 !important;
+    font-size: 11pt !important;
+  }
+  #sidebar, #top-header, .no-print, .interactive-controls, #toast-container, .print-hide {
+    display: none !important;
+  }
+  #main-content {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  .print-only {
+    display: block !important;
+  }
+  .prose-academic {
+    font-size: 10.5pt !important;
+    line-height: 1.5 !important;
+    color: #000000 !important;
+  }
+  .prose-academic h1 {
+    font-size: 18pt !important;
+    border-bottom: 2px solid #000000 !important;
+    color: #000000 !important;
+  }
+  .prose-academic h2 {
+    font-size: 14pt !important;
+    margin-top: 12pt !important;
+    color: #000000 !important;
+  }
+  .prose-academic table, .prose-academic th, .prose-academic td {
+    border: 1px solid #333333 !important;
+    color: #000000 !important;
+  }
+  .prose-academic th {
+    background-color: #F0F0F0 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  @page {
+    margin: 1.5cm;
+    size: letter portrait;
+  }
+}

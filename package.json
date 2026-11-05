@@ -1,0 +1,21 @@
+{
+  "name": "pedaia",
+  "version": "1.0.0",
+  "description": "PEDAIA — AI-Powered Instructional Design Studio",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "test": "node scratch/audit_suite.mjs"
+  },
+  "keywords": [
+    "instructional-design",
+    "pedagogy",
+    "edtech",
+    "ai",
+    "lesson-planning"
+  ],
+  "author": "PEDAIA Studio",
+  "license": "MIT"
+}

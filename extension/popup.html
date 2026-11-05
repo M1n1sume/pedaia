@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PEDAIA Companion</title>
+  <style>
+    :root {
+      --primary-indigo: #312E81;
+      --secondary-violet: #7C3AED;
+      --accent-teal: #14B8A6;
+      --bg: #0F172A;
+      --surface: #1E293B;
+      --surface-elevated: #273449;
+      --text: #F8FAFC;
+      --text-muted: #94A3B8;
+      --border: #334155;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      width: 380px;
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-size: 13px;
+      line-height: 1.5;
+      padding: 16px;
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 14px;
+    }
+    .logo-badge {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .logo-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--secondary-violet), var(--primary-indigo));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-weight: 800;
+      font-size: 14px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+    .brand-title {
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: -0.3px;
+      color: var(--text);
+    }
+    .brand-sub {
+      font-size: 10.5px;
+      color: var(--text-muted);
+    }
+    .status-pill {
+      font-size: 10px;
+      font-weight: 700;
+      color: #34D399;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      padding: 2px 8px;
+      border-radius: 9999px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #10B981;
+    }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 12px;
+    }
+    .card-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .clip-preview {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 11px;
+      background: rgba(0,0,0,0.25);
+      border: 1px solid var(--border);
+      padding: 8px;
+      border-radius: 8px;
+      color: #E2E8F0;
+      max-height: 70px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+      margin-bottom: 8px;
+    }
+    .btn-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+    button {
+      cursor: pointer;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-size: 11.5px;
+      font-weight: 600;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .btn-primary {
+      background: var(--secondary-violet);
+      color: #fff;
+    }
+    .btn-primary:hover {
+      background: #6D28D9;
+    }
+    .btn-secondary {
+      background: var(--surface-elevated);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-secondary:hover {
+      background: #334155;
+    }
+    .btn-accent {
+      background: rgba(20, 184, 166, 0.15);
+      color: #2DD4BF;
+      border: 1px solid rgba(20, 184, 166, 0.3);
+    }
+    .btn-accent:hover {
+      background: rgba(20, 184, 166, 0.25);
+    }
+    .btn-full {
+      width: 100%;
+      margin-top: 4px;
+    }
+    .footer {
+      display: flex;
+      gap: 8px;
+      margin-top: 14px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <div class="header">
+    <div class="logo-badge">
+      <div class="logo-icon">P</div>
+      <div>
+        <div class="brand-title">PEDAIA</div>
+        <div class="brand-sub">Instructional Design Studio</div>
+      </div>
+    </div>
+    <div class="status-pill">
+      <span class="dot"></span>
+      <span>Extension Ready</span>
+    </div>
+  </div>
+
+  <!-- Curriculum Clipper Card -->
+  <div class="card">
+    <div class="card-title">
+      <span>Curriculum Web Clipper</span>
+      <span id="clip-count" style="font-weight: normal; color: #94A3B8;">Select text on web</span>
+    </div>
+    <div id="clip-text" class="clip-preview">No text selected. Highlight any curriculum standard, topic, or syllabus text on this webpage, then click "Capture".</div>
+    
+    <div class="btn-grid">
+      <button id="capture-selection-btn" class="btn-secondary">
+        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/></svg>
+        <span>Capture Selection</span>
+      </button>
+      <button id="clip-to-lesson-btn" class="btn-primary">
+        <span>To Lesson Plan</span>
+        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Direct Studio Launchers -->
+  <div class="card">
+    <div class="card-title">
+      <span>Quick Studio Launchers</span>
+    </div>
+    <div class="btn-grid">
+      <button id="nav-lp-btn" class="btn-secondary">
+        <span>AI Lesson Planner</span>
+      </button>
+      <button id="nav-qs-btn" class="btn-secondary">
+        <span>Bloom's Questions</span>
+      </button>
+      <button id="nav-ad-btn" class="btn-secondary">
+        <span>Activity Designer</span>
+      </button>
+      <button id="nav-diff-btn" class="btn-secondary">
+        <span>Differentiation</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- LMS Link & Full App Launchers -->
+  <div class="footer">
+    <button id="open-sidepanel-btn" class="btn-accent" style="flex: 1;">
+      <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"/></svg>
+      <span>Dock Side Panel</span>
+    </button>
+    <button id="open-full-app-btn" class="btn-primary" style="flex: 1;">
+      <span>Launch Web Studio ↗</span>
+    </button>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

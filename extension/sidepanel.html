@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PEDAIA Instructional Studio — Side Panel</title>
+  <style>
+    :root {
+      --primary-indigo: #312E81;
+      --secondary-violet: #7C3AED;
+      --accent-teal: #14B8A6;
+      --bg: #0F172A;
+      --surface: #1E293B;
+      --surface-elevated: #273449;
+      --text: #F8FAFC;
+      --text-muted: #94A3B8;
+      --border: #334155;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-size: 13px;
+      line-height: 1.5;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .header {
+      padding: 12px 16px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .logo-badge {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .logo-icon {
+      width: 26px;
+      height: 26px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--secondary-violet), var(--primary-indigo));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-weight: 800;
+      font-size: 13px;
+    }
+    .brand-title {
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--text);
+    }
+    .nav-bar {
+      display: flex;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 12px;
+      overflow-x: auto;
+    }
+    .nav-tab {
+      padding: 10px 14px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      white-space: nowrap;
+      transition: all 0.15s ease;
+    }
+    .nav-tab.active {
+      color: var(--text);
+      border-bottom-color: var(--secondary-violet);
+    }
+    .panel-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 14px;
+    }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 14px;
+    }
+    .card-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .field-group {
+      margin-bottom: 10px;
+    }
+    label {
+      display: block;
+      font-size: 11.5px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+    input, select, textarea {
+      width: 100%;
+      background: rgba(0,0,0,0.25);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-size: 12px;
+      outline: none;
+      font-family: inherit;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--secondary-violet);
+    }
+    textarea {
+      resize: vertical;
+      min-height: 80px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 11.5px;
+    }
+    button {
+      cursor: pointer;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .btn-primary {
+      background: var(--secondary-violet);
+      color: #fff;
+      width: 100%;
+    }
+    .btn-primary:hover {
+      background: #6D28D9;
+    }
+    .btn-secondary {
+      background: var(--surface-elevated);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-secondary:hover {
+      background: #334155;
+    }
+    .output-area {
+      background: #0B1120;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 11.5px;
+      line-height: 1.6;
+      max-height: 280px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      color: #CBD5E1;
+      margin-top: 10px;
+    }
+    .studio-iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      background: #0F172A;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Header -->
+  <div class="header">
+    <div class="logo-badge">
+      <div class="logo-icon">P</div>
+      <div>
+        <div class="brand-title">PEDAIA Studio</div>
+      </div>
+    </div>
+    <div style="display: flex; gap: 6px;">
+      <button id="sp-capture-page-btn" class="btn-secondary" style="padding: 4px 8px; font-size: 11px;">
+        <span>Capture Page</span>
+      </button>
+      <button id="sp-launch-tab-btn" class="btn-secondary" style="padding: 4px 8px; font-size: 11px;" title="Open in Full Tab">
+        <span>↗</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Tabs Navigation -->
+  <div class="nav-bar">
+    <div class="nav-tab active" data-tab="quick-planner">Quick Lesson Planner</div>
+    <div class="nav-tab" data-tab="quick-questions">Bloom's Questions</div>
+    <div class="nav-tab" data-tab="lms-push">Canvas / Classroom</div>
+    <div class="nav-tab" data-tab="full-view">Full Web Studio</div>
+  </div>
+
+  <!-- Body Content -->
+  <div id="sp-tab-content" class="panel-body">
+    
+    <!-- Tab 1: Quick Lesson Planner -->
+    <div id="tab-quick-planner-view">
+      <div class="card">
+        <div class="card-title">
+          <span>Active Curriculum Standard / Topic</span>
+          <span style="color: #34D399; font-size: 10px;">● Zero Key Required</span>
+        </div>
+        <div class="field-group">
+          <label>Topic / Concept:</label>
+          <input type="text" id="sp-topic-input" placeholder="e.g. Cellular Respiration, Quadratic Functions">
+        </div>
+        <div class="field-group">
+          <label>Subject & Grade Level:</label>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+            <input type="text" id="sp-subject-input" value="Science" placeholder="Subject">
+            <input type="text" id="sp-grade-input" value="Grade 10" placeholder="Grade">
+          </div>
+        </div>
+        <div class="field-group">
+          <label>Instructional Framework:</label>
+          <select id="sp-model-select">
+            <option value="5E Instructional Model">5E Model (Engage, Explore, Explain, Elaborate, Evaluate)</option>
+            <option value="Understanding by Design (UbD)">UbD (Results, Evidence, Plan)</option>
+            <option value="4A's Model">4A's (Activity, Analysis, Abstraction, Application)</option>
+            <option value="Direct Instruction">Direct Instruction (Hunter Model)</option>
+          </select>
+        </div>
+        <button id="sp-generate-lesson-btn" class="btn-primary" style="margin-top: 4px;">
+          <span>Generate Aligned Lesson Architecture</span>
+        </button>
+      </div>
+
+      <div id="sp-lesson-output-card" class="card" style="display: none;">
+        <div class="card-title">
+          <span>Synthesized Lesson Plan</span>
+          <button id="sp-copy-lesson-btn" class="btn-secondary" style="padding: 2px 8px; font-size: 10px;">Copy Plan</button>
+        </div>
+        <div id="sp-lesson-output" class="output-area"></div>
+      </div>
+    </div>
+
+    <!-- Tab 2: Bloom's Questions -->
+    <div id="tab-quick-questions-view" style="display: none;">
+      <div class="card">
+        <div class="card-title">
+          <span>Bloom's Taxonomy Assessment Generator</span>
+        </div>
+        <div class="field-group">
+          <label>Assessment Topic / Competency:</label>
+          <input type="text" id="sp-q-topic-input" placeholder="e.g. Newton's Laws of Motion">
+        </div>
+        <div class="field-group">
+          <label>Cognitive Levels to Generate:</label>
+          <select id="sp-q-count-select">
+            <option value="6">Full 6-Level Bloom Matrix (Remember to Create)</option>
+            <option value="4">Higher-Order Thinking (Apply, Analyze, Evaluate, Create)</option>
+            <option value="3">Foundational Diagnostic (Remember, Understand, Apply)</option>
+          </select>
+        </div>
+        <button id="sp-generate-q-btn" class="btn-primary">
+          <span>Synthesize Calibrated Assessment Items</span>
+        </button>
+      </div>
+
+      <div id="sp-q-output-card" class="card" style="display: none;">
+        <div class="card-title">
+          <span>Calibrated Question Matrix</span>
+          <button id="sp-copy-q-btn" class="btn-secondary" style="padding: 2px 8px; font-size: 10px;">Copy Questions</button>
+        </div>
+        <div id="sp-q-output" class="output-area"></div>
+      </div>
+    </div>
+
+    <!-- Tab 3: Canvas / Classroom Push -->
+    <div id="tab-lms-push-view" style="display: none;">
+      <div class="card">
+        <div class="card-title">
+          <span>LMS Direct Linking</span>
+        </div>
+        <p style="font-size: 11.5px; color: var(--text-muted); margin-bottom: 12px;">
+          Deploy synthesized instructional plans directly into your learning management system without tab switching.
+        </p>
+
+        <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+          <button id="sp-lms-canvas-btn" class="btn-secondary" style="flex: 1; border-color: #E13F2B; color: #FCA5A5;">
+            <span>Canvas LMS</span>
+          </button>
+          <button id="sp-lms-google-btn" class="btn-secondary" style="flex: 1; border-color: #10B981; color: #6EE7B7;">
+            <span>Google Classroom</span>
+          </button>
+        </div>
+
+        <div id="sp-lms-status" style="font-size: 11px; padding: 8px; border-radius: 6px; background: rgba(0,0,0,0.2); border: 1px solid var(--border); color: #94A3B8;">
+          Ready to publish. Generate or load a plan in the tabs above, then click either LMS platform button.
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab 4: Full Web Studio Frame -->
+    <div id="tab-full-view" style="display: none; height: 100%;">
+      <iframe id="sp-full-iframe" class="studio-iframe" src="about:blank"></iframe>
+    </div>
+
+  </div>
+
+  <script src="sidepanel.js"></script>
+</body>
+</html>
