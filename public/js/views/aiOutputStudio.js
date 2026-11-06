@@ -1434,146 +1434,151 @@ function renderOutputLibraryView(outputs) {
 // 4. EVENT LISTENERS & INTERACTION WIRING
 // =========================================================================
 export function setupAiOutputStudioListeners(container, navigateTo, showToast) {
-  // Prominent Header & Empty State Create Output Buttons
-  const triggerCreateFlow = () => {
-    activeStudioState.viewMode = 'creator';
-    refreshView(container, navigateTo, showToast);
-    setTimeout(() => {
-      const target = container.querySelector('#step-1-category-section') || container.querySelector('#step-2-content-section');
-      target?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 50);
-  };
+  if (!container) return;
+  try {
+    // Prominent Header & Empty State Create Output Buttons
+    const triggerCreateFlow = () => {
+      activeStudioState.viewMode = 'creator';
+      refreshView(container, navigateTo, showToast);
+      setTimeout(() => {
+        const target = container.querySelector('#step-1-category-section') || container.querySelector('#step-2-content-section');
+        target?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 50);
+    };
 
-  container.querySelector('#output-studio-create-btn')?.addEventListener('click', triggerCreateFlow);
-  container.querySelectorAll('.scroll-to-create-btn').forEach(btn => btn.addEventListener('click', triggerCreateFlow));
-  container.querySelector('#library-get-started-btn')?.addEventListener('click', triggerCreateFlow);
-  container.querySelector('#create-new-output-shortcut-btn')?.addEventListener('click', triggerCreateFlow);
+    container.querySelector('#output-studio-create-btn')?.addEventListener('click', triggerCreateFlow);
+    container.querySelectorAll('.scroll-to-create-btn').forEach(btn => btn.addEventListener('click', triggerCreateFlow));
+    container.querySelector('#library-get-started-btn')?.addEventListener('click', triggerCreateFlow);
+    container.querySelector('#create-new-output-shortcut-btn')?.addEventListener('click', triggerCreateFlow);
 
-  // Mode Tabs (Creative Workspace vs Library vs Templates)
-  container.querySelector('#mode-creator-btn')?.addEventListener('click', () => {
-    activeStudioState.viewMode = 'creator';
-    refreshView(container, navigateTo, showToast);
-  });
-
-  container.querySelector('#mode-library-btn')?.addEventListener('click', () => {
-    activeStudioState.viewMode = 'library';
-    refreshView(container, navigateTo, showToast);
-  });
-
-  container.querySelector('#mode-templates-btn')?.addEventListener('click', () => {
-    activeStudioState.viewMode = 'templates';
-    refreshView(container, navigateTo, showToast);
-  });
-
-  container.querySelector('#templates-back-to-workspace-btn')?.addEventListener('click', () => {
-    activeStudioState.viewMode = 'creator';
-    refreshView(container, navigateTo, showToast);
-  });
-
-  container.querySelector('#see-all-outputs-btn')?.addEventListener('click', () => {
-    activeStudioState.viewMode = 'library';
-    refreshView(container, navigateTo, showToast);
-  });
-
-  // Load Template Buttons
-  container.querySelectorAll('.load-output-template-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const tplId = btn.getAttribute('data-template-id');
-      const tpl = OUTPUT_TEMPLATES.find(t => t.id === tplId);
-      if (tpl) {
-        activeStudioState.activeCategoryId = tpl.categoryId;
-        activeStudioState.activeTypeId = tpl.typeId;
-        activeStudioState.formData.subject = tpl.subject;
-        activeStudioState.formData.educationalLevel = tpl.educationalLevel;
-        activeStudioState.formData.gradeLevel = tpl.gradeLevel;
-        activeStudioState.formData.topic = tpl.topic;
-        activeStudioState.formData.objectives = tpl.objectives;
-        activeStudioState.formData.competency = tpl.competency;
-        activeStudioState.formData.targetAudience = tpl.targetAudience;
-        activeStudioState.formData.purpose = tpl.purpose;
-        activeStudioState.formData.contentRequirements = tpl.contentRequirements;
-        activeStudioState.viewMode = 'creator';
-        refreshView(container, navigateTo, showToast);
-        if (showToast) showToast(`Loaded template: "${tpl.title}"`, 'success');
-        setTimeout(() => {
-          const formSec = container.querySelector('#step-2-content-section');
-          formSec?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }, 80);
-      }
-    });
-  });
-
-  // Category Selection
-  container.querySelectorAll('.category-card').forEach(card => {
-    card.addEventListener('click', () => {
-      const catId = card.getAttribute('data-category-id');
-      const cat = OUTPUT_CATEGORIES.find(c => c.id === catId);
-      if (cat) {
-        activeStudioState.activeCategoryId = catId;
-        activeStudioState.activeTypeId = cat.types[0]?.id || '';
-        refreshView(container, navigateTo, showToast);
-      }
-    });
-  });
-
-  // Subtype Selection
-  container.querySelectorAll('.type-pill').forEach(pill => {
-    pill.addEventListener('click', () => {
-      const typeId = pill.getAttribute('data-type-id');
-      activeStudioState.activeTypeId = typeId;
+    // Mode Tabs (Creative Workspace vs Library vs Templates)
+    container.querySelector('#mode-creator-btn')?.addEventListener('click', () => {
+      activeStudioState.viewMode = 'creator';
       refreshView(container, navigateTo, showToast);
     });
-  });
 
-  // Search Input Filter
-  container.querySelector('#category-search-input')?.addEventListener('input', (e) => {
-    activeStudioState.searchQuery = e.target.value;
-    refreshView(container, navigateTo, showToast);
-  });
+    container.querySelector('#mode-library-btn')?.addEventListener('click', () => {
+      activeStudioState.viewMode = 'library';
+      refreshView(container, navigateTo, showToast);
+    });
 
-  // Import from Design Dropdown
-  container.querySelector('#import-design-select')?.addEventListener('change', (e) => {
-    const designId = e.target.value;
-    if (designId) {
-      const design = store.getDesignById(designId);
-      if (design) {
-        activeStudioState.selectedSourceDesignId = designId;
-        activeStudioState.formData.subject = design.subject || activeStudioState.formData.subject;
-        activeStudioState.formData.educationalLevel = design.educationalLevel || activeStudioState.formData.educationalLevel;
-        activeStudioState.formData.gradeLevel = design.gradeLevel || activeStudioState.formData.gradeLevel;
-        activeStudioState.formData.topic = design.topic || design.title;
-        activeStudioState.formData.competency = design.competency || activeStudioState.formData.competency;
-        if (design.output) {
-          activeStudioState.formData.contentRequirements = `Inherited from ${design.title}:\n` + design.output.slice(0, 300) + '...';
+    container.querySelector('#mode-templates-btn')?.addEventListener('click', () => {
+      activeStudioState.viewMode = 'templates';
+      refreshView(container, navigateTo, showToast);
+    });
+
+    container.querySelector('#templates-back-to-workspace-btn')?.addEventListener('click', () => {
+      activeStudioState.viewMode = 'creator';
+      refreshView(container, navigateTo, showToast);
+    });
+
+    container.querySelector('#see-all-outputs-btn')?.addEventListener('click', () => {
+      activeStudioState.viewMode = 'library';
+      refreshView(container, navigateTo, showToast);
+    });
+
+    // Load Template Buttons
+    container.querySelectorAll('.load-output-template-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tplId = btn.getAttribute('data-template-id');
+        const tpl = OUTPUT_TEMPLATES.find(t => t.id === tplId);
+        if (tpl) {
+          activeStudioState.activeCategoryId = tpl.categoryId;
+          activeStudioState.activeTypeId = tpl.typeId;
+          activeStudioState.formData.subject = tpl.subject;
+          activeStudioState.formData.educationalLevel = tpl.educationalLevel;
+          activeStudioState.formData.gradeLevel = tpl.gradeLevel;
+          activeStudioState.formData.topic = tpl.topic;
+          activeStudioState.formData.objectives = tpl.objectives;
+          activeStudioState.formData.competency = tpl.competency;
+          activeStudioState.formData.targetAudience = tpl.targetAudience;
+          activeStudioState.formData.purpose = tpl.purpose;
+          activeStudioState.formData.contentRequirements = tpl.contentRequirements;
+          activeStudioState.viewMode = 'creator';
+          refreshView(container, navigateTo, showToast);
+          if (showToast) showToast(`Loaded template: "${tpl.title}"`, 'success');
+          setTimeout(() => {
+            const formSec = container.querySelector('#step-2-content-section');
+            formSec?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }, 80);
         }
-        showToast(`Imported context from "${design.title}".`, 'success');
-        refreshView(container, navigateTo, showToast);
-      }
-    }
-  });
+      });
+    });
 
-  // Contextual Conversion Shortcuts
-  container.querySelectorAll('.shortcut-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const cat = btn.getAttribute('data-cat');
-      const type = btn.getAttribute('data-type');
-      activeStudioState.activeCategoryId = cat;
-      activeStudioState.activeTypeId = type;
-      showToast(`Switched deliverable to ${btn.textContent.trim()}`, 'info');
+    // Category Selection
+    container.querySelectorAll('.category-card').forEach(card => {
+      card.addEventListener('click', () => {
+        const catId = card.getAttribute('data-category-id');
+        const cat = OUTPUT_CATEGORIES.find(c => c.id === catId);
+        if (cat) {
+          activeStudioState.activeCategoryId = catId;
+          activeStudioState.activeTypeId = cat.types[0]?.id || '';
+          refreshView(container, navigateTo, showToast);
+        }
+      });
+    });
+
+    // Subtype Selection
+    container.querySelectorAll('.type-pill').forEach(pill => {
+      pill.addEventListener('click', () => {
+        const typeId = pill.getAttribute('data-type-id');
+        activeStudioState.activeTypeId = typeId;
+        refreshView(container, navigateTo, showToast);
+      });
+    });
+
+    // Search Input Filter
+    container.querySelector('#category-search-input')?.addEventListener('input', (e) => {
+      activeStudioState.searchQuery = e.target.value;
       refreshView(container, navigateTo, showToast);
     });
-  });
 
-  // Sync Form Input Data
-  bindFormSync(container);
+    // Import from Design Dropdown
+    container.querySelector('#import-design-select')?.addEventListener('change', (e) => {
+      const designId = e.target.value;
+      if (designId) {
+        const design = store.getDesignById(designId);
+        if (design) {
+          activeStudioState.selectedSourceDesignId = designId;
+          activeStudioState.formData.subject = design.subject || activeStudioState.formData.subject;
+          activeStudioState.formData.educationalLevel = design.educationalLevel || activeStudioState.formData.educationalLevel;
+          activeStudioState.formData.gradeLevel = design.gradeLevel || activeStudioState.formData.gradeLevel;
+          activeStudioState.formData.topic = design.topic || design.title;
+          activeStudioState.formData.competency = design.competency || activeStudioState.formData.competency;
+          if (design.output) {
+            activeStudioState.formData.contentRequirements = `Inherited from ${design.title}:\n` + design.output.slice(0, 300) + '...';
+          }
+          showToast(`Imported context from "${design.title}".`, 'success');
+          refreshView(container, navigateTo, showToast);
+        }
+      }
+    });
 
-  // Generate Output Action
-  container.querySelector('#generate-output-btn')?.addEventListener('click', async () => {
-    await executeOutputGeneration(container, navigateTo, showToast);
-  });
+    // Contextual Conversion Shortcuts
+    container.querySelectorAll('.shortcut-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const cat = btn.getAttribute('data-cat');
+        const type = btn.getAttribute('data-type');
+        activeStudioState.activeCategoryId = cat;
+        activeStudioState.activeTypeId = type;
+        showToast(`Switched deliverable to ${btn.textContent.trim()}`, 'info');
+        refreshView(container, navigateTo, showToast);
+      });
+    });
 
-  // Workspace Actions
-  setupWorkspaceListeners(container, navigateTo, showToast);
+    // Sync Form Input Data
+    bindFormSync(container);
+
+    // Generate Output Action
+    container.querySelector('#generate-output-btn')?.addEventListener('click', async () => {
+      await executeOutputGeneration(container, navigateTo, showToast);
+    });
+
+    // Workspace Actions
+    setupWorkspaceListeners(container, navigateTo, showToast);
+  } catch (err) {
+    console.warn('[AI Output Studio] setup listeners caught exception:', err);
+  }
 }
 
 function bindFormSync(container) {
