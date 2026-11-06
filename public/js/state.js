@@ -9,7 +9,13 @@ const STORAGE_KEYS = {
   ACTIVE_BUILDER_STATE: 'pedaia_active_builder_state_v1',
   USER_PROFILES: 'pedaia_user_profiles_v1',
   ACTIVE_USER: 'pedaia_active_user_id_v1',
-  MATERIALS_GENERATED: 'pedaia_materials_generated_count'
+  MATERIALS_GENERATED: 'pedaia_materials_generated_count',
+  PROJECTS: 'pedaia_projects_v1',
+  CHECKLISTS: 'pedaia_checklists_v1',
+  CURRICULUM_MAPS: 'pedaia_curriculum_maps_v1',
+  REFLECTIONS: 'pedaia_reflections_v1',
+  WEEKLY_SCHEDULES: 'pedaia_weekly_schedules_v1',
+  STANDARDS: 'pedaia_curriculum_standards_v1'
 };
 
 export const BLANK_EDUCATOR_PROFILE = Object.freeze({
@@ -501,13 +507,323 @@ class StateStore {
     return this.setThemeMode(next);
   }
 
-  // --- Unified Brand System (Legacy Palette Compatibility) ---
-  getColorPalette() {
-    return 'default';
+  // --- Connected Instructional Design Projects & Workflows ---
+  getProjects() {
+    try {
+      const data = localStorage.getItem(STORAGE_KEYS.PROJECTS);
+      if (!data) {
+        // Initialize with default demo project linked to first saved design
+        const designs = this.getDesigns();
+        const baseDesign = designs[0] || {};
+        const defaultProject = [{
+          id: 'proj-demo-1',
+          title: baseDesign.title ? `${baseDesign.title} [Complete Instructional Package]` : 'Cell Biology & Photosynthesis Unit Package',
+          subject: baseDesign.subject || 'Science',
+          educationalLevel: baseDesign.educationalLevel || 'Junior High School',
+          gradeLevel: baseDesign.gradeLevel || 'Grade 8',
+          topic: baseDesign.topic || 'Photosynthesis & Cellular Respiration',
+          competency: baseDesign.competency || 'Demonstrate mastery of core discipline standards through inquiry and critical analysis',
+          sourceDesignId: baseDesign.id || null,
+          status: 'In Progress',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          resources: [
+            { type: 'lesson-plan', id: baseDesign.id || 'res-1', title: baseDesign.title || 'Master 5E Lesson Plan', status: 'Completed' },
+            { type: 'presentation', id: 'res-2', title: 'Interactive Slide Deck (12 Slides)', status: 'Draft' },
+            { type: 'worksheet', id: 'res-3', title: 'Guided Inquiry Handout & Vocabulary Sheet', status: 'Completed' },
+            { type: 'assessment', id: 'res-4', title: 'Formative Assessment Matrix & Rubric', status: 'Draft' },
+            { type: 'script', id: 'res-5', title: 'Teacher Facilitation Dialogue & Socratic Stems', status: 'Pending' },
+            { type: 'checklist', id: 'res-6', title: 'Lab Supplies & Instructional Checklist', status: 'Completed' }
+          ]
+        }];
+        localStorage.setItem(STORAGE_KEYS.PROJECTS, JSON.stringify(defaultProject));
+        return defaultProject;
+      }
+      return JSON.parse(data);
+    } catch {
+      return [];
+    }
   }
 
-  setColorPalette() {
-    return 'default';
+  saveProject(project) {
+    const list = this.getProjects();
+    const cleanProject = {
+      ...project,
+      id: project.id || 'proj-' + Date.now(),
+      updatedAt: new Date().toISOString(),
+      createdAt: project.createdAt || new Date().toISOString()
+    };
+    const idx = list.findIndex(p => p.id === cleanProject.id);
+    if (idx >= 0) list[idx] = cleanProject;
+    else list.unshift(cleanProject);
+    localStorage.setItem(STORAGE_KEYS.PROJECTS, JSON.stringify(list));
+    this.notify('projectsUpdated', { list, activeId: cleanProject.id });
+    return cleanProject;
+  }
+
+  deleteProject(id) {
+    let list = this.getProjects();
+    list = list.filter(p => p.id !== id);
+    localStorage.setItem(STORAGE_KEYS.PROJECTS, JSON.stringify(list));
+    this.notify('projectsUpdated', { list });
+  }
+
+  // --- Instructional Organizer & Checklists ---
+  getChecklists() {
+    try {
+      const data = localStorage.getItem(STORAGE_KEYS.CHECKLISTS);
+      if (!data) {
+        const defaultLists = [
+          {
+            id: 'chk-1',
+            title: 'Master Lesson Preparation Checklist',
+            category: 'Lesson Preparation',
+            priority: 'High',
+            dueDate: new Date(Date.now() + 86400000 * 2).toISOString().slice(0, 10),
+            notes: 'Essential checks prior to launching active inquiry sessions',
+            items: [
+              { id: 'item-1', text: 'Print and collate student inquiry worksheets and lab guides', completed: true },
+              { id: 'item-2', text: 'Verify audio-visual projector and digital presentation slides', completed: true },
+              { id: 'item-3', text: 'Prepare manipulative lab stations and glassware kits', completed: false },
+              { id: 'item-4', text: 'Review differentiated scaffolding cards for Tier 1 learners', completed: false },
+              { id: 'item-5', text: 'Post Socratic inquiry questions and discussion norms on classroom board', completed: true }
+            ]
+          },
+          {
+            id: 'chk-2',
+            title: 'Classroom Supplies & Materials Checklist',
+            category: 'Classroom Supplies',
+            priority: 'Medium',
+            dueDate: new Date(Date.now() + 86400000 * 5).toISOString().slice(0, 10),
+            notes: 'Physical inventory needed for hands-on activities',
+            items: [
+              { id: 'item-21', text: 'Dry-erase markers and whiteboard erasers', completed: true },
+              { id: 'item-22', text: 'Chart paper and multi-colored index cards', completed: true },
+              { id: 'item-23', text: 'Colored sticky notes for exit ticket reflection', completed: false }
+            ]
+          }
+        ];
+        localStorage.setItem(STORAGE_KEYS.CHECKLISTS, JSON.stringify(defaultLists));
+        return defaultLists;
+      }
+      return JSON.parse(data);
+    } catch {
+      return [];
+    }
+  }
+
+  saveChecklist(checklist) {
+    const list = this.getChecklists();
+    const cleanList = {
+      ...checklist,
+      id: checklist.id || 'chk-' + Date.now(),
+      updatedAt: new Date().toISOString()
+    };
+    const idx = list.findIndex(c => c.id === cleanList.id);
+    if (idx >= 0) list[idx] = cleanList;
+    else list.unshift(cleanList);
+    localStorage.setItem(STORAGE_KEYS.CHECKLISTS, JSON.stringify(list));
+    this.notify('checklistsUpdated', { list, activeId: cleanList.id });
+    return cleanList;
+  }
+
+  toggleChecklistItem(listId, itemId) {
+    const list = this.getChecklists();
+    const targetList = list.find(l => l.id === listId);
+    if (!targetList) return;
+    const item = targetList.items.find(i => i.id === itemId);
+    if (!item) return;
+    item.completed = !item.completed;
+    targetList.updatedAt = new Date().toISOString();
+    localStorage.setItem(STORAGE_KEYS.CHECKLISTS, JSON.stringify(list));
+    this.notify('checklistsUpdated', { list, updatedListId: listId });
+    return targetList;
+  }
+
+  deleteChecklist(id) {
+    let list = this.getChecklists();
+    list = list.filter(c => c.id !== id);
+    localStorage.setItem(STORAGE_KEYS.CHECKLISTS, JSON.stringify(list));
+    this.notify('checklistsUpdated', { list });
+  }
+
+  // --- Curriculum & Competency Maps ---
+  getCurriculumMaps() {
+    try {
+      const data = localStorage.getItem(STORAGE_KEYS.CURRICULUM_MAPS);
+      if (!data) {
+        const defaultMaps = [{
+          id: 'cmap-1',
+          title: 'Integrated Science Curriculum & Pacing Guide (Quarter 1)',
+          subject: 'Science',
+          educationalLevel: 'Junior High School',
+          gradeLevel: 'Grade 8',
+          term: 'Quarter 1',
+          updatedAt: new Date().toISOString(),
+          rows: [
+            { week: 'Week 1-2', unit: 'Unit 1: Cell Structure & Function', competency: 'Differentiate plant and animal cell structures and organelles', objective: 'Identify key organelles through microscopic observation', activity: 'Hands-on Microscope Wet Mount Lab', assessment: 'Formative Lab Diagram & Organelle Quiz', time: '10 Hours' },
+            { week: 'Week 3-4', unit: 'Unit 1: Cellular Energetics', competency: 'Explain the coupled mechanisms of photosynthesis and respiration', objective: 'Model chemical equation transitions using molecular kits', activity: 'Photosynthesis Leaf Disk Floating Experiment', assessment: 'Rubric-Scored Experimental Lab Report', time: '10 Hours' },
+            { week: 'Week 5-6', unit: 'Unit 2: Heredity & Genetics', competency: 'Predict phenotypic outcomes using Mendelian monohybrid crosses', objective: 'Construct and solve Punnett squares for dominant/recessive traits', activity: 'Genetics Dragon Breeding Simulation', assessment: 'Performance Task: Genetic Trait Case Study', time: '10 Hours' },
+            { week: 'Week 7-8', unit: 'Unit 2: Genetic Diversity', competency: 'Explain how meiosis contributes to species genetic variation', objective: 'Compare chromosome segregation in mitosis vs meiosis', activity: 'Kinesthetic Pipe Cleaner Meiosis Dance', assessment: 'Quarterly Summative Assessment', time: '10 Hours' }
+          ]
+        }];
+        localStorage.setItem(STORAGE_KEYS.CURRICULUM_MAPS, JSON.stringify(defaultMaps));
+        return defaultMaps;
+      }
+      return JSON.parse(data);
+    } catch {
+      return [];
+    }
+  }
+
+  saveCurriculumMap(map) {
+    const list = this.getCurriculumMaps();
+    const cleanMap = {
+      ...map,
+      id: map.id || 'cmap-' + Date.now(),
+      updatedAt: new Date().toISOString()
+    };
+    const idx = list.findIndex(m => m.id === cleanMap.id);
+    if (idx >= 0) list[idx] = cleanMap;
+    else list.unshift(cleanMap);
+    localStorage.setItem(STORAGE_KEYS.CURRICULUM_MAPS, JSON.stringify(list));
+    this.notify('curriculumMapsUpdated', { list, activeId: cleanMap.id });
+    return cleanMap;
+  }
+
+  deleteCurriculumMap(id) {
+    let list = this.getCurriculumMaps();
+    list = list.filter(m => m.id !== id);
+    localStorage.setItem(STORAGE_KEYS.CURRICULUM_MAPS, JSON.stringify(list));
+    this.notify('curriculumMapsUpdated', { list });
+  }
+
+  // --- Teaching Reflections (Gibbs / Schön / What? So What? Now What?) ---
+  getReflections() {
+    try {
+      const data = localStorage.getItem(STORAGE_KEYS.REFLECTIONS);
+      if (!data) {
+        const defaultReflections = [{
+          id: 'refl-1',
+          title: 'Reflection on 5E Photosynthesis Inquiry Lab',
+          framework: "Gibbs' Reflective Cycle",
+          subject: 'Science',
+          gradeLevel: 'Grade 8',
+          createdAt: new Date().toISOString(),
+          description: 'Students conducted the floating leaf disk assay. High engagement observed during the Explore phase.',
+          feelings: 'Satisfied with student inquiry depth, but noticed pacing became rushed during the Explain synthesis.',
+          evaluation: 'What worked well: Collaborative peer data recording. What needed improvement: Transition timing from lab benches to whole-group whiteboard dialogue.',
+          analysis: 'Scaffolding the data capture table beforehand would give learners 10 extra minutes for collective sense-making.',
+          conclusion: 'Students achieved the core objective but needed more guided question prompts to articulate their empirical claims.',
+          actionPlan: 'Provide pre-printed graphic organizers and establish a 5-minute audible chime timer for the Elaborate phase.'
+        }];
+        localStorage.setItem(STORAGE_KEYS.REFLECTIONS, JSON.stringify(defaultReflections));
+        return defaultReflections;
+      }
+      return JSON.parse(data);
+    } catch {
+      return [];
+    }
+  }
+
+  saveReflection(refl) {
+    const list = this.getReflections();
+    const cleanRefl = {
+      ...refl,
+      id: refl.id || 'refl-' + Date.now(),
+      createdAt: refl.createdAt || new Date().toISOString()
+    };
+    const idx = list.findIndex(r => r.id === cleanRefl.id);
+    if (idx >= 0) list[idx] = cleanRefl;
+    else list.unshift(cleanRefl);
+    localStorage.setItem(STORAGE_KEYS.REFLECTIONS, JSON.stringify(list));
+    this.notify('reflectionsUpdated', { list, activeId: cleanRefl.id });
+    return cleanRefl;
+  }
+
+  deleteReflection(id) {
+    let list = this.getReflections();
+    list = list.filter(r => r.id !== id);
+    localStorage.setItem(STORAGE_KEYS.REFLECTIONS, JSON.stringify(list));
+    this.notify('reflectionsUpdated', { list });
+  }
+
+  // --- Weekly Teaching Planner & Schedule ---
+  getWeeklySchedule() {
+    try {
+      const data = localStorage.getItem(STORAGE_KEYS.WEEKLY_SCHEDULES);
+      if (!data) {
+        const defaultSchedule = {
+          weekTitle: 'Current Instructional Week',
+          days: {
+            'Monday': [
+              { time: '08:00 - 09:00', subject: 'Grade 8 Science', topic: 'Photosynthesis 5E Model (Engage & Explore)', room: 'Lab 201', designId: null },
+              { time: '10:00 - 11:00', subject: 'Grade 10 Biology', topic: 'Genetics Monohybrid Cross Modeling', room: 'Room 304', designId: null }
+            ],
+            'Tuesday': [
+              { time: '08:00 - 09:00', subject: 'Grade 8 Science', topic: 'Photosynthesis 5E Model (Explain & Elaborate)', room: 'Lab 201', designId: null },
+              { time: '13:00 - 14:00', subject: 'Faculty Mentorship', topic: 'Instructional Design & UDL Review', room: 'Conference Hall', designId: null }
+            ],
+            'Wednesday': [
+              { time: '09:00 - 10:00', subject: 'Grade 8 Science', topic: 'Photosynthesis Formative Assessment & Quiz', room: 'Lab 201', designId: null },
+              { time: '11:00 - 12:00', subject: 'Grade 10 Biology', topic: 'Pedigree Analysis Collaborative Jigsaw', room: 'Room 304', designId: null }
+            ],
+            'Thursday': [
+              { time: '08:00 - 09:00', subject: 'Grade 8 Science', topic: 'Cellular Respiration Hook & Micro-Inquiry', room: 'Lab 201', designId: null },
+              { time: '14:00 - 15:30', subject: 'Curriculum Committee', topic: 'Quarter 2 Standards & Competency Mapping', room: 'CTE Faculty Lounge', designId: null }
+            ],
+            'Friday': [
+              { time: '08:30 - 10:00', subject: 'Grade 8 & 10 Science', topic: 'Integrated Inquiry Showcase & Reflection', room: 'Auditorium', designId: null },
+              { time: '11:00 - 12:00', subject: 'Office Hours', topic: 'Differentiated Learning Support & Consultations', room: 'Faculty Office', designId: null }
+            ]
+          }
+        };
+        localStorage.setItem(STORAGE_KEYS.WEEKLY_SCHEDULES, JSON.stringify(defaultSchedule));
+        return defaultSchedule;
+      }
+      return JSON.parse(data);
+    } catch {
+      return { weekTitle: 'Current Week', days: {} };
+    }
+  }
+
+  saveWeeklySchedule(schedule) {
+    localStorage.setItem(STORAGE_KEYS.WEEKLY_SCHEDULES, JSON.stringify(schedule));
+    this.notify('weeklyScheduleUpdated', schedule);
+    return schedule;
+  }
+
+  // --- Curriculum Standards & Competencies Library ---
+  getStandards() {
+    try {
+      const data = localStorage.getItem(STORAGE_KEYS.STANDARDS);
+      if (!data) {
+        const defaultStandards = [
+          { code: 'SCI-JHS-01', subject: 'Science', level: 'Junior High School', grade: 'Grade 8', domain: 'Living Things and Their Environment', description: 'Demonstrate an understanding of how cells function as the basic structural and functional units of life.' },
+          { code: 'SCI-JHS-02', subject: 'Science', level: 'Junior High School', grade: 'Grade 8', domain: 'Living Things and Their Environment', description: 'Differentiate plant and animal cells according to the presence or absence of certain organelles.' },
+          { code: 'SCI-JHS-03', subject: 'Science', level: 'Junior High School', grade: 'Grade 8', domain: 'Energy & Ecosystems', description: 'Explain how photosynthetic organisms produce their own food through light-dependent and Calvin cycle reactions.' },
+          { code: 'MATH-JHS-01', subject: 'Mathematics', level: 'Junior High School', grade: 'Grade 8', domain: 'Patterns and Algebra', description: 'Formulate, solve, and graph linear equations in two variables using slope-intercept form.' },
+          { code: 'ENG-JHS-01', subject: 'English', level: 'Junior High School', grade: 'Grade 7', domain: 'Reading Comprehension', description: 'Identify main ideas, supporting details, and author rhetorical purposes in academic informational texts.' },
+          { code: 'FIL-SHS-01', subject: 'Filipino', level: 'Senior High School', grade: 'Grade 11', domain: 'Pagbasa at Pagsusuri', description: 'Nasusuri ang iba’t ibang uri ng binasang teksto ayon sa kaugnayan nito sa sarili, pamilya, komunidad, bansa at daigdig.' }
+        ];
+        localStorage.setItem(STORAGE_KEYS.STANDARDS, JSON.stringify(defaultStandards));
+        return defaultStandards;
+      }
+      return JSON.parse(data);
+    } catch {
+      return [];
+    }
+  }
+
+  saveStandard(std) {
+    const list = this.getStandards();
+    const cleanStd = { ...std, id: std.id || 'std-' + Date.now() };
+    const idx = list.findIndex(s => s.code === cleanStd.code || s.id === cleanStd.id);
+    if (idx >= 0) list[idx] = cleanStd;
+    else list.unshift(cleanStd);
+    localStorage.setItem(STORAGE_KEYS.STANDARDS, JSON.stringify(list));
+    this.notify('standardsUpdated', { list });
+    return cleanStd;
   }
 
   // --- Export & Reset ---

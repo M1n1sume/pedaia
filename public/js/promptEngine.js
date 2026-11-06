@@ -403,3 +403,412 @@ ${additionalRequirements ? `\n[ADDITIONAL CONSTRAINTS & PREFERENCES]\n${addition
 
   return prompt.trim();
 }
+
+
+/**
+ * 5. AI Presentation & Slide Generator Prompt Builder
+ */
+export function buildPresentationGeneratorPrompt(config = {}) {
+  const {
+    subject = 'General Education',
+    educationalLevel = 'Junior High School',
+    gradeLevel = '',
+    topic = '',
+    competency = '',
+    objectives = '',
+    targetAudience = 'Students',
+    numSlides = 10,
+    duration = '45 minutes',
+    modality = 'Face-to-Face',
+    presentationStyle = 'Interactive Academic',
+    visualStyle = 'Clean Pedagogical',
+    contentDensity = 'Balanced',
+    includeSpeakerNotes = true,
+    sourceLessonPlan = '',
+    additionalRequirements = ''
+  } = config;
+
+  return `[ROLE & PEDAGOGICAL PERSONA]
+You are PEDAIA's Academic Presentation Architect. Construct an engaging, highly structured, and pedagogy-first slide presentation deck for educators.
+
+[EDUCATIONAL & PRESENTATION CONTEXT]
+- Subject / Discipline: ${subject}
+- Educational Level: ${educationalLevel} ${gradeLevel ? '(' + gradeLevel + ')' : ''}
+- Topic / Central Concept: ${topic || 'Key Discipline Concepts'}
+- Target Standard / Competency: ${competency || 'Curricular Mastery'}
+- Learning Objectives: ${objectives || 'Demonstrate deep conceptual and analytical understanding'}
+- Target Audience: ${targetAudience}
+- Total Slides: ${numSlides}
+- Presentation Duration: ${duration}
+- Delivery Modality: ${modality}
+- Presentation Style: ${presentationStyle}
+- Visual Style / Tone: ${visualStyle}
+- Content Density: ${contentDensity}
+${sourceLessonPlan ? `\n[SOURCE LESSON PLAN FOR CONVERSION]\n${sourceLessonPlan}` : ''}
+
+[SLIDE STRUCTURE SPECIFICATIONS]
+Structure the presentation into ${numSlides} discrete slides with clear markdown tags:
+Each slide must include:
+### Slide [Number]: [Slide Title]
+- **Slide Type**: (Title, Learning Objectives, Hook/Motivation, Concept Explanation, Examples, Activity, Discussion, Assessment, or Summary)
+- **Visual & Layout Directive**: (Clean academic suggestions, diagrams, tables, or split cards)
+- **Slide Content**: (Structured bullet points, key equations, concepts, or quote blocks)
+${includeSpeakerNotes ? `- **Speaker Notes & Narration**: (Comprehensive word-for-word teacher script, discussion prompts, and transition cues)` : ''}
+- **Estimated Timing**: (Minutes allocated for this slide)
+
+[OUTPUT REQUIREMENTS]
+Ensure the slide sequence follows an authentic pedagogical arc. Every slide must contain editable text and actionable speaker notes.
+${additionalRequirements ? `\n[ADDITIONAL CONSTRAINTS]\n${additionalRequirements}` : ''}`.trim();
+}
+
+/**
+ * 6. AI Assessment & Rubric Studio Prompt Builder
+ */
+export function buildAssessmentRubricPrompt(config = {}) {
+  const {
+    subject = 'General Education',
+    educationalLevel = 'Junior High School',
+    gradeLevel = '',
+    topic = '',
+    competency = '',
+    assessmentType = 'Formative & Performance Task',
+    itemCount = 10,
+    rubricType = 'Analytic Rubric (4 Performance Levels)',
+    includeAnswerKey = true,
+    includeBlueprintTOS = true,
+    scoringMethod = 'Weighted Points Scale',
+    additionalRequirements = ''
+  } = config;
+
+  return `[ROLE & PEDAGOGICAL PERSONA]
+You are PEDAIA's Psychometric and Assessment Design Specialist. Construct a balanced, standards-aligned assessment blueprint, item set, and scoring rubric.
+
+[EDUCATIONAL ASSESSMENT CONTEXT]
+- Subject: ${subject}
+- Level / Grade: ${educationalLevel} ${gradeLevel ? '(' + gradeLevel + ')' : ''}
+- Topic: ${topic || 'Curriculum Concepts'}
+- Competency / Outcome: ${competency || 'Core Standard Mastery'}
+- Assessment Archetype: ${assessmentType}
+- Target Items / Tasks: ${itemCount} items
+- Rubric Architecture: ${rubricType}
+- Scoring Methodology: ${scoringMethod}
+
+[ASSESSMENT SPECIFICATIONS]
+${includeBlueprintTOS ? `1. Table of Specifications (TOS) & Blueprint:
+   - Matrix showing Objective, Bloom's Cognitive Level (Remember/Understand, Apply/Analyze, Evaluate/Create), Item Number, and Point Weighting.` : ''}
+2. Assessment Instrument / Question Items:
+   - Clearly formatted assessment questions (Multiple Choice with diagnostic distractors, Scenario-Based Problems, or Authentic Performance Tasks).
+${includeAnswerKey ? `3. Answer Key & Teacher Scoring Guide:
+   - Correct answers with step-by-step pedagogical rationales and student misconception diagnoses.` : ''}
+4. Comprehensive Rubric Matrix:
+   - Formatted Markdown table containing Criteria, Point Values, and explicit descriptive qualitative indicators across 4 performance levels (Exemplary, Proficient, Developing, Beginning).
+5. Student-Facing Task Instructions & Accommodations.
+${additionalRequirements ? `\n[ADDITIONAL REQUIREMENTS]\n${additionalRequirements}` : ''}`.trim();
+}
+
+/**
+ * 7. AI Instructional Materials Studio Prompt Builder
+ */
+export function buildInstructionalMaterialsPrompt(config = {}) {
+  const {
+    subject = 'General Education',
+    educationalLevel = 'Junior High School',
+    gradeLevel = '',
+    topic = '',
+    competency = '',
+    materialType = 'Student Worksheet & Learning Activity Sheet',
+    difficulty = 'Grade-Level Benchmark',
+    length = '2-3 Pages',
+    includeAnswerKey = true,
+    includeTeacherGuide = true,
+    additionalRequirements = ''
+  } = config;
+
+  return `[ROLE & PEDAGOGICAL PERSONA]
+You are PEDAIA's Classroom Materials Specialist. Create publication-quality, classroom-ready instructional materials.
+
+[MATERIAL CONTEXT]
+- Subject: ${subject}
+- Level / Grade: ${educationalLevel} ${gradeLevel ? '(' + gradeLevel + ')' : ''}
+- Topic: ${topic || 'Key Concepts'}
+- Competency / Objective: ${competency || 'Core Standard'}
+- Target Material Type: ${materialType}
+- Difficulty: ${difficulty}
+- Target Length: ${length}
+
+[MATERIAL STRUCTURE]
+1. Student Material Section:
+   - Title, Header Metadata, Learning Objectives, Vocabulary / Word Bank.
+   - Part 1: Guided Concept Review & Graphic Organizer.
+   - Part 2: Hands-on / Written Application Exercises.
+   - Part 3: Critical Thinking / Synthesis Challenge & Exit Ticket.
+${includeAnswerKey ? `2. Teacher Answer Key & Diagnostic Guide:\n   - Complete solutions, exemplar student responses, and common errors to watch for.` : ''}
+${includeTeacherGuide ? `3. Pedagogical Teacher Facilitation Tips:\n   - Implementation instructions, time breakdown, and UDL scaffolding notes.` : ''}
+${additionalRequirements ? `\n[ADDITIONAL CONSTRAINTS]\n${additionalRequirements}` : ''}`.trim();
+}
+
+/**
+ * 8. AI Curriculum & Competency Mapper Prompt Builder
+ */
+export function buildCurriculumMapperPrompt(config = {}) {
+  const {
+    subject = 'General Education',
+    educationalLevel = 'Junior High School',
+    gradeLevel = '',
+    term = 'Quarter 1',
+    numUnits = 4,
+    competencies = '',
+    additionalRequirements = ''
+  } = config;
+
+  return `[ROLE & PEDAGOGICAL PERSONA]
+You are PEDAIA's Curriculum Architect. Construct a multi-week curriculum map, competency progression guide, and instructional pacing matrix.
+
+[CURRICULUM CONTEXT]
+- Subject: ${subject}
+- Level: ${educationalLevel} ${gradeLevel ? '(' + gradeLevel + ')' : ''}
+- Term / Period: ${term}
+- Units to Cover: ${numUnits} units
+- Input Competencies: ${competencies || 'Standard National / State Curriculum Sequence'}
+
+[MAPPING MATRIX SPECIFICATIONS]
+Generate a complete, structured Markdown Curriculum Matrix table with columns:
+| Week & Timeframe | Unit / Central Topic | Curriculum Competency & Code | Specific Learning Objective | Core Instructional Strategy / Activity | Formative & Summative Assessment | Essential Resources |
+Include:
+1. Pacing & Time Allocation Analysis.
+2. Vertical & Horizontal Articulation Notes.
+3. Diagnostic Gaps & Redundancy Checks.
+${additionalRequirements ? `\n[ADDITIONAL CONSTRAINTS]\n${additionalRequirements}` : ''}`.trim();
+}
+
+/**
+ * 9. AI Learning Accessibility & UDL Studio Prompt Builder
+ */
+export function buildAccessibilityUdlPrompt(config = {}) {
+  const {
+    subject = 'General Education',
+    educationalLevel = 'Junior High School',
+    topic = '',
+    competency = '',
+    existingMaterial = '',
+    udlDimensions = ['Engagement', 'Representation', 'Action and Expression'],
+    additionalRequirements = ''
+  } = config;
+
+  return `[ROLE & PEDAGOGICAL PERSONA]
+You are PEDAIA's Universal Design for Learning (UDL) and Accessibility Auditor. Evaluate learning materials and generate inclusive adaptations.
+
+[CONTEXT]
+- Subject: ${subject} | Level: ${educationalLevel} | Topic: ${topic}
+- Core Competency: ${competency}
+- UDL Focus: ${udlDimensions.join(', ')}
+${existingMaterial ? `\n[TARGET MATERIAL TO AUDIT & ADAPT]\n${existingMaterial}` : ''}
+
+[UDL AUDIT & DESIGN OUTPUT]
+1. Readability & Learning Barrier Audit:
+   - Identify linguistic, cognitive, sensory, or physical barriers in typical lessons on this topic.
+2. Principle 1 — Multiple Means of Engagement:
+   - Interest hooks, authentic choice, self-regulation, and collaborative scaffolds.
+3. Principle 2 — Multiple Means of Representation:
+   - Dual-coding, multi-sensory formats (visual/auditory/tactile), vocabulary clarification, and concept chunking.
+4. Principle 3 — Multiple Means of Action & Expression:
+   - Alternative response modalities, executive function scaffolds, and adaptive tools.
+5. UDL Implementation Checklist for the Classroom.
+${additionalRequirements ? `\n[ADDITIONAL REQUIREMENTS]\n${additionalRequirements}` : ''}`.trim();
+}
+
+/**
+ * 10. AI Teaching Script & Facilitation Studio Prompt Builder
+ */
+export function buildTeachingScriptPrompt(config = {}) {
+  const {
+    subject = 'General Education',
+    educationalLevel = 'Junior High School',
+    topic = '',
+    scriptType = 'Full Lesson Facilitation Script',
+    duration = '45 minutes',
+    tone = 'Supportive & Socratic',
+    additionalRequirements = ''
+  } = config;
+
+  return `[ROLE & PEDAGOGICAL PERSONA]
+You are PEDAIA's Master Teacher Facilitator. Craft a natural, age-appropriate, highly engaging classroom teaching script.
+
+[SCRIPT CONTEXT]
+- Subject: ${subject} | Level: ${educationalLevel} | Topic: ${topic}
+- Script Archetype: ${scriptType}
+- Class Duration: ${duration}
+- Instructional Tone: ${tone}
+
+[SCRIPT SPECIFICATIONS]
+Structure the script into clear conversational phases:
+1. Opening Hook & Objective Orientation (Teacher talk, provocative opening question, anticipated student responses).
+2. Direct Concept Explanation (Analogies, whiteboard notes, checking for understanding stems).
+3. Guided Discussion & Socratic Questioning Flow (Teacher probing questions, branching student answers, redirect prompts).
+4. Activity Transition & Group Work Instructions (Clear physical directives, noise level norms).
+5. Lesson Closing & Synthesis (Student metacognitive reflection, wrap-up statements).
+Include explicit [Teacher Action], [Teacher Says], and [Expected Student Response] markup.
+${additionalRequirements ? `\n[ADDITIONAL CONSTRAINTS]\n${additionalRequirements}` : ''}`.trim();
+}
+
+/**
+ * 11. AI Classroom Management & Facilitation Studio Prompt Builder
+ */
+export function buildClassroomManagementPrompt(config = {}) {
+  const {
+    educationalLevel = 'Junior High School',
+    setting = 'Physical Classroom',
+    classSize = '30-35 Students',
+    challengeType = 'Group Work Transitions & Discussion Norms',
+    additionalRequirements = ''
+  } = config;
+
+  return `[ROLE & PEDAGOGICAL PERSONA]
+You are PEDAIA's Positive Classroom Culture Specialist. Formulate respectful, inclusive, and non-punitive classroom management systems.
+
+[CLASSROOM CONTEXT]
+- Educational Level: ${educationalLevel}
+- Physical Setting: ${setting}
+- Class Size: ${classSize}
+- Focus Area: ${challengeType}
+
+[MANAGEMENT SYSTEM OUTPUT]
+1. Core Behavioral Norms & Co-Created Agreements (Positive, clear, action-oriented).
+2. Explicit Procedural Protocols & Transitions (Step-by-step routines for starting, material distribution, transitions, and dismissal).
+3. Cooperative Group Work Norms & Role Assignments (Roles: Facilitator, Recorder, Reporter, Materials Manager).
+4. Restorative & De-escalation Strategies (Positive redirection cues, non-verbal signals, calm-down routines).
+5. Family & Student Communication Stems.
+Strict Rule: Use supportive, non-punitive, and dignifying strategies.
+${additionalRequirements ? `\n[ADDITIONAL CONSTRAINTS]\n${additionalRequirements}` : ''}`.trim();
+}
+
+/**
+ * 12. AI Teaching Reflection Studio Prompt Builder
+ */
+export function buildTeachingReflectionPrompt(config = {}) {
+  const {
+    framework = "Gibbs' Reflective Cycle",
+    subject = 'General Education',
+    topic = '',
+    lessonNotes = '',
+    additionalRequirements = ''
+  } = config;
+
+  return `[ROLE & PEDAGOGICAL PERSONA]
+You are PEDAIA's Reflective Practice Mentor. Facilitate an in-depth teaching reflection and instructional continuous improvement action plan.
+
+[REFLECTION CONTEXT]
+- Framework: ${framework}
+- Subject: ${subject} | Topic: ${topic}
+${lessonNotes ? `- Educator Classroom Observations:\n${lessonNotes}` : ''}
+
+[REFLECTIVE STRUCTURE (${framework})]
+1. Description of the Lesson & Context
+2. Feelings & Teacher Reactions
+3. Evaluation (What worked well vs what was challenging)
+4. Pedagogical Analysis (Why did things occur this way? Cognitive/engagement factors)
+5. Conclusion & Pedagogical Insights
+6. Concrete Action Plan for Future Instruction (Immediate changes, revised activities, follow-up scaffolding)
+${additionalRequirements ? `\n[ADDITIONAL CONSTRAINTS]\n${additionalRequirements}` : ''}`.trim();
+}
+
+/**
+ * 13. AI Research & Resource Assistant Prompt Builder
+ */
+export function buildResearchAssistantPrompt(config = {}) {
+  const {
+    researchTopic = '',
+    educationalLevel = 'General Education',
+    inquiryFocus = 'Empirical Evidence & Best Practices',
+    additionalRequirements = ''
+  } = config;
+
+  return `[ROLE & PEDAGOGICAL PERSONA]
+You are PEDAIA's Academic Research Specialist. Synthesize educational research, pedagogical literature, and evidence-based instructional strategies.
+
+[RESEARCH TOPIC]
+- Research Topic / Question: ${researchTopic}
+- Educational Level: ${educationalLevel}
+- Inquiry Focus: ${inquiryFocus}
+
+[RESEARCH SYNTHESIS OUTPUT]
+1. Executive Research Overview & Key Conceptual Foundations.
+2. Key Pedagogical Findings from Cognitive & Educational Science.
+3. Translating Research into Classroom Practice (Actionable instructional strategies).
+4. Recommended Investigation Questions for Teacher Action Research.
+5. APA 7th Edition Reference Formats (Strictly formatted references, verified educational theory citations).
+Strict Rule: Do not fabricate fake authors, fake DOI numbers, or fictional empirical data.
+${additionalRequirements ? `\n[ADDITIONAL CONSTRAINTS]\n${additionalRequirements}` : ''}`.trim();
+}
+
+/**
+ * 14. AI Quality Review & Alignment Checker Prompt Builder
+ */
+export function buildQualityReviewPrompt(config = {}) {
+  const {
+    designTitle = '',
+    designContent = '',
+    additionalRequirements = ''
+  } = config;
+
+  return `[ROLE & PEDAGOGICAL PERSONA]
+You are PEDAIA's Senior Curriculum Quality Auditor. Evaluate the provided instructional design against 12 rigorous pedagogical benchmarks.
+
+[TARGET INSTRUCTIONAL DESIGN]
+Title: ${designTitle}
+Content:
+${designContent}
+
+[QUALITY REVIEW CRITERIA]
+Evaluate and score across:
+1. Learning Objective Alignment
+2. Curriculum Competency Alignment
+3. Content Accuracy & Conceptual Rigor
+4. Pedagogical Model Appropriateness
+5. Learner-Level Feasibility
+6. Assessment Alignment (Constructive Alignment)
+7. Inclusivity & Universal Design (UDL)
+8. Accessibility & Cognitive Load
+9. Procedural Clarity & Step Details
+10. Classroom Time Pacing
+11. Instructional Sequence Logic
+12. Resource Availability & Safety
+
+Provide:
+- Strengths Identified
+- Potential Vulnerabilities or Pedagogical Gaps
+- Concrete Revision Recommendations
+- Overall Alignment Index (Percentage).
+${additionalRequirements ? `\n[ADDITIONAL CONSTRAINTS]\n${additionalRequirements}` : ''}`.trim();
+}
+
+/**
+ * 15. Instructional Organizer Checklist Generator Prompt Builder
+ */
+export function buildOrganizerChecklistPrompt(config = {}) {
+  const {
+    checklistType = 'Lesson Preparation Checklist',
+    topic = '',
+    subject = '',
+    sourceContent = '',
+    additionalRequirements = ''
+  } = config;
+
+  return `[ROLE & PEDAGOGICAL PERSONA]
+You are PEDAIA's Classroom Operations Organizer. Generate a comprehensive, chronological, and actionable checklist for educators.
+
+[CONTEXT]
+- Checklist Type: ${checklistType}
+- Topic: ${topic} | Subject: ${subject}
+${sourceContent ? `\n[SOURCE INSTRUCTIONAL CONTEXT]\n${sourceContent}` : ''}
+
+[CHECKLIST REQUIREMENTS]
+Provide a structured list of actionable tasks grouped by:
+1. Advance Preparation (2-3 days prior)
+2. Day-of Setup (30 minutes prior)
+3. During-Class Execution Milestones
+4. Post-Class Follow-up & Assessment Collection
+Format each item with clear checkbox markdown:
+- [ ] [Task Title]: Detailed directive and required materials.
+${additionalRequirements ? `\n[ADDITIONAL CONSTRAINTS]\n${additionalRequirements}` : ''}`.trim();
+}
