@@ -57,8 +57,9 @@ export function renderSettingsView() {
 
       <!-- Settings Navigation Tabs -->
       <div class="flex items-center gap-1.5 overflow-x-auto pb-1 border-b border-slate-200 dark:border-slate-800 text-xs">
-        <button class="settings-tab-nav px-3.5 py-2 rounded-xl font-bold whitespace-nowrap transition-all ${activeSettingsTab === 'general' ? 'bg-indigo-600 text-white shadow-2xs' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'}" data-tab="general">
-          Account Profile
+        <button class="settings-tab-nav px-3.5 py-2 rounded-xl font-bold whitespace-nowrap transition-all flex items-center gap-1.5 ${activeSettingsTab === 'general' ? 'bg-indigo-600 text-white shadow-2xs' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'}" data-tab="general">
+          <span>Account Profile</span>
+          ${!store.isAuthenticated() ? '<span class="text-[11px] opacity-75" title="Requires Log In or Sign Up">🔒</span>' : ''}
         </button>
         ${isAdmin ? `
           <button class="settings-tab-nav px-3.5 py-2 rounded-xl font-bold whitespace-nowrap transition-all ${activeSettingsTab === 'admin' ? 'bg-amber-600 text-white shadow-2xs' : 'text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/60'}" data-tab="admin">

@@ -553,6 +553,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   };
   updateAuthUI();
+  window.updateAuthUI = updateAuthUI;
+  window.updateSidebarProfile = updateSidebarProfile;
 
   // Top-Right Header Unauthenticated Buttons (Log In & Create Account)
   document.getElementById('header-login-btn')?.addEventListener('click', () => {
@@ -702,6 +704,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       updateAuthUI();
       updateApiStatusIndicator();
       updateHeaderPalette();
+      if (currentRoute === 'settings') {
+        renderCurrentView();
+      }
     }
     if (evt === 'paletteChanged' || evt === 'themeChanged') {
       updateHeaderPalette();

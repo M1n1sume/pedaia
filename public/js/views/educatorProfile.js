@@ -193,7 +193,122 @@ function renderAuthCredentialsBanner() {
   `;
 }
 
+// Locked Section View (When user is unauthenticated)
+export function renderLockedProfileView() {
+  return `
+    <div id="educator-profile-locked-root" class="space-y-6 animate-fade-in">
+      <div class="relative overflow-hidden rounded-2xl border border-slate-200/90 dark:border-slate-750 bg-gradient-to-b from-white to-slate-50/70 dark:from-slate-850 dark:to-slate-900 p-6 sm:p-10 shadow-2xs text-center transition-colors">
+        
+        <!-- Subtle ambient radial glows -->
+        <div class="absolute -top-16 -right-16 w-56 h-56 bg-indigo-500/5 dark:bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute -bottom-16 -left-16 w-56 h-56 bg-purple-500/5 dark:bg-purple-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="relative max-w-xl mx-auto space-y-6">
+          
+          <!-- Lock Icon & Authentication Badge -->
+          <div class="flex flex-col items-center gap-3">
+            <div class="w-16 h-16 rounded-2xl bg-indigo-50 dark:bg-indigo-950/70 border border-indigo-200/80 dark:border-indigo-800/80 flex items-center justify-center text-indigo-600 dark:text-indigo-400 shadow-sm">
+              <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+            </div>
+            
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800/60 shadow-2xs">
+              <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+              <span>Account Authentication Required</span>
+            </span>
+          </div>
+
+          <!-- Title and Description -->
+          <div class="space-y-2">
+            <h2 class="text-xl sm:text-2xl font-bold font-scholarly text-slate-900 dark:text-white tracking-tight">
+              Educator Profile &amp; Portfolio Locked
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed max-w-lg mx-auto">
+              This section is reserved for registered educators. Please log in or create an account to access, customize, and save your verified educator credentials, portfolio completion, and curricular activity.
+            </p>
+          </div>
+
+          <!-- Feature Breakdown / Preview Cards -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-left pt-1 pb-1">
+            <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-750">
+              <div class="flex items-start gap-2.5">
+                <span class="text-base shrink-0">🎓</span>
+                <div>
+                  <h4 class="text-xs font-bold text-slate-900 dark:text-white">Verified Scholarly Identity</h4>
+                  <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-snug">Set your full name, title, department, institution, and subject specialization.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-750">
+              <div class="flex items-start gap-2.5">
+                <span class="text-base shrink-0">📊</span>
+                <div>
+                  <h4 class="text-xs font-bold text-slate-900 dark:text-white">Curricular Activity Folio</h4>
+                  <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-snug">Real-time statistics for your saved designs, prompt templates, and materials.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-750">
+              <div class="flex items-start gap-2.5">
+                <span class="text-base shrink-0">✨</span>
+                <div>
+                  <h4 class="text-xs font-bold text-slate-900 dark:text-white">AI Portfolio Statement</h4>
+                  <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-snug">Synthesize educational philosophy statements based strictly on your teaching context.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-750">
+              <div class="flex items-start gap-2.5">
+                <span class="text-base shrink-0">🛡️</span>
+                <div>
+                  <h4 class="text-xs font-bold text-slate-900 dark:text-white">Private &amp; Isolated Storage</h4>
+                  <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-snug">Your profile and designs are stored in your personal vault, hidden from other users.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Direct Authentication Buttons -->
+          <div class="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+            <button type="button" id="prof-lock-login-btn" class="w-full sm:w-auto px-6 py-2.5 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-xs transition-all hover:scale-[1.02] flex items-center justify-center gap-2 cursor-pointer">
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+              </svg>
+              <span>Log In to Account</span>
+            </button>
+
+            <button type="button" id="prof-lock-signup-btn" class="w-full sm:w-auto px-6 py-2.5 text-xs font-bold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-750 border border-slate-200 dark:border-slate-700 rounded-xl shadow-2xs transition-all hover:scale-[1.02] flex items-center justify-center gap-2 cursor-pointer">
+              <svg class="w-4 h-4 text-indigo-600 dark:text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+              </svg>
+              <span>Create Account</span>
+            </button>
+          </div>
+
+          <p class="text-[11px] text-slate-400 dark:text-slate-500 pt-1">
+            Free educator accounts with private curriculum vaults. Never displays unsolicited pop-ups.
+          </p>
+
+        </div>
+      </div>
+    </div>
+  `;
+}
+
 export function renderEducatorProfileView(options = {}) {
+  const isAuthenticated = store.isAuthenticated ? store.isAuthenticated() : false;
+
+  // Strict Lock Guard: Unauthenticated users are strictly barred from viewing or editing the educator profile & portfolio
+  if (!isAuthenticated) {
+    isEditMode = false;
+    editDraft = null;
+    return renderLockedProfileView();
+  }
+
   const currentProfile = (store.getEducatorProfile ? store.getEducatorProfile() : store.getSettings()?.educatorProfile) || { ...BLANK_EDUCATOR_PROFILE };
   const activeProfile = isEditMode && editDraft ? editDraft : currentProfile;
   const completion = calculateProfileCompletion(currentProfile);
@@ -533,6 +648,39 @@ export function setupEducatorProfileListeners(container, { showToast, onProfileU
     setupEducatorProfileListeners(container, { showToast, onProfileUpdate, reRenderParent });
   });
 
+  const isAuthenticated = store.isAuthenticated ? store.isAuthenticated() : false;
+
+  // STRICT LOCK ENFORCEMENT: When unauthenticated, only wire up Log In and Create Account triggers
+  if (!isAuthenticated) {
+    container.querySelector('#prof-lock-login-btn')?.addEventListener('click', async () => {
+      const { openAuthModal } = await import('./authModal.js');
+      openAuthModal({
+        defaultTab: 'login',
+        showToast: toast,
+        onSuccess: () => {
+          if (typeof window.updateAuthUI === 'function') window.updateAuthUI();
+          if (typeof window.updateSidebarProfile === 'function') window.updateSidebarProfile();
+          reRender();
+        }
+      });
+    });
+
+    container.querySelector('#prof-lock-signup-btn')?.addEventListener('click', async () => {
+      const { openAuthModal } = await import('./authModal.js');
+      openAuthModal({
+        defaultTab: 'signup',
+        showToast: toast,
+        onSuccess: () => {
+          if (typeof window.updateAuthUI === 'function') window.updateAuthUI();
+          if (typeof window.updateSidebarProfile === 'function') window.updateSidebarProfile();
+          reRender();
+        }
+      });
+    });
+
+    return; // Strict protection: prevent attaching any edit, save, or profile mutation listeners
+  }
+
   // Enter Edit Mode
   container.querySelector('#prof-enter-edit-btn')?.addEventListener('click', () => {
     isEditMode = true;
@@ -751,6 +899,7 @@ function openChangePasswordModal(toast) {
 // Default export
 export default {
   renderEducatorProfileView,
+  renderLockedProfileView,
   setupEducatorProfileListeners,
   calculateProfileCompletion,
   calculatePortfolioStatistics,
