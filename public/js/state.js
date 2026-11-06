@@ -15,7 +15,8 @@ const STORAGE_KEYS = {
   CURRICULUM_MAPS: 'pedaia_curriculum_maps_v1',
   REFLECTIONS: 'pedaia_reflections_v1',
   WEEKLY_SCHEDULES: 'pedaia_weekly_schedules_v1',
-  STANDARDS: 'pedaia_curriculum_standards_v1'
+  STANDARDS: 'pedaia_curriculum_standards_v1',
+  INTEGRITY_VAULT: 'pedaia_integrity_vault_v1'
 };
 
 export const BLANK_EDUCATOR_PROFILE = Object.freeze({
@@ -65,11 +66,96 @@ class StateStore {
     this.init();
   }
 
-  init() {
-    // Ensure designs exist in localStorage
-    if (!localStorage.getItem(STORAGE_KEYS.DESIGNS)) {
-      localStorage.setItem(STORAGE_KEYS.DESIGNS, JSON.stringify(INITIAL_SAVED_DESIGNS));
+    init() {
+    if (typeof localStorage === 'undefined') return;
+
+    // Safety: ensure designs store exists without ever disrupting user designs
+    if (localStorage.getItem(STORAGE_KEYS.DESIGNS) === null) {
+      const fromVault = this.recoverFromVault(STORAGE_KEYS.DESIGNS);
+      localStorage.setItem(STORAGE_KEYS.DESIGNS, JSON.stringify(Array.isArray(fromVault) ? fromVault : []));
+    } else {
+      try {
+        const existing = JSON.parse(localStorage.getItem(STORAGE_KEYS.DESIGNS) || '[]');
+        if (Array.isArray(existing)) {
+          const cleaned = existing.filter(d => d && !String(d.id || '').startsWith('sample-'));
+          if (cleaned.length !== existing.length) {
+            localStorage.setItem(STORAGE_KEYS.DESIGNS, JSON.stringify(cleaned));
+          }
+          if (cleaned.length > 0) {
+            this.recordVaultSnapshot(STORAGE_KEYS.DESIGNS, cleaned);
+          }
+        }
+      } catch {}
     }
+
+    // Safety: ensure projects store exists without ever disrupting user projects
+    if (localStorage.getItem(STORAGE_KEYS.PROJECTS) === null) {
+      const fromVault = this.recoverFromVault(STORAGE_KEYS.PROJECTS);
+      localStorage.setItem(STORAGE_KEYS.PROJECTS, JSON.stringify(Array.isArray(fromVault) ? fromVault : []));
+    } else {
+      try {
+        const existing = JSON.parse(localStorage.getItem(STORAGE_KEYS.PROJECTS) || '[]');
+        if (Array.isArray(existing)) {
+          const cleaned = existing.filter(p => p && p.id !== 'proj-demo-1' && !p.isExample && !String(p.id || '').startsWith('proj-demo-'));
+          if (cleaned.length !== existing.length) {
+            localStorage.setItem(STORAGE_KEYS.PROJECTS, JSON.stringify(cleaned));
+          }
+          if (cleaned.length > 0) {
+            this.recordVaultSnapshot(STORAGE_KEYS.PROJECTS, cleaned);
+          }
+        }
+      } catch {}
+    }
+
+    // Safety: ensure user profiles store exists without disrupting educator information
+    if (localStorage.getItem(STORAGE_KEYS.USER_PROFILES) === null) {
+      const fromVault = this.recoverFromVault(STORAGE_KEYS.USER_PROFILES);
+      if (fromVault) {
+        localStorage.setItem(STORAGE_KEYS.USER_PROFILES, JSON.stringify(fromVault));
+      }
+    } else {
+      try {
+        const profiles = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_PROFILES) || '{}');
+        if (profiles && Object.keys(profiles).length > 0) {
+          this.recordVaultSnapshot(STORAGE_KEYS.USER_PROFILES, profiles);
+        }
+      } catch {}
+    }
+
+    // Clean up any legacy sample checklists, curriculum maps, and reflections
+    try {
+      const chkData = localStorage.getItem(STORAGE_KEYS.CHECKLISTS);
+      if (chkData) {
+        const list = JSON.parse(chkData);
+        if (Array.isArray(list)) {
+          const cleaned = list.filter(c => c && c.id !== 'chk-1' && c.id !== 'chk-2');
+          localStorage.setItem(STORAGE_KEYS.CHECKLISTS, JSON.stringify(cleaned));
+        }
+      }
+    } catch {}
+
+    try {
+      const mapData = localStorage.getItem(STORAGE_KEYS.CURRICULUM_MAPS);
+      if (mapData) {
+        const list = JSON.parse(mapData);
+        if (Array.isArray(list)) {
+          const cleaned = list.filter(m => m && m.id !== 'cmap-1');
+          localStorage.setItem(STORAGE_KEYS.CURRICULUM_MAPS, JSON.stringify(cleaned));
+        }
+      }
+    } catch {}
+
+    try {
+      const reflData = localStorage.getItem(STORAGE_KEYS.REFLECTIONS);
+      if (reflData) {
+        const list = JSON.parse(reflData);
+        if (Array.isArray(list)) {
+          const cleaned = list.filter(r => r && r.id !== 'refl-1');
+          localStorage.setItem(STORAGE_KEYS.REFLECTIONS, JSON.stringify(cleaned));
+        }
+      }
+    } catch {}
+
     // Ensure templates exist
     if (!localStorage.getItem(STORAGE_KEYS.TEMPLATES)) {
       localStorage.setItem(STORAGE_KEYS.TEMPLATES, JSON.stringify(INITIAL_PROMPT_TEMPLATES));
@@ -78,6 +164,36 @@ class StateStore {
     if (!localStorage.getItem(STORAGE_KEYS.SETTINGS)) {
       localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(DEFAULT_SETTINGS));
     }
+  }
+
+  // --- Data Integrity & Disaster Recovery Vault ---
+  recordVaultSnapshot(collectionKey, data) {
+    if (typeof localStorage === 'undefined') return;
+    try {
+      const raw = localStorage.getItem(STORAGE_KEYS.INTEGRITY_VAULT);
+      const vault = raw ? JSON.parse(raw) : {};
+      vault[collectionKey] = {
+        data,
+        updatedAt: new Date().toISOString()
+      };
+      localStorage.setItem(STORAGE_KEYS.INTEGRITY_VAULT, JSON.stringify(vault));
+    } catch (e) {
+      // Non-fatal safety snapshot warning
+    }
+  }
+
+  recoverFromVault(collectionKey) {
+    if (typeof localStorage === 'undefined') return null;
+    try {
+      const raw = localStorage.getItem(STORAGE_KEYS.INTEGRITY_VAULT);
+      if (!raw) return null;
+      const vault = JSON.parse(raw);
+      if (vault && vault[collectionKey] && vault[collectionKey].data) {
+        console.info(`[PEDAIA Integrity] Recovered ${collectionKey} from safety vault.`);
+        return vault[collectionKey].data;
+      }
+    } catch {}
+    return null;
   }
 
   subscribe(listener) {
@@ -99,10 +215,19 @@ class StateStore {
   getDesigns() {
     try {
       const data = localStorage.getItem(STORAGE_KEYS.DESIGNS);
-      return data ? JSON.parse(data) : INITIAL_SAVED_DESIGNS;
+      if (!data) {
+        const fromVault = this.recoverFromVault(STORAGE_KEYS.DESIGNS);
+        return Array.isArray(fromVault) ? fromVault.filter(d => d && !String(d.id || '').startsWith('sample-')) : [];
+      }
+      const list = JSON.parse(data);
+      if (Array.isArray(list)) {
+        return list.filter(d => d && !String(d.id || '').startsWith('sample-'));
+      }
+      return [];
     } catch (e) {
-      console.error('Failed to parse saved designs:', e);
-      return INITIAL_SAVED_DESIGNS;
+      console.warn('Non-destructive recovery for saved designs:', e);
+      const fromVault = this.recoverFromVault(STORAGE_KEYS.DESIGNS);
+      return Array.isArray(fromVault) ? fromVault : [];
     }
   }
 
@@ -113,11 +238,13 @@ class StateStore {
 
   saveDesign(design) {
     const list = this.getDesigns();
-    const existingIndex = list.findIndex(d => d.id === design.id);
+    const cleanId = design.id || ('des-' + Date.now() + '-' + Math.random().toString(36).substring(2, 7));
+    const existingIndex = list.findIndex(d => d.id === cleanId);
     const now = new Date().toISOString();
 
     const cleanDesign = {
       ...design,
+      id: cleanId,
       updatedAt: now,
       createdAt: design.createdAt || now,
       versionHistory: design.versionHistory || [
@@ -130,12 +257,13 @@ class StateStore {
     };
 
     if (existingIndex >= 0) {
-      list[existingIndex] = cleanDesign;
+      list[existingIndex] = { ...list[existingIndex], ...cleanDesign };
     } else {
       list.unshift(cleanDesign);
     }
 
     localStorage.setItem(STORAGE_KEYS.DESIGNS, JSON.stringify(list));
+    this.recordVaultSnapshot(STORAGE_KEYS.DESIGNS, list);
     this.notify('designsUpdated', { list, activeId: cleanDesign.id });
     return cleanDesign;
   }
@@ -384,6 +512,7 @@ class StateStore {
       const allProfiles = allProfilesStr ? JSON.parse(allProfilesStr) : {};
       allProfiles[targetUid] = cleanProfile;
       localStorage.setItem(STORAGE_KEYS.USER_PROFILES, JSON.stringify(allProfiles));
+      this.recordVaultSnapshot(STORAGE_KEYS.USER_PROFILES, allProfiles);
 
       // Synchronize with settings for backward compatibility ONLY if targetUid is active user
       if (targetUid === this.getCurrentUserId()) {
@@ -512,36 +641,17 @@ class StateStore {
     try {
       const data = localStorage.getItem(STORAGE_KEYS.PROJECTS);
       if (!data) {
-        // Initialize with default demo project linked to first saved design
-        const designs = this.getDesigns();
-        const baseDesign = designs[0] || {};
-        const defaultProject = [{
-          id: 'proj-demo-1',
-          title: baseDesign.title ? `${baseDesign.title} [Complete Instructional Package]` : 'Cell Biology & Photosynthesis Unit Package',
-          subject: baseDesign.subject || 'Science',
-          educationalLevel: baseDesign.educationalLevel || 'Junior High School',
-          gradeLevel: baseDesign.gradeLevel || 'Grade 8',
-          topic: baseDesign.topic || 'Photosynthesis & Cellular Respiration',
-          competency: baseDesign.competency || 'Demonstrate mastery of core discipline standards through inquiry and critical analysis',
-          sourceDesignId: baseDesign.id || null,
-          status: 'In Progress',
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          resources: [
-            { type: 'lesson-plan', id: baseDesign.id || 'res-1', title: baseDesign.title || 'Master 5E Lesson Plan', status: 'Completed' },
-            { type: 'presentation', id: 'res-2', title: 'Interactive Slide Deck (12 Slides)', status: 'Draft' },
-            { type: 'worksheet', id: 'res-3', title: 'Guided Inquiry Handout & Vocabulary Sheet', status: 'Completed' },
-            { type: 'assessment', id: 'res-4', title: 'Formative Assessment Matrix & Rubric', status: 'Draft' },
-            { type: 'script', id: 'res-5', title: 'Teacher Facilitation Dialogue & Socratic Stems', status: 'Pending' },
-            { type: 'checklist', id: 'res-6', title: 'Lab Supplies & Instructional Checklist', status: 'Completed' }
-          ]
-        }];
-        localStorage.setItem(STORAGE_KEYS.PROJECTS, JSON.stringify(defaultProject));
-        return defaultProject;
+        const fromVault = this.recoverFromVault(STORAGE_KEYS.PROJECTS);
+        return Array.isArray(fromVault) ? fromVault.filter(p => p && p.id !== 'proj-demo-1' && !p.isExample && !String(p.id || '').startsWith('proj-demo-')) : [];
       }
-      return JSON.parse(data);
-    } catch {
+      const list = JSON.parse(data);
+      if (Array.isArray(list)) {
+        return list.filter(p => p && p.id !== 'proj-demo-1' && !p.isExample && !String(p.id || '').startsWith('proj-demo-'));
+      }
       return [];
+    } catch {
+      const fromVault = this.recoverFromVault(STORAGE_KEYS.PROJECTS);
+      return Array.isArray(fromVault) ? fromVault : [];
     }
   }
 
@@ -549,14 +659,18 @@ class StateStore {
     const list = this.getProjects();
     const cleanProject = {
       ...project,
-      id: project.id || 'proj-' + Date.now(),
+      id: project.id || 'proj-' + Date.now() + '-' + Math.random().toString(36).substring(2, 7),
       updatedAt: new Date().toISOString(),
       createdAt: project.createdAt || new Date().toISOString()
     };
     const idx = list.findIndex(p => p.id === cleanProject.id);
-    if (idx >= 0) list[idx] = cleanProject;
-    else list.unshift(cleanProject);
+    if (idx >= 0) {
+      list[idx] = { ...list[idx], ...cleanProject };
+    } else {
+      list.unshift(cleanProject);
+    }
     localStorage.setItem(STORAGE_KEYS.PROJECTS, JSON.stringify(list));
+    this.recordVaultSnapshot(STORAGE_KEYS.PROJECTS, list);
     this.notify('projectsUpdated', { list, activeId: cleanProject.id });
     return cleanProject;
   }
@@ -572,41 +686,12 @@ class StateStore {
   getChecklists() {
     try {
       const data = localStorage.getItem(STORAGE_KEYS.CHECKLISTS);
-      if (!data) {
-        const defaultLists = [
-          {
-            id: 'chk-1',
-            title: 'Master Lesson Preparation Checklist',
-            category: 'Lesson Preparation',
-            priority: 'High',
-            dueDate: new Date(Date.now() + 86400000 * 2).toISOString().slice(0, 10),
-            notes: 'Essential checks prior to launching active inquiry sessions',
-            items: [
-              { id: 'item-1', text: 'Print and collate student inquiry worksheets and lab guides', completed: true },
-              { id: 'item-2', text: 'Verify audio-visual projector and digital presentation slides', completed: true },
-              { id: 'item-3', text: 'Prepare manipulative lab stations and glassware kits', completed: false },
-              { id: 'item-4', text: 'Review differentiated scaffolding cards for Tier 1 learners', completed: false },
-              { id: 'item-5', text: 'Post Socratic inquiry questions and discussion norms on classroom board', completed: true }
-            ]
-          },
-          {
-            id: 'chk-2',
-            title: 'Classroom Supplies & Materials Checklist',
-            category: 'Classroom Supplies',
-            priority: 'Medium',
-            dueDate: new Date(Date.now() + 86400000 * 5).toISOString().slice(0, 10),
-            notes: 'Physical inventory needed for hands-on activities',
-            items: [
-              { id: 'item-21', text: 'Dry-erase markers and whiteboard erasers', completed: true },
-              { id: 'item-22', text: 'Chart paper and multi-colored index cards', completed: true },
-              { id: 'item-23', text: 'Colored sticky notes for exit ticket reflection', completed: false }
-            ]
-          }
-        ];
-        localStorage.setItem(STORAGE_KEYS.CHECKLISTS, JSON.stringify(defaultLists));
-        return defaultLists;
+      if (!data) return [];
+      const list = JSON.parse(data);
+      if (Array.isArray(list)) {
+        return list.filter(c => c && c.id !== 'chk-1' && c.id !== 'chk-2');
       }
-      return JSON.parse(data);
+      return [];
     } catch {
       return [];
     }
@@ -623,6 +708,7 @@ class StateStore {
     if (idx >= 0) list[idx] = cleanList;
     else list.unshift(cleanList);
     localStorage.setItem(STORAGE_KEYS.CHECKLISTS, JSON.stringify(list));
+    this.recordVaultSnapshot(STORAGE_KEYS.CHECKLISTS, list);
     this.notify('checklistsUpdated', { list, activeId: cleanList.id });
     return cleanList;
   }
@@ -651,26 +737,12 @@ class StateStore {
   getCurriculumMaps() {
     try {
       const data = localStorage.getItem(STORAGE_KEYS.CURRICULUM_MAPS);
-      if (!data) {
-        const defaultMaps = [{
-          id: 'cmap-1',
-          title: 'Integrated Science Curriculum & Pacing Guide (Quarter 1)',
-          subject: 'Science',
-          educationalLevel: 'Junior High School',
-          gradeLevel: 'Grade 8',
-          term: 'Quarter 1',
-          updatedAt: new Date().toISOString(),
-          rows: [
-            { week: 'Week 1-2', unit: 'Unit 1: Cell Structure & Function', competency: 'Differentiate plant and animal cell structures and organelles', objective: 'Identify key organelles through microscopic observation', activity: 'Hands-on Microscope Wet Mount Lab', assessment: 'Formative Lab Diagram & Organelle Quiz', time: '10 Hours' },
-            { week: 'Week 3-4', unit: 'Unit 1: Cellular Energetics', competency: 'Explain the coupled mechanisms of photosynthesis and respiration', objective: 'Model chemical equation transitions using molecular kits', activity: 'Photosynthesis Leaf Disk Floating Experiment', assessment: 'Rubric-Scored Experimental Lab Report', time: '10 Hours' },
-            { week: 'Week 5-6', unit: 'Unit 2: Heredity & Genetics', competency: 'Predict phenotypic outcomes using Mendelian monohybrid crosses', objective: 'Construct and solve Punnett squares for dominant/recessive traits', activity: 'Genetics Dragon Breeding Simulation', assessment: 'Performance Task: Genetic Trait Case Study', time: '10 Hours' },
-            { week: 'Week 7-8', unit: 'Unit 2: Genetic Diversity', competency: 'Explain how meiosis contributes to species genetic variation', objective: 'Compare chromosome segregation in mitosis vs meiosis', activity: 'Kinesthetic Pipe Cleaner Meiosis Dance', assessment: 'Quarterly Summative Assessment', time: '10 Hours' }
-          ]
-        }];
-        localStorage.setItem(STORAGE_KEYS.CURRICULUM_MAPS, JSON.stringify(defaultMaps));
-        return defaultMaps;
+      if (!data) return [];
+      const list = JSON.parse(data);
+      if (Array.isArray(list)) {
+        return list.filter(m => m && m.id !== 'cmap-1');
       }
-      return JSON.parse(data);
+      return [];
     } catch {
       return [];
     }
@@ -702,25 +774,12 @@ class StateStore {
   getReflections() {
     try {
       const data = localStorage.getItem(STORAGE_KEYS.REFLECTIONS);
-      if (!data) {
-        const defaultReflections = [{
-          id: 'refl-1',
-          title: 'Reflection on 5E Photosynthesis Inquiry Lab',
-          framework: "Gibbs' Reflective Cycle",
-          subject: 'Science',
-          gradeLevel: 'Grade 8',
-          createdAt: new Date().toISOString(),
-          description: 'Students conducted the floating leaf disk assay. High engagement observed during the Explore phase.',
-          feelings: 'Satisfied with student inquiry depth, but noticed pacing became rushed during the Explain synthesis.',
-          evaluation: 'What worked well: Collaborative peer data recording. What needed improvement: Transition timing from lab benches to whole-group whiteboard dialogue.',
-          analysis: 'Scaffolding the data capture table beforehand would give learners 10 extra minutes for collective sense-making.',
-          conclusion: 'Students achieved the core objective but needed more guided question prompts to articulate their empirical claims.',
-          actionPlan: 'Provide pre-printed graphic organizers and establish a 5-minute audible chime timer for the Elaborate phase.'
-        }];
-        localStorage.setItem(STORAGE_KEYS.REFLECTIONS, JSON.stringify(defaultReflections));
-        return defaultReflections;
+      if (!data) return [];
+      const list = JSON.parse(data);
+      if (Array.isArray(list)) {
+        return list.filter(r => r && r.id !== 'refl-1');
       }
-      return JSON.parse(data);
+      return [];
     } catch {
       return [];
     }
@@ -752,38 +811,14 @@ class StateStore {
   getWeeklySchedule() {
     try {
       const data = localStorage.getItem(STORAGE_KEYS.WEEKLY_SCHEDULES);
-      if (!data) {
-        const defaultSchedule = {
-          weekTitle: 'Current Instructional Week',
-          days: {
-            'Monday': [
-              { time: '08:00 - 09:00', subject: 'Grade 8 Science', topic: 'Photosynthesis 5E Model (Engage & Explore)', room: 'Lab 201', designId: null },
-              { time: '10:00 - 11:00', subject: 'Grade 10 Biology', topic: 'Genetics Monohybrid Cross Modeling', room: 'Room 304', designId: null }
-            ],
-            'Tuesday': [
-              { time: '08:00 - 09:00', subject: 'Grade 8 Science', topic: 'Photosynthesis 5E Model (Explain & Elaborate)', room: 'Lab 201', designId: null },
-              { time: '13:00 - 14:00', subject: 'Faculty Mentorship', topic: 'Instructional Design & UDL Review', room: 'Conference Hall', designId: null }
-            ],
-            'Wednesday': [
-              { time: '09:00 - 10:00', subject: 'Grade 8 Science', topic: 'Photosynthesis Formative Assessment & Quiz', room: 'Lab 201', designId: null },
-              { time: '11:00 - 12:00', subject: 'Grade 10 Biology', topic: 'Pedigree Analysis Collaborative Jigsaw', room: 'Room 304', designId: null }
-            ],
-            'Thursday': [
-              { time: '08:00 - 09:00', subject: 'Grade 8 Science', topic: 'Cellular Respiration Hook & Micro-Inquiry', room: 'Lab 201', designId: null },
-              { time: '14:00 - 15:30', subject: 'Curriculum Committee', topic: 'Quarter 2 Standards & Competency Mapping', room: 'CTE Faculty Lounge', designId: null }
-            ],
-            'Friday': [
-              { time: '08:30 - 10:00', subject: 'Grade 8 & 10 Science', topic: 'Integrated Inquiry Showcase & Reflection', room: 'Auditorium', designId: null },
-              { time: '11:00 - 12:00', subject: 'Office Hours', topic: 'Differentiated Learning Support & Consultations', room: 'Faculty Office', designId: null }
-            ]
-          }
-        };
-        localStorage.setItem(STORAGE_KEYS.WEEKLY_SCHEDULES, JSON.stringify(defaultSchedule));
-        return defaultSchedule;
+      if (!data) return { weekTitle: 'Current Instructional Week', days: {} };
+      const parsed = JSON.parse(data);
+      if (parsed && parsed.days && parsed.days['Monday'] && parsed.days['Monday'][0]?.topic?.includes('Photosynthesis 5E Model')) {
+        return { weekTitle: 'Current Instructional Week', days: {} };
       }
-      return JSON.parse(data);
+      return parsed || { weekTitle: 'Current Instructional Week', days: {} };
     } catch {
-      return { weekTitle: 'Current Week', days: {} };
+      return { weekTitle: 'Current Instructional Week', days: {} };
     }
   }
 
@@ -857,7 +892,12 @@ class StateStore {
   }
 
   resetToDefaults() {
-    localStorage.setItem(STORAGE_KEYS.DESIGNS, JSON.stringify(INITIAL_SAVED_DESIGNS));
+    localStorage.setItem(STORAGE_KEYS.DESIGNS, JSON.stringify([]));
+    localStorage.setItem(STORAGE_KEYS.PROJECTS, JSON.stringify([]));
+    localStorage.setItem(STORAGE_KEYS.CHECKLISTS, JSON.stringify([]));
+    localStorage.setItem(STORAGE_KEYS.CURRICULUM_MAPS, JSON.stringify([]));
+    localStorage.setItem(STORAGE_KEYS.REFLECTIONS, JSON.stringify([]));
+    localStorage.setItem(STORAGE_KEYS.WEEKLY_SCHEDULES, JSON.stringify({ weekTitle: 'Current Instructional Week', days: {} }));
     localStorage.setItem(STORAGE_KEYS.TEMPLATES, JSON.stringify(INITIAL_PROMPT_TEMPLATES));
     localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(DEFAULT_SETTINGS));
     this.notify('dataReset', null);
