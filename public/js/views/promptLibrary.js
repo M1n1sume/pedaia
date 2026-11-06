@@ -15,7 +15,8 @@ export const TEMPLATE_CATEGORIES = [
   'Questioning',
   'Differentiation',
   'Assessment Design',
-  'Classroom Management'
+  'Classroom Management',
+  'AI Output Studio'
 ];
 
 export function renderPromptLibraryView() {

@@ -163,6 +163,7 @@ export function renderMyDesignsView() {
               <option value="differentiation" ${selectedCategoryFilter === 'differentiation' ? 'selected' : ''}>Differentiation Studio</option>
               <option value="assessment-design" ${selectedCategoryFilter === 'assessment-design' ? 'selected' : ''}>Assessment Design</option>
               <option value="classroom-management" ${selectedCategoryFilter === 'classroom-management' ? 'selected' : ''}>Classroom Management</option>
+              <option value="ai-output" ${selectedCategoryFilter === 'ai-output' ? 'selected' : ''}>AI Output Studio</option>
             </select>
           </div>
 
