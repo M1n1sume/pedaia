@@ -1,13 +1,12 @@
 [
   {
-    "id": "usr_m1n1sume",
+    "id": "usr_admin_m1n1sume",
     "username": "M1n1sume",
-    "email": "",
-    "role": "admin",
+    "email": "admin@pedaia.internal",
     "passwordHash": null,
-    "salt": "49c9371e05d5d122a14eb49e06d7345a",
-    "isInitialized": false,
-    "createdAt": "2026-11-06T21:49:55.797Z",
-    "lastLogin": null
+    "role": "admin",
+    "createdAt": "2026-11-06T22:00:34.251Z",
+    "updatedAt": "2026-11-06T22:00:34.251Z",
+    "isInitialized": false
   }
 ]

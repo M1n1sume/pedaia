@@ -138,12 +138,20 @@ export function applyThemeMode(mode) {
 
   if (typeof document !== 'undefined') {
     const root = document.documentElement;
+    const bgHex = resolved === 'dark' ? '#0F172A' : '#F8FAFC';
+    root.style.backgroundColor = bgHex;
     if (resolved === 'dark') {
       root.classList.add('dark');
-      if (document.body) document.body.classList.add('dark');
+      if (document.body) {
+        document.body.classList.add('dark');
+        document.body.style.backgroundColor = bgHex;
+      }
     } else {
       root.classList.remove('dark');
-      if (document.body) document.body.classList.remove('dark');
+      if (document.body) {
+        document.body.classList.remove('dark');
+        document.body.style.backgroundColor = bgHex;
+      }
     }
     root.setAttribute('data-theme-mode', validMode);
 
@@ -152,12 +160,20 @@ export function applyThemeMode(mode) {
       const mql = window.matchMedia('(prefers-color-scheme: dark)');
       const handleSystemChange = (e) => {
         if (getThemeMode() === THEME_MODES.SYSTEM) {
+          const sysBg = e.matches ? '#0F172A' : '#F8FAFC';
+          root.style.backgroundColor = sysBg;
           if (e.matches) {
             root.classList.add('dark');
-            if (document.body) document.body.classList.add('dark');
+            if (document.body) {
+              document.body.classList.add('dark');
+              document.body.style.backgroundColor = sysBg;
+            }
           } else {
             root.classList.remove('dark');
-            if (document.body) document.body.classList.remove('dark');
+            if (document.body) {
+              document.body.classList.remove('dark');
+              document.body.style.backgroundColor = sysBg;
+            }
           }
           window.dispatchEvent(new CustomEvent('pedaia-theme-changed', {
             detail: { mode: 'system', resolved: e.matches ? 'dark' : 'light' }
