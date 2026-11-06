@@ -1,30 +1,30 @@
 {
-  "sess_c3f49635308cd06f023bc2bebd17cac9f34550a5f1fcaedd0450d9d9c663e25d": {
-    "userId": "usr_1794003070261_5fcb6e",
+  "sess_8d5b6acb3e6de45cf3b45a47e6f5f791423c212016a417c4999dfb26a165b6c8": {
+    "userId": "usr_1794003969836_31b917",
     "username": "prof_clara",
     "email": "clara@university.edu",
     "role": "educator",
-    "createdAt": "2026-11-06T22:11:10.261Z"
+    "createdAt": "2026-11-06T22:26:09.836Z"
   },
-  "sess_f8fd82d856f23e049dd6a8eacbd56e537a1fe154506d974dd74ed758c0dfd57d": {
-    "userId": "usr_1794003070450_13f184",
+  "sess_2420d9d3bff0a586b9cb7f26ee8c1286c93895d3df2f19dc15a4d7f2c727d29a": {
+    "userId": "usr_1794003970035_fe7645",
     "username": "mr_smith",
     "email": "smith@school.org",
     "role": "educator",
-    "createdAt": "2026-11-06T22:11:10.450Z"
+    "createdAt": "2026-11-06T22:26:10.035Z"
   },
-  "sess_7d7cfc052e208b143b78e6a166f9c23ae4d2f105fd619e79788b18a3df59c80e": {
+  "sess_b2420dce552584cf0c94ce175f21adaf11fd92ebd6365d4b7b6496c2e52a0cdc": {
     "userId": "usr_m1n1sume",
     "username": "M1n1sume",
     "email": "",
     "role": "admin",
-    "createdAt": "2026-11-06T22:11:10.552Z"
+    "createdAt": "2026-11-06T22:26:10.163Z"
   },
-  "sess_5fff3505f5303063756cd743945a92d86364205acb04c118c94d75c082c690dc": {
+  "sess_5b7982a3856268b47ac0d7cfbdd49e699faf16ff680b2fca020fcb24ed88138f": {
     "userId": "usr_m1n1sume",
     "username": "M1n1sume",
     "email": "",
     "role": "admin",
-    "createdAt": "2026-11-06T22:11:10.621Z"
+    "createdAt": "2026-11-06T22:26:10.234Z"
   }
 }

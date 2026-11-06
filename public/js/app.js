@@ -19,6 +19,7 @@ import { renderAdminDashboardView, setupAdminDashboardListeners } from './views/
 import { openAuthModal } from './views/authModal.js';
 import { openExtensionModal } from './views/extensionModal.js';
 import { initCommandPalette, openCommandPalette } from './views/commandPalette.js';
+import { initLayoutManager } from './layoutManager.js';
 
 let currentRoute = 'dashboard';
 let isSidebarCollapsed = false;
@@ -319,6 +320,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Initialize unified theme mode
   const currentMode = store.getThemeMode ? store.getThemeMode() : 'system';
   store.setThemeMode(currentMode);
+
+  // Initialize responsive device layout & screen fit system
+  initLayoutManager();
 
   // Update header appearance indicator (Light / Dark / System)
   const updateHeaderPalette = () => {

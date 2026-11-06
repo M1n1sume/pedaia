@@ -57,6 +57,8 @@ export const DEFAULT_PROVIDERS = {
 const DEFAULT_SETTINGS = {
   themeMode: 'system',
   theme: 'system',
+  layoutMode: 'auto', // 'auto' | 'left' | 'compact' | 'centered'
+  uiScale: 100, // 90 | 95 | 100 | 105
   activeProvider: 'gemini',
   apiKey: '',
   model: 'gemini-2.5-flash',
@@ -1253,6 +1255,32 @@ class StateStore {
     else if (current === 'light') next = 'system';
     else next = 'dark';
     return this.setThemeMode(next);
+  }
+
+  // --- Device Layout & Screen Fit System ---
+  getLayoutMode() {
+    const s = this.getSettings();
+    return s.layoutMode || 'auto';
+  }
+
+  setLayoutMode(mode) {
+    const validModes = ['auto', 'left', 'compact', 'centered'];
+    const cleanMode = validModes.includes(mode) ? mode : 'auto';
+    this.updateSettings({ layoutMode: cleanMode });
+    this.notify('layoutChanged', { mode: cleanMode, scale: this.getUiScale() });
+    return cleanMode;
+  }
+
+  getUiScale() {
+    const s = this.getSettings();
+    return s.uiScale !== undefined ? Number(s.uiScale) : 100;
+  }
+
+  setUiScale(scale) {
+    const num = [90, 95, 100, 105].includes(Number(scale)) ? Number(scale) : 100;
+    this.updateSettings({ uiScale: num });
+    this.notify('layoutChanged', { mode: this.getLayoutMode(), scale: num });
+    return num;
   }
 
   // --- Connected Instructional Design Projects & Workflows ---

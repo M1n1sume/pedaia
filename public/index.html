@@ -222,7 +222,7 @@
   <!-- ========================================================================= -->
   <header id="top-masthead" class="sticky top-0 z-40 w-full bg-white/95 dark:bg-[#1E293B]/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-700/80 transition-colors shadow-2xs overflow-x-clip">
     
-    <div class="w-full max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-2 sm:gap-3 min-w-0">
+    <div class="masthead-inner w-full px-3 sm:px-6 lg:px-8 xl:px-10 h-16 flex items-center justify-between gap-2 sm:gap-3 min-w-0">
       
       <!-- Left: Brand & Dashboard Link -->
       <div class="flex items-center gap-2 sm:gap-3 shrink-0">
@@ -290,7 +290,7 @@
       </div>
 
       <!-- Right: Asset Links & Utilities -->
-      <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
+      <div class="flex items-center gap-1.5 sm:gap-2 shrink-0 ml-auto">
         <!-- Designs & Library (Primary Content Links) -->
         <button data-nav="designs" class="nav-item hidden 2xl:flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-white transition-colors" title="My Instructional Designs">
           <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
@@ -328,13 +328,96 @@
           <span class="hidden md:inline text-[11px]">Extension</span>
         </button>
 
+        <!-- Screen Fit & Device Layout Dropdown Trigger -->
+        <div class="relative shrink-0" id="header-screen-fit-wrapper">
+          <button id="header-screen-fit-btn" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-750 border border-slate-200 dark:border-slate-700 transition-all shadow-2xs cursor-pointer" title="Adjust website layout for your device (Left-aligned, Auto-fit, or Compact)">
+            <svg class="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+            <span class="hidden sm:inline text-[11px]" id="header-screen-fit-label">Screen Fit</span>
+          </button>
+
+          <!-- Screen Fit Dropdown Popover -->
+          <div id="header-screen-fit-dropdown" class="hidden absolute right-0 mt-2 w-80 rounded-2xl bg-white dark:bg-slate-850 border border-slate-200 dark:border-slate-750 shadow-xl p-4 z-50 text-slate-800 dark:text-slate-100 animate-fade-in space-y-3.5">
+            <div class="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-750">
+              <div class="flex items-center gap-2">
+                <span class="text-base">🖥️</span>
+                <div>
+                  <h4 class="text-xs font-bold text-slate-900 dark:text-white">Device & Screen Fit</h4>
+                  <p class="text-[10px] text-slate-500 dark:text-slate-400" id="screen-fit-detected-device">Detecting screen...</p>
+                </div>
+              </div>
+              <span class="px-2 py-0.5 rounded-md text-[10px] font-mono font-bold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800/60" id="screen-fit-res-badge">1920×1080</span>
+            </div>
+
+            <!-- Layout Alignment Selection -->
+            <div>
+              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-1.5">Layout Alignment</label>
+              <div class="space-y-1.5 text-xs">
+                <button type="button" class="screen-layout-opt-btn w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-start gap-2.5 text-left transition-all cursor-pointer" data-mode="auto">
+                  <span class="text-base shrink-0 mt-0.5">⚡</span>
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-center justify-between">
+                      <span class="font-bold text-slate-900 dark:text-white">Smart Device Adaptive</span>
+                      <span class="layout-check hidden text-indigo-600 dark:text-indigo-400 font-bold">✓</span>
+                    </div>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400">Auto-adjusts layout to your device so all buttons stay visible</p>
+                  </div>
+                </button>
+
+                <button type="button" class="screen-layout-opt-btn w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-start gap-2.5 text-left transition-all cursor-pointer" data-mode="left">
+                  <span class="text-base shrink-0 mt-0.5">⬅️</span>
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-center justify-between">
+                      <span class="font-bold text-slate-900 dark:text-white">Left-Aligned (Wide)</span>
+                      <span class="layout-check hidden text-indigo-600 dark:text-indigo-400 font-bold">✓</span>
+                    </div>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400">Moves layout to the left, maximizing viewable area</p>
+                  </div>
+                </button>
+
+                <button type="button" class="screen-layout-opt-btn w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-start gap-2.5 text-left transition-all cursor-pointer" data-mode="compact">
+                  <span class="text-base shrink-0 mt-0.5">💻</span>
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-center justify-between">
+                      <span class="font-bold text-slate-900 dark:text-white">Laptop & Scaled Fit</span>
+                      <span class="layout-check hidden text-indigo-600 dark:text-indigo-400 font-bold">✓</span>
+                    </div>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400">Fits 100% of controls on 1366x768 and 125%/150% scaled displays</p>
+                  </div>
+                </button>
+
+                <button type="button" class="screen-layout-opt-btn w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-start gap-2.5 text-left transition-all cursor-pointer" data-mode="centered">
+                  <span class="text-base shrink-0 mt-0.5">🎯</span>
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-center justify-between">
+                      <span class="font-bold text-slate-900 dark:text-white">Centered Atelier</span>
+                      <span class="layout-check hidden text-indigo-600 dark:text-indigo-400 font-bold">✓</span>
+                    </div>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400">Classic centered document column</p>
+                  </div>
+                </button>
+              </div>
+            </div>
+
+            <!-- UI Scale Adjuster -->
+            <div class="pt-2 border-t border-slate-100 dark:border-slate-750">
+              <div class="flex items-center justify-between mb-1.5">
+                <label class="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">UI Scale / Zoom</label>
+                <span class="text-xs font-mono font-bold text-indigo-600 dark:text-indigo-400" id="screen-fit-scale-val">100%</span>
+              </div>
+              <div class="grid grid-cols-4 gap-1.5">
+                <button type="button" class="scale-opt-btn py-1 text-xs font-bold rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer" data-scale="90">90%</button>
+                <button type="button" class="scale-opt-btn py-1 text-xs font-bold rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer" data-scale="95">95%</button>
+                <button type="button" class="scale-opt-btn py-1 text-xs font-bold rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer" data-scale="100">100%</button>
+                <button type="button" class="scale-opt-btn py-1 text-xs font-bold rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer" data-scale="105">105%</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Studio Settings Button (Official Settings Gear Logo) -->
         <button id="header-settings-btn" data-nav="settings" data-tab="ai-providers" class="nav-item p-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-750 text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors shadow-2xs flex items-center justify-center shrink-0" title="Studio Settings & AI Catalog">
-          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-          </svg>
-        </button>
           <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -534,7 +617,7 @@
   <!-- ========================================================================= -->
   <!-- MAIN SCHOLARLY ATELIER CANVAS                                             -->
   <!-- ========================================================================= -->
-  <main id="main-content" class="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 transition-colors">
+  <main id="main-content" class="flex-1 w-full px-3 sm:px-6 lg:px-8 py-6 sm:py-8 transition-all">
     <div id="main-view-container">
       <!-- Injected dynamically via router -->
     </div>
@@ -542,7 +625,7 @@
 
   <!-- Global Footer -->
   <footer class="border-t border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 py-6 text-xs text-slate-500 dark:text-slate-400 transition-colors">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3">
+    <div class="w-full px-4 sm:px-6 lg:px-8 xl:px-10 flex flex-col sm:flex-row items-center justify-between gap-3">
       <div class="flex items-center gap-2">
         <span class="font-scholarly font-bold text-slate-700 dark:text-slate-300">PEDAIA</span>
         <span>— AI-Powered Instructional Design Studio</span>

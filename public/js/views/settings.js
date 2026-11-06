@@ -408,6 +408,8 @@ function renderAppearanceSettings({ currentThemeMode = 'system', resolvedTheme =
   const isLight = currentThemeMode === 'light';
   const isDark = currentThemeMode === 'dark';
   const isSystem = currentThemeMode === 'system';
+  const layoutMode = store.getLayoutMode ? store.getLayoutMode() : 'auto';
+  const uiScale = store.getUiScale ? store.getUiScale() : 100;
 
   return `
     <div class="bg-white dark:bg-slate-850 rounded-2xl border border-slate-200/80 dark:border-slate-750 p-6 shadow-2xs space-y-6">
@@ -493,6 +495,79 @@ function renderAppearanceSettings({ currentThemeMode = 'system', resolvedTheme =
           </div>
         </button>
 
+      </div>
+
+      <!-- Device & Screen Layout Adjustment Section -->
+      <div class="p-5 rounded-xl border border-slate-200 dark:border-slate-750 bg-slate-50/70 dark:bg-slate-900/50 space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-200/80 dark:border-slate-750">
+          <div class="flex items-center gap-2.5">
+            <span class="text-xl">🖥️</span>
+            <div>
+              <h3 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">Device & Screen Fit System</h3>
+              <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Anchors layout to the left and auto-adapts margins so buttons and studio panels are 100% visible on your screen</p>
+            </div>
+          </div>
+          <span class="self-start sm:self-auto px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold bg-indigo-50 dark:bg-indigo-950/70 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800/60">
+            Active: ${layoutMode === 'left' ? 'Left-Fit' : layoutMode === 'compact' ? 'Compact Fit' : layoutMode === 'centered' ? 'Centered' : 'Smart Auto'}
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <!-- Option 1: Smart Auto -->
+          <button type="button" class="settings-layout-btn p-3.5 rounded-xl border text-left transition-all cursor-pointer ${layoutMode === 'auto' ? 'border-indigo-600 bg-indigo-50/70 dark:bg-indigo-950/60 ring-1 ring-indigo-500/40 shadow-xs' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-650'}" data-layout="auto">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="text-base">⚡</span>
+              ${layoutMode === 'auto' ? '<span class="text-[10px] font-bold text-indigo-600 dark:text-indigo-400">Active ✓</span>' : ''}
+            </div>
+            <div class="text-xs font-bold text-slate-900 dark:text-white">Smart Adaptive</div>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">Automatically fits all buttons and panels to your device screen.</p>
+          </button>
+
+          <!-- Option 2: Left-Aligned -->
+          <button type="button" class="settings-layout-btn p-3.5 rounded-xl border text-left transition-all cursor-pointer ${layoutMode === 'left' ? 'border-indigo-600 bg-indigo-50/70 dark:bg-indigo-950/60 ring-1 ring-indigo-500/40 shadow-xs' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-650'}" data-layout="left">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="text-base">⬅️</span>
+              ${layoutMode === 'left' ? '<span class="text-[10px] font-bold text-indigo-600 dark:text-indigo-400">Active ✓</span>' : ''}
+            </div>
+            <div class="text-xs font-bold text-slate-900 dark:text-white">Left-Aligned (Wide)</div>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">Anchors layout to the left, maximizing viewable area and eliminating cutoffs.</p>
+          </button>
+
+          <!-- Option 3: Compact / Laptop Fit -->
+          <button type="button" class="settings-layout-btn p-3.5 rounded-xl border text-left transition-all cursor-pointer ${layoutMode === 'compact' ? 'border-indigo-600 bg-indigo-50/70 dark:bg-indigo-950/60 ring-1 ring-indigo-500/40 shadow-xs' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-650'}" data-layout="compact">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="text-base">💻</span>
+              ${layoutMode === 'compact' ? '<span class="text-[10px] font-bold text-indigo-600 dark:text-indigo-400">Active ✓</span>' : ''}
+            </div>
+            <div class="text-xs font-bold text-slate-900 dark:text-white">Laptop &amp; Scaled</div>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">Compact fit for 1366×768 or 125%/150% scaled displays.</p>
+          </button>
+
+          <!-- Option 4: Centered -->
+          <button type="button" class="settings-layout-btn p-3.5 rounded-xl border text-left transition-all cursor-pointer ${layoutMode === 'centered' ? 'border-indigo-600 bg-indigo-50/70 dark:bg-indigo-950/60 ring-1 ring-indigo-500/40 shadow-xs' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-650'}" data-layout="centered">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="text-base">🎯</span>
+              ${layoutMode === 'centered' ? '<span class="text-[10px] font-bold text-indigo-600 dark:text-indigo-400">Active ✓</span>' : ''}
+            </div>
+            <div class="text-xs font-bold text-slate-900 dark:text-white">Centered Atelier</div>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">Classic centered document column.</p>
+          </button>
+        </div>
+
+        <!-- UI Scale Selection -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 border-t border-slate-200/70 dark:border-slate-750">
+          <div>
+            <span class="text-xs font-bold text-slate-900 dark:text-white">UI Display Scale</span>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400">Adjust magnification if your screen has high Windows display scaling</p>
+          </div>
+          <div class="flex items-center gap-1.5">
+            ${[90, 95, 100, 105].map(sc => `
+              <button type="button" class="settings-scale-btn px-3 py-1 text-xs font-bold rounded-lg border transition-all cursor-pointer ${uiScale === sc ? 'bg-indigo-600 text-white border-indigo-600 shadow-2xs' : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-750'}" data-scale="${sc}">
+                ${sc}%
+              </button>
+            `).join('')}
+          </div>
+        </div>
       </div>
 
       <!-- Official PEDAIA Brand System Reference -->
@@ -1096,6 +1171,42 @@ export function setupSettingsListeners(container, showToast) {
     btn.addEventListener('click', () => {
       const mode = btn.getAttribute('data-mode');
       if (mode) handleModeChange(mode);
+    });
+  });
+
+  // Device & Screen Layout Mode Buttons
+  container.querySelectorAll('.settings-layout-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const mode = btn.getAttribute('data-layout');
+      if (mode && store.setLayoutMode) {
+        store.setLayoutMode(mode);
+        const curScale = store.getUiScale ? store.getUiScale() : 100;
+        if (window.applyLayoutMode) window.applyLayoutMode(mode, curScale);
+        const names = {
+          auto: '⚡ Smart Device Adaptive',
+          left: '⬅️ Left-Aligned (Wide Canvas)',
+          compact: '💻 Laptop & Scaled Fit',
+          centered: '🎯 Centered Atelier'
+        };
+        showToast(`Layout updated to ${names[mode] || mode}`, 'info');
+        container.innerHTML = renderSettingsView();
+        setupSettingsListeners(container, showToast);
+      }
+    });
+  });
+
+  // UI Scale Buttons
+  container.querySelectorAll('.settings-scale-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const scale = Number(btn.getAttribute('data-scale'));
+      if (scale && store.setUiScale) {
+        store.setUiScale(scale);
+        const curMode = store.getLayoutMode ? store.getLayoutMode() : 'auto';
+        if (window.applyLayoutMode) window.applyLayoutMode(curMode, scale);
+        showToast(`Display scale set to ${scale}%`, 'info');
+        container.innerHTML = renderSettingsView();
+        setupSettingsListeners(container, showToast);
+      }
     });
   });
 

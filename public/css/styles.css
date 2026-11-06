@@ -141,11 +141,67 @@ html.dark body, body.dark {
   color: #F8FAFC !important;
 }
 
+/* ========================================================================= */
+/* ADAPTIVE DEVICE & SCREEN FITTING SYSTEM                                   */
+/* Anchors layout to the left, expands usable workspace, prevents cutoffs    */
+/* ========================================================================= */
+
+#top-masthead .masthead-inner {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
 #main-content {
   width: 100%;
-  max-width: 80rem; /* max-w-7xl */
-  min-w: 0;
+  min-width: 0;
   overflow-x: clip;
+  transition: max-width 0.2s ease, margin 0.2s ease, padding 0.2s ease;
+}
+
+/* Default & Left-aligned: Content anchored cleanly to the left */
+html[data-resolved-layout="left"] #main-content,
+html:not([data-resolved-layout="centered"]) #main-content {
+  max-width: 1720px !important;
+  margin-left: 0.75rem !important;
+  margin-right: auto !important;
+  padding-left: 1rem !important;
+  padding-right: 1.5rem !important;
+}
+
+@media (min-width: 640px) {
+  html[data-resolved-layout="left"] #main-content,
+  html:not([data-resolved-layout="centered"]) #main-content {
+    margin-left: 1.25rem !important;
+    padding-left: 1.25rem !important;
+    padding-right: 2rem !important;
+  }
+}
+
+@media (min-width: 1024px) {
+  html[data-resolved-layout="left"] #main-content,
+  html:not([data-resolved-layout="centered"]) #main-content {
+    margin-left: 2rem !important;
+    padding-left: 1.5rem !important;
+    padding-right: 2.5rem !important;
+  }
+}
+
+/* Compact layout for laptop / scaled screens */
+html[data-resolved-layout="compact"] #main-content {
+  max-width: 1540px !important;
+  margin-left: 0.5rem !important;
+  margin-right: auto !important;
+  padding-left: 0.75rem !important;
+  padding-right: 1.25rem !important;
+}
+
+/* Centered layout mode (when explicitly requested) */
+html[data-resolved-layout="centered"] #main-content {
+  max-width: 80rem !important; /* 1280px */
+  margin-left: auto !important;
+  margin-right: auto !important;
+  padding-left: 1rem !important;
+  padding-right: 1rem !important;
 }
 
 /* ========================================================================= */
