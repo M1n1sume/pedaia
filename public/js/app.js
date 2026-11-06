@@ -477,6 +477,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     const dropdownUsername = document.getElementById('dropdown-username-text');
     const dropdownRole = document.getElementById('dropdown-role-text');
     const adminMenuItem = document.getElementById('menu-item-admin');
+    const navAdminTab = document.getElementById('nav-admin-tab');
+    const drawerAdminSection = document.getElementById('drawer-admin-section');
 
     const mobileUsername = document.getElementById('mobile-username-text');
     const mobileRole = document.getElementById('mobile-user-role');
@@ -515,6 +517,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (mobileRole) mobileRole.textContent = 'System Administrator';
         if (adminMenuItem) adminMenuItem.classList.remove('hidden');
         if (mobileAdminBtn) mobileAdminBtn.classList.remove('hidden');
+        if (navAdminTab) navAdminTab.classList.remove('hidden');
+        if (drawerAdminSection) drawerAdminSection.classList.remove('hidden');
       } else {
         if (roleBadge) roleBadge.classList.add('hidden');
         if (avatar) {
@@ -529,6 +533,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (mobileRole) mobileRole.textContent = 'Educator Workspace';
         if (adminMenuItem) adminMenuItem.classList.add('hidden');
         if (mobileAdminBtn) mobileAdminBtn.classList.add('hidden');
+        if (navAdminTab) navAdminTab.classList.add('hidden');
+        if (drawerAdminSection) drawerAdminSection.classList.add('hidden');
       }
     } else {
       // Unauthenticated: show explicit top-right Log In & Create Account buttons
@@ -538,6 +544,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (mobileUnauthActions) mobileUnauthActions.classList.remove('hidden');
       if (mobileExtraActions) mobileExtraActions.classList.add('hidden');
       if (mobileAdminBtn) mobileAdminBtn.classList.add('hidden');
+      if (navAdminTab) navAdminTab.classList.add('hidden');
+      if (drawerAdminSection) drawerAdminSection.classList.add('hidden');
 
       if (usernameDisplay) usernameDisplay.textContent = 'Sign In';
       if (roleBadge) roleBadge.classList.add('hidden');

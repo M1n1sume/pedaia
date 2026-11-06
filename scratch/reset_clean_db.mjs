@@ -16,4 +16,7 @@ const users = [
 fs.writeFileSync("data/users.json", JSON.stringify(users, null, 2));
 fs.writeFileSync("data/designs.json", "[]\n");
 fs.writeFileSync("data/outputs.json", "[]\n");
+fs.writeFileSync("data/profiles.json", "{}\n");
+fs.writeFileSync("data/sessions.json", "{}\n");
+fs.writeFileSync("data/audit.json", "[]\n");
 console.log("Database cleanly reset for production with uninitialized M1n1sume.");

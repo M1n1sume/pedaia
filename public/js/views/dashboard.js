@@ -197,6 +197,7 @@ export function renderDashboardView() {
                   ${escapeHtml(mostRecentDesign.categoryLabel || mostRecentDesign.category)}
                 </span>
                 ${renderStatusPill(mostRecentDesign.status, mostRecentDesign.rubricScore)}
+                <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full ${mostRecentDesign.visibility === 'public' || mostRecentDesign.isPublic ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/30' : 'bg-slate-500/10 text-slate-500 dark:text-slate-400 border border-slate-500/30'}">${mostRecentDesign.visibility === 'public' || mostRecentDesign.isPublic ? '🌐 Public' : '🔒 Private'}</span>
                 <span class="text-xs text-slate-500 dark:text-slate-400">• ${escapeHtml(mostRecentDesign.subject || 'General')}</span>
                 <span class="text-xs text-slate-500 dark:text-slate-400">• ${escapeHtml(mostRecentDesign.educationalLevel || '')}</span>
               </div>
@@ -270,6 +271,7 @@ export function renderDashboardView() {
                     ${escapeHtml(d.categoryLabel || d.category)}
                   </span>
                   ${renderStatusPill(d.status, d.rubricScore)}
+                  <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full ${d.visibility === 'public' || d.isPublic ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20' : 'bg-slate-500/10 text-slate-500 dark:text-slate-400 border border-slate-500/20'}">${d.visibility === 'public' || d.isPublic ? '🌐 Public' : '🔒 Private'}</span>
                   <span class="text-xs text-slate-500 dark:text-slate-400">• ${escapeHtml(d.subject || 'General')}</span>
                   <span class="text-xs text-slate-500 dark:text-slate-400">• ${escapeHtml(d.educationalLevel || '')}</span>
                 </div>
@@ -513,17 +515,17 @@ export function renderDashboardView() {
 function renderStatusPill(status, rubricScore) {
   switch (status) {
     case 'Draft':
-      return `<span class="status-pill-draft">Draft</span>`;
+      return `<span class="status-pill-draft inline-flex items-center gap-1"><svg class="w-2.5 h-2.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg><span>Draft • WIP Locked</span></span>`;
     case 'Prompt Saved':
-      return `<span class="status-pill-prompt-saved">Prompt Saved</span>`;
+      return `<span class="status-pill-prompt-saved inline-flex items-center gap-1"><svg class="w-2.5 h-2.5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg><span>Prompt Saved • WIP Locked</span></span>`;
     case 'Output Generated':
-      return `<span class="status-pill-output-generated">Output Ready</span>`;
+      return `<span class="status-pill-output-generated inline-flex items-center gap-1"><svg class="w-2.5 h-2.5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg><span>Output Ready • WIP Locked</span></span>`;
     case 'Reviewed':
-      return `<span class="status-pill-reviewed">Reviewed ${rubricScore ? `(${rubricScore}/7)` : ''}</span>`;
+      return `<span class="status-pill-reviewed inline-flex items-center gap-1"><svg class="w-2.5 h-2.5 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg><span>Reviewed ${rubricScore ? `(${rubricScore}/7)` : ''} • WIP Locked</span></span>`;
     case 'Completed':
-      return `<span class="status-pill-completed">Completed</span>`;
+      return `<span class="status-pill-completed inline-flex items-center gap-1"><svg class="w-2.5 h-2.5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg><span>✓ Completed • Unlocked</span></span>`;
     default:
-      return `<span class="status-pill-draft">${escapeHtml(status || 'Draft')}</span>`;
+      return `<span class="status-pill-draft inline-flex items-center gap-1"><svg class="w-2.5 h-2.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg><span>${escapeHtml(status || 'Draft')} • WIP Locked</span></span>`;
   }
 }
 

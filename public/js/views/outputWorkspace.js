@@ -32,6 +32,66 @@ export function setActiveWorkspaceDesignId(id) {
   activeDesignId = id;
 }
 
+function renderLockedWipView(design) {
+  const isPrivateLock = design.lockReason === 'PROJECT_PRIVATE';
+
+  return `
+    <div class="bg-white dark:bg-slate-850 rounded-2xl border border-slate-200 dark:border-slate-750 p-8 sm:p-12 text-center max-w-2xl mx-auto my-12 shadow-sm animate-fade-in">
+      <div class="w-16 h-16 rounded-2xl ${isPrivateLock ? 'bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-900/60 text-indigo-600 dark:text-indigo-400' : 'bg-amber-50 dark:bg-amber-950/60 border border-amber-200 dark:border-amber-900/60 text-amber-600 dark:text-amber-400'} flex items-center justify-center mx-auto mb-5 shadow-inner">
+        <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+        </svg>
+      </div>
+
+      <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold ${isPrivateLock ? 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/30' : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30'} mb-3">
+        <span>🔒 ${isPrivateLock ? 'Private Project' : 'Project Locked'}</span>
+        <span>•</span>
+        <span>${isPrivateLock ? 'Author Access Only' : `Work In Progress Stage (${escapeHtml(design.status || 'Draft')})`}</span>
+      </div>
+
+      <h2 class="text-xl sm:text-2xl font-bold text-slate-850 dark:text-white mb-2">
+        ${isPrivateLock ? 'Access Restricted: Private Project' : 'Access Restricted: Work In Progress'}
+      </h2>
+      <p class="text-sm text-slate-600 dark:text-slate-300 max-w-lg mx-auto mb-6 leading-relaxed">
+        ${isPrivateLock
+          ? 'This instructional design is set to <strong>Private</strong> by its creator. To protect classroom autonomy and author confidentiality, private projects can only be viewed and edited by their author.'
+          : 'This instructional design is currently active work in progress and is locked. In accordance with PEDAIA curricular confidentiality policy, projects cannot be accessed by other educators until the author completes all stages and marks the project as <strong>Completed and Public</strong>.'}
+      </p>
+
+      <div class="bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-750 p-4 text-left max-w-md mx-auto mb-6 text-xs space-y-2 text-slate-600 dark:text-slate-300">
+        <div class="flex justify-between pb-1.5 border-b border-slate-200 dark:border-slate-700">
+          <span class="font-semibold text-slate-500 dark:text-slate-400">Design Title:</span>
+          <span class="font-medium text-slate-800 dark:text-slate-200">${escapeHtml(design.title || 'Instructional Project')}</span>
+        </div>
+        <div class="flex justify-between pb-1.5 border-b border-slate-200 dark:border-slate-700">
+          <span class="font-semibold text-slate-500 dark:text-slate-400">Current Lifecycle:</span>
+          <span class="font-bold ${isPrivateLock ? 'text-indigo-600 dark:text-indigo-400' : 'text-amber-600 dark:text-amber-400'}">${escapeHtml(design.status || 'Draft')}</span>
+        </div>
+        <div class="flex justify-between pb-1.5 border-b border-slate-200 dark:border-slate-700">
+          <span class="font-semibold text-slate-500 dark:text-slate-400">Visibility:</span>
+          <span class="font-bold text-slate-700 dark:text-slate-300">🔒 Private (Restricted)</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="font-semibold text-slate-500 dark:text-slate-400">Access Policy:</span>
+          <span class="font-medium text-slate-700 dark:text-slate-300">${isPrivateLock ? 'Author & Administrator Access Only' : 'Private to Author until Completed & Public'}</span>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-center gap-3 flex-wrap">
+        <button id="ws-locked-go-designs" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold shadow-sm transition-colors">
+          Browse My Designs
+        </button>
+        <button id="ws-locked-go-dashboard" class="px-4 py-2 bg-slate-100 dark:bg-slate-750 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-medium transition-colors">
+          Return to Dashboard
+        </button>
+        <button id="ws-locked-go-planner" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold shadow-sm transition-colors">
+          Create New Design
+        </button>
+      </div>
+    </div>
+  `;
+}
+
 export function renderOutputWorkspaceView() {
   let targetDesignId = activeDesignId;
   if (!targetDesignId) {
@@ -66,6 +126,13 @@ export function renderOutputWorkspaceView() {
     `;
   }
 
+  // Work In Progress Project Lock: If viewer is not owner/admin and design is not completed
+  if (design.isLockedToViewer) {
+    return renderLockedWipView(design);
+  }
+
+  const activeUid = store.getCurrentUserId();
+  const isAuthor = !design.userId || design.userId === activeUid || store.isAdmin();
   const versions = design.versionHistory || [];
   const categoryBadgeColor = {
     'lesson-planning': 'category-pill-lp',
@@ -102,6 +169,35 @@ export function renderOutputWorkspaceView() {
             <span class="text-[11px] font-medium text-slate-500 dark:text-slate-400">• ${escapeHtml(design.subject || 'General')}</span>
             <span class="text-[11px] font-medium text-slate-500 dark:text-slate-400">• ${escapeHtml(design.educationalLevel || '')} ${escapeHtml(design.gradeLevel || '')}</span>
             <span class="text-[11px] font-medium text-slate-400 dark:text-slate-500">• Last revised: ${new Date(design.updatedAt || design.createdAt).toLocaleDateString()}</span>
+            
+            <!-- Project Lifecycle & Access Lock Indicator -->
+            ${design.status === 'Completed' ? (design.visibility === 'public' || design.isPublic ? `
+              <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
+                <svg class="w-3 h-3 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                <span>Completed</span>
+              </span>
+              <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/30 flex items-center gap-1">
+                <svg class="w-3 h-3 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <span>🌐 Public • Unlocked for Others</span>
+              </span>
+            ` : `
+              <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
+                <svg class="w-3 h-3 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                <span>Completed</span>
+              </span>
+              <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-slate-500/10 text-slate-600 dark:text-slate-400 border border-slate-500/30 flex items-center gap-1">
+                <svg class="w-3 h-3 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                <span>🔒 Private Project • Only You</span>
+              </span>
+            `) : `
+              <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30 flex items-center gap-1">
+                <svg class="w-3 h-3 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                <span>${escapeHtml(design.status || 'Draft')} • WIP Locked</span>
+              </span>
+              <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full ${design.visibility === 'public' || design.isPublic ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/30' : 'bg-slate-500/10 text-slate-600 dark:text-slate-400 border border-slate-500/30'} flex items-center gap-1">
+                ${design.visibility === 'public' || design.isPublic ? '🌐 Public (Once Completed)' : '🔒 Private'}
+              </span>
+            `}
           </div>
           <div class="flex items-center gap-2">
             <h1 id="ws-design-title-heading" class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white tracking-tight">${escapeHtml(design.title)}</h1>
@@ -239,6 +335,38 @@ export function renderOutputWorkspaceView() {
                 `).join('')}
               </div>
             </div>
+          ` : ''}
+
+          <!-- Lock / Unlock Project Status Control (Author/Admin) -->
+          ${isAuthor ? (design.status === 'Completed' ? `
+            <button id="ws-mark-wip-btn" class="px-3 py-1.5 text-xs font-semibold bg-amber-50 dark:bg-amber-950/50 hover:bg-amber-100 dark:hover:bg-amber-900/60 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 rounded-lg transition-colors flex items-center gap-1.5" title="Revert project to Work In Progress (locks access from other users)">
+              <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+              <span>🔒 Revert to WIP (Lock)</span>
+            </button>
+          ` : `
+            <button id="ws-mark-completed-btn" class="px-3 py-1.5 text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg shadow-2xs transition-colors flex items-center gap-1.5" title="Mark this design as Completed (unlocks access for other educators)">
+              <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+              <span>✓ Mark Completed (Unlock)</span>
+            </button>
+          `) : ''}
+
+          <!-- Private or Public Project Option Toggle (Author/Admin) -->
+          ${isAuthor ? `
+            <button id="ws-toggle-visibility-btn" class="px-3 py-1.5 text-xs font-semibold rounded-lg border transition-colors flex items-center gap-1.5 ${design.visibility === 'public' || design.isPublic ? 'bg-blue-50 dark:bg-blue-950/50 hover:bg-blue-100 dark:hover:bg-blue-900/60 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800' : 'bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-750 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-700'}" title="${design.visibility === 'public' || design.isPublic ? 'Project is Public. Click to switch to Private.' : 'Project is Private. Click to switch to Public.'}">
+              ${design.visibility === 'public' || design.isPublic ? `
+                <svg class="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <span>🌐 Public</span>
+              ` : `
+                <svg class="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                <span>🔒 Private</span>
+              `}
+            </button>
+
+            <!-- Project Email Updates Notification Button -->
+            <button id="ws-email-updates-btn" class="px-3 py-1.5 text-xs font-semibold rounded-lg border bg-white dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800/80 transition-colors shadow-2xs flex items-center gap-1.5 cursor-pointer" title="Manage Project Email Updates & Send Instant Summary">
+              <span>📧</span>
+              <span>Email Updates</span>
+            </button>
           ` : ''}
 
         </div>
@@ -396,6 +524,48 @@ export function setupOutputWorkspaceListeners(container, navigateToWorkspace, sh
     if (goPlanner) goPlanner.addEventListener('click', () => navigateToWorkspace('lesson-planning'));
     return;
   }
+
+  // Work In Progress Project Lock handling: If locked to viewer
+  if (design.isLockedToViewer) {
+    container.querySelector('#ws-locked-go-designs')?.addEventListener('click', () => navigateToWorkspace('designs'));
+    container.querySelector('#ws-locked-go-dashboard')?.addEventListener('click', () => navigateToWorkspace('dashboard'));
+    container.querySelector('#ws-locked-go-planner')?.addEventListener('click', () => navigateToWorkspace('lesson-planning'));
+    return;
+  }
+
+  // Mark Completed / Revert to WIP Lock buttons for author/admin
+  container.querySelector('#ws-mark-completed-btn')?.addEventListener('click', () => {
+    store.updateDesign(design.id, { status: 'Completed' });
+    container.innerHTML = renderOutputWorkspaceView();
+    setupOutputWorkspaceListeners(container, navigateToWorkspace, showToast, openSettings);
+    showToast('Project status marked as Completed: Unlocked for other educators to access.', 'success');
+  });
+
+  container.querySelector('#ws-mark-wip-btn')?.addEventListener('click', () => {
+    store.updateDesign(design.id, { status: 'Draft' });
+    container.innerHTML = renderOutputWorkspaceView();
+    setupOutputWorkspaceListeners(container, navigateToWorkspace, showToast, openSettings);
+    showToast('Project reverted to Work In Progress: Locked from other viewers.', 'info');
+  });
+
+  // Project Visibility Option Toggle (Private vs Public)
+  container.querySelector('#ws-toggle-visibility-btn')?.addEventListener('click', () => {
+    const isCurrentlyPublic = design.visibility === 'public' || design.isPublic;
+    const nextVis = isCurrentlyPublic ? 'private' : 'public';
+    store.updateDesign(design.id, { visibility: nextVis, isPublic: !isCurrentlyPublic });
+    container.innerHTML = renderOutputWorkspaceView();
+    setupOutputWorkspaceListeners(container, navigateToWorkspace, showToast, openSettings);
+    if (nextVis === 'public') {
+      showToast('Project visibility set to Public: Other educators can view this once completed.', 'info');
+    } else {
+      showToast('Project visibility set to Private: Strictly restricted to you.', 'info');
+    }
+  });
+
+  // Project Email Updates Dialog
+  container.querySelector('#ws-email-updates-btn')?.addEventListener('click', () => {
+    openProjectEmailModal(design, showToast);
+  });
 
   // Toggle Edit/View Mode
   const toggleEditBtn = container.querySelector('#ws-toggle-edit-btn');
@@ -878,4 +1048,181 @@ function escapeHtml(str) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
+}
+
+export async function openProjectEmailModal(design, toast = () => {}) {
+  const existing = document.getElementById('project-email-modal-overlay');
+  if (existing) existing.remove();
+
+  const currentUser = store.getCurrentUser();
+  const profile = store.getEducatorProfile ? store.getEducatorProfile() : {};
+  const defaultEmail = design.notificationEmail || profile.email || currentUser?.email || '';
+  const notifSettings = design.emailNotifications || {
+    enabled: true,
+    onOutputGenerated: true,
+    onStageChange: true,
+    onVisibilityChange: false
+  };
+
+  let emailHistory = [];
+  try {
+    emailHistory = await store.getProjectEmailHistory(design.id);
+  } catch {}
+
+  const modalHtml = `
+    <div id="project-email-modal-overlay" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
+      <div class="bg-white dark:bg-slate-900 rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 max-h-[90vh] overflow-y-auto">
+        
+        <div class="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
+          <div class="flex items-center gap-2.5">
+            <span class="w-10 h-10 rounded-2xl bg-emerald-100 dark:bg-emerald-950/80 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-xl font-bold shadow-2xs">
+              📧
+            </span>
+            <div>
+              <h3 class="text-sm font-bold text-slate-900 dark:text-white">Project Email Updates</h3>
+              <p class="text-[11px] text-slate-500 dark:text-slate-400 font-mono">"${escapeHtml(design.title || 'Instructional Design')}"</p>
+            </div>
+          </div>
+          <button id="close-project-email-modal-btn" class="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        </div>
+
+        <form id="project-email-form" class="space-y-4 mt-5">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Recipient Notification Email</label>
+            <input type="email" id="pe-recipient-email" required value="${escapeHtml(defaultEmail)}" placeholder="e.g. educator@institution.edu" class="w-full text-xs px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white outline-none focus:border-emerald-500 font-mono" />
+            <p class="text-[10px] text-slate-400 mt-1">Updates and milestone digests will be sent to this verified address.</p>
+          </div>
+
+          <div class="space-y-2 p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-750">
+            <span class="text-[11px] font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wider block">Automated Email Triggers</span>
+            
+            <label class="flex items-center gap-2.5 text-xs text-slate-700 dark:text-slate-300 cursor-pointer">
+              <input type="checkbox" id="pe-trigger-output" ${notifSettings.onOutputGenerated !== false ? 'checked' : ''} class="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500" />
+              <span>Email me when new AI educational outputs are generated</span>
+            </label>
+
+            <label class="flex items-center gap-2.5 text-xs text-slate-700 dark:text-slate-300 cursor-pointer">
+              <input type="checkbox" id="pe-trigger-stage" ${notifSettings.onStageChange !== false ? 'checked' : ''} class="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500" />
+              <span>Email me when project advances or is marked Completed</span>
+            </label>
+
+            <label class="flex items-center gap-2.5 text-xs text-slate-700 dark:text-slate-300 cursor-pointer">
+              <input type="checkbox" id="pe-trigger-vis" ${notifSettings.onVisibilityChange ? 'checked' : ''} class="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500" />
+              <span>Email me when project visibility toggles (Private / Public)</span>
+            </label>
+          </div>
+
+          <!-- Instant Action -->
+          <div class="p-3.5 rounded-2xl bg-emerald-50/70 dark:bg-emerald-950/40 border border-emerald-100 dark:border-emerald-900/60 flex items-center justify-between gap-3">
+            <div>
+              <p class="text-xs font-bold text-emerald-900 dark:text-emerald-200">Send Instant Project Summary</p>
+              <p class="text-[10px] text-emerald-700 dark:text-emerald-400">Email yourself the current pedagogical dossier right now.</p>
+            </div>
+            <button type="button" id="pe-send-now-btn" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white text-xs font-bold rounded-xl shadow-xs transition-all flex items-center gap-1.5 shrink-0 cursor-pointer">
+              <span>🚀 Send Now</span>
+            </button>
+          </div>
+
+          <!-- Recent Sent History -->
+          <div class="space-y-2 pt-2">
+            <span class="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Recent Email Updates Sent</span>
+            <div id="pe-history-list" class="space-y-1.5 max-h-36 overflow-y-auto">
+              ${emailHistory.length === 0 ? `
+                <div class="text-[11px] text-slate-400 italic p-2 bg-slate-50 dark:bg-slate-800/40 rounded-xl text-center">
+                  No email updates have been dispatched for this project yet.
+                </div>
+              ` : emailHistory.map(h => `
+                <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-750 text-xs flex items-center justify-between gap-2">
+                  <div class="truncate">
+                    <span class="font-bold text-slate-800 dark:text-slate-200 block truncate">${escapeHtml(h.headline || h.subject)}</span>
+                    <span class="text-[10px] text-slate-400 font-mono truncate">To: ${escapeHtml(h.recipientEmail)}</span>
+                  </div>
+                  <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-mono shrink-0">✓ Sent</span>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+
+          <div class="flex justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+            <button type="button" id="pe-cancel-btn" class="px-3.5 py-2 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white cursor-pointer">
+              Close
+            </button>
+            <button type="submit" class="px-4 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 active:scale-95 rounded-xl shadow-xs transition-all cursor-pointer">
+              Save Preferences
+            </button>
+          </div>
+        </form>
+
+      </div>
+    </div>
+  `;
+
+  const div = document.createElement('div');
+  div.innerHTML = modalHtml;
+  document.body.appendChild(div.firstElementChild);
+
+  const overlay = document.getElementById('project-email-modal-overlay');
+  const close = () => overlay?.remove();
+
+  document.getElementById('close-project-email-modal-btn')?.addEventListener('click', close);
+  document.getElementById('pe-cancel-btn')?.addEventListener('click', close);
+
+  // Send Instant Project Summary
+  document.getElementById('pe-send-now-btn')?.addEventListener('click', async () => {
+    const email = document.getElementById('pe-recipient-email')?.value;
+    if (!email || !email.includes('@')) {
+      toast('Please enter a valid email address first.', 'error');
+      return;
+    }
+
+    try {
+      toast('Sending project summary email...', 'info');
+      await store.sendProjectEmailUpdate(design.id, {
+        eventType: 'PROJECT_UPDATE',
+        recipient: email,
+        details: { message: 'Here is your requested project curriculum update.' }
+      });
+      toast(`✓ Project update successfully emailed to ${email}!`, 'success');
+      
+      const historyList = document.getElementById('pe-history-list');
+      if (historyList) {
+        historyList.innerHTML = `
+          <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-750 text-xs flex items-center justify-between gap-2">
+            <div class="truncate">
+              <span class="font-bold text-slate-800 dark:text-slate-200 block truncate">Project Update: ${escapeHtml(design.title)}</span>
+              <span class="text-[10px] text-slate-400 font-mono truncate">To: ${escapeHtml(email)}</span>
+            </div>
+            <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-mono shrink-0">✓ Sent just now</span>
+          </div>
+        `;
+      }
+    } catch (e) {
+      toast('Failed to send email: ' + e.message, 'error');
+    }
+  });
+
+  // Save Preferences Form
+  document.getElementById('project-email-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('pe-recipient-email')?.value;
+    const onOutput = document.getElementById('pe-trigger-output')?.checked;
+    const onStage = document.getElementById('pe-trigger-stage')?.checked;
+    const onVis = document.getElementById('pe-trigger-vis')?.checked;
+
+    try {
+      await store.saveProjectNotificationSettings(design.id, {
+        notificationEmail: email,
+        enabled: true,
+        onOutputGenerated: onOutput,
+        onStageChange: onStage,
+        onVisibilityChange: onVis
+      });
+      toast('✓ Project email notification preferences saved!', 'success');
+      close();
+    } catch (err) {
+      toast('Error saving preferences: ' + err.message, 'error');
+    }
+  });
 }

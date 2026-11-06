@@ -1,0 +1,301 @@
+[
+  {
+    "id": "act_1794007349211_760133",
+    "type": "USER_LOGIN",
+    "userId": "usr_admin_m1n1sume",
+    "username": "M1n1sume",
+    "details": {
+      "status": "SUCCESS",
+      "role": "admin"
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "timestamp": "2026-11-06T23:22:29.212Z"
+  },
+  {
+    "id": "act_1794007337221_8cf775",
+    "type": "PROJECT_SAVED",
+    "userId": "usr_1794007336999_669920",
+    "username": "author_1794007336936",
+    "details": {
+      "designId": "des-1794007337103-d90bd0",
+      "title": "Instructional Design",
+      "stage": "Draft",
+      "visibility": "private"
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "timestamp": "2026-11-06T23:22:17.221Z"
+  },
+  {
+    "id": "act_1794007337208_d9f97b",
+    "type": "EMAIL_SENT",
+    "userId": "usr_1794007336999_669920",
+    "username": "author_1794007336936",
+    "details": {
+      "recipient": "author_1794007336936@example.com",
+      "designId": "des-1794007337103-d90bd0",
+      "designTitle": "Photosynthesis & Cellular Energetics",
+      "eventType": "STAGE_COMPLETED",
+      "subject": "[PEDAIA] 🎉 Milestone Reached: \"Photosynthesis & Cellular Energetics\" is Completed!"
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "timestamp": "2026-11-06T23:22:17.208Z"
+  },
+  {
+    "id": "act_1794007337176_614c1d",
+    "type": "PROJECT_SAVED",
+    "userId": "usr_1794007336999_669920",
+    "username": "author_1794007336936",
+    "details": {
+      "designId": "des-1794007337103-d90bd0",
+      "title": "Instructional Design",
+      "stage": "Completed",
+      "visibility": "public"
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "timestamp": "2026-11-06T23:22:17.176Z"
+  },
+  {
+    "id": "act_1794007337159_421b12",
+    "type": "PROJECT_SAVED",
+    "userId": "usr_1794007336999_669920",
+    "username": "author_1794007336936",
+    "details": {
+      "designId": "des-1794007337103-d90bd0",
+      "title": "Instructional Design",
+      "stage": "Reviewed",
+      "visibility": "private"
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "timestamp": "2026-11-06T23:22:17.159Z"
+  },
+  {
+    "id": "act_1794007337145_6d8233",
+    "type": "PROJECT_SAVED",
+    "userId": "usr_1794007336999_669920",
+    "username": "author_1794007336936",
+    "details": {
+      "designId": "des-1794007337103-d90bd0",
+      "title": "Instructional Design",
+      "stage": "Output Generated",
+      "visibility": "private"
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "timestamp": "2026-11-06T23:22:17.145Z"
+  },
+  {
+    "id": "act_1794007337131_991100",
+    "type": "PROJECT_SAVED",
+    "userId": "usr_1794007336999_669920",
+    "username": "author_1794007336936",
+    "details": {
+      "designId": "des-1794007337103-d90bd0",
+      "title": "Instructional Design",
+      "stage": "Prompt Saved",
+      "visibility": "private"
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "timestamp": "2026-11-06T23:22:17.131Z"
+  },
+  {
+    "id": "act_1794007337110_0c1687",
+    "type": "OUTPUT_CREATED",
+    "userId": "usr_1794007336999_669920",
+    "username": "author_1794007336936",
+    "details": {
+      "designId": "des-1794007337103-d90bd0",
+      "title": "Photosynthesis & Cellular Energetics",
+      "stage": "Draft",
+      "visibility": "private"
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "timestamp": "2026-11-06T23:22:17.110Z"
+  },
+  {
+    "id": "act_1794007336746_7a358b",
+    "type": "PROJECT_SAVED",
+    "userId": "usr_1794007336547_447674",
+    "username": "author_vis_1794007336442",
+    "details": {
+      "designId": "des-1794007336648-7254ff",
+      "title": "Instructional Design",
+      "stage": "Draft",
+      "visibility": "private"
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "timestamp": "2026-11-06T23:22:16.746Z"
+  },
+  {
+    "id": "act_1794007336726_d6dab1",
+    "type": "PROJECT_SAVED",
+    "userId": "usr_1794007336547_447674",
+    "username": "author_vis_1794007336442",
+    "details": {
+      "designId": "des-1794007336648-7254ff",
+      "title": "Instructional Design",
+      "stage": "Draft",
+      "visibility": "public"
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "timestamp": "2026-11-06T23:22:16.726Z"
+  },
+  {
+    "id": "act_1794007336707_5ed661",
+    "type": "EMAIL_SENT",
+    "userId": "usr_1794007336547_447674",
+    "username": "author_vis_1794007336442",
+    "details": {
+      "recipient": "author_vis_1794007336442@example.com",
+      "designId": "des-1794007336648-7254ff",
+      "designTitle": "Advanced Thermodynamics & Entropy",
+      "eventType": "STAGE_COMPLETED",
+      "subject": "[PEDAIA] 🎉 Milestone Reached: \"Advanced Thermodynamics & Entropy\" is Completed!"
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "timestamp": "2026-11-06T23:22:16.707Z"
+  },
+  {
+    "id": "act_1794007336659_6b7ab7",
+    "type": "OUTPUT_CREATED",
+    "userId": "usr_1794007336547_447674",
+    "username": "author_vis_1794007336442",
+    "details": {
+      "designId": "des-1794007336648-7254ff",
+      "title": "Advanced Thermodynamics & Entropy",
+      "stage": "Completed",
+      "visibility": "private"
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "timestamp": "2026-11-06T23:22:16.659Z"
+  },
+  {
+    "id": "act_1794007330649_61d4af",
+    "type": "EMAIL_SENT",
+    "userId": "usr_1794007330497_f42d0d",
+    "username": "educator_notif_1794007330435",
+    "details": {
+      "recipient": "educator_1794007330435@school.edu",
+      "designId": "des-1794007330530-9d5fe7",
+      "designTitle": "Quantum Computing Fundamentals for High School",
+      "eventType": "STAGE_COMPLETED",
+      "subject": "[PEDAIA] 🎉 Milestone Reached: \"Quantum Computing Fundamentals for High School\" is Completed!"
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "timestamp": "2026-11-06T23:22:10.649Z"
+  },
+  {
+    "id": "act_1794007330634_b341d3",
+    "type": "OUTPUT_CREATED",
+    "userId": "usr_1794007330497_f42d0d",
+    "username": "educator_notif_1794007330435",
+    "details": {
+      "designId": "des-1794007330530-9d5fe7",
+      "title": "Quantum Computing Fundamentals for High School",
+      "stage": "Completed",
+      "visibility": "private"
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "timestamp": "2026-11-06T23:22:10.634Z"
+  },
+  {
+    "id": "act_1794007330614_2a8d4d",
+    "type": "EMAIL_SENT",
+    "userId": "usr_1794007330497_f42d0d",
+    "username": "educator_notif_1794007330435",
+    "details": {
+      "recipient": "educator_1794007330435@school.edu",
+      "designId": "des-1794007330530-9d5fe7",
+      "designTitle": "Quantum Computing Fundamentals for High School",
+      "eventType": "PROJECT_UPDATE",
+      "subject": "[PEDAIA] Project Update: \"Quantum Computing Fundamentals for High School\""
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "timestamp": "2026-11-06T23:22:10.615Z"
+  },
+  {
+    "id": "act_1794007330584_17ab28",
+    "type": "EMAIL_SENT",
+    "userId": "usr_1794007330497_f42d0d",
+    "username": "educator_notif_1794007330435",
+    "details": {
+      "recipient": "educator_1794007330435@school.edu",
+      "designId": "des-1794007330530-9d5fe7",
+      "designTitle": "Quantum Computing Fundamentals for High School",
+      "eventType": "OUTPUT_GENERATED",
+      "subject": "[PEDAIA] ✨ New AI Educational Output Ready for \"Quantum Computing Fundamentals for High School\""
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "timestamp": "2026-11-06T23:22:10.584Z"
+  },
+  {
+    "id": "act_1794007330551_c808ef",
+    "type": "OUTPUT_CREATED",
+    "userId": "usr_1794007330497_f42d0d",
+    "username": "educator_notif_1794007330435",
+    "details": {
+      "outputId": "out-1794007330542-1302b6",
+      "title": "Interactive Qubit Simulation Worksheet",
+      "outputType": "AI Worksheet & Activity",
+      "designId": "des-1794007330530-9d5fe7"
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "timestamp": "2026-11-06T23:22:10.551Z"
+  },
+  {
+    "id": "act_1794007330538_b09cd0",
+    "type": "OUTPUT_CREATED",
+    "userId": "usr_1794007330497_f42d0d",
+    "username": "educator_notif_1794007330435",
+    "details": {
+      "designId": "des-1794007330530-9d5fe7",
+      "title": "Quantum Computing Fundamentals for High School",
+      "stage": "Draft",
+      "visibility": "private"
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "timestamp": "2026-11-06T23:22:10.538Z"
+  },
+  {
+    "id": "act_1794007330524_a2fc89",
+    "type": "USER_LOGIN",
+    "userId": "usr_1794007330497_f42d0d",
+    "username": "educator_notif_1794007330435",
+    "details": {
+      "status": "SUCCESS",
+      "role": "educator"
+    },
+    "ip": "192.168.1.42",
+    "userAgent": "",
+    "timestamp": "2026-11-06T23:22:10.524Z"
+  },
+  {
+    "id": "act_1794007330512_1b57a7",
+    "type": "WEBSITE_ACCESS",
+    "userId": "usr_1794007330497_f42d0d",
+    "username": "educator_notif_1794007330435",
+    "details": {
+      "path": "/dashboard",
+      "device": "Desktop Browser"
+    },
+    "ip": "192.168.1.42",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+    "timestamp": "2026-11-06T23:22:10.512Z"
+  }
+]

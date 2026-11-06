@@ -111,11 +111,13 @@ export function initDb() {
     writeJson('users.json', users);
   }
 
-  // Ensure sessions, designs, outputs, and profiles exist
+  // Ensure sessions, designs, outputs, profiles, activity logs, and email notifications exist
   if (!fs.existsSync(getFilePath('sessions.json'))) writeJson('sessions.json', {});
   if (!fs.existsSync(getFilePath('designs.json'))) writeJson('designs.json', []);
   if (!fs.existsSync(getFilePath('outputs.json'))) writeJson('outputs.json', []);
   if (!fs.existsSync(getFilePath('profiles.json'))) writeJson('profiles.json', {});
+  if (!fs.existsSync(getFilePath('activity_logs.json'))) writeJson('activity_logs.json', []);
+  if (!fs.existsSync(getFilePath('email_notifications.json'))) writeJson('email_notifications.json', []);
 }
 
 // User Registration
@@ -294,11 +296,24 @@ export function loginUser({ identifier, password, isFirstTimeAdmin, masterPasswo
 
   const isValid = verifyPassword(password, user.passwordHash, user.salt);
   if (!isValid) {
+    recordActivity({
+      type: 'USER_LOGIN',
+      userId: user.id,
+      username: user.username,
+      details: { status: 'FAILED', reason: 'Incorrect password' }
+    });
     throw new Error('Incorrect password. Please verify your credentials.');
   }
 
   user.lastLogin = new Date().toISOString();
   writeJson('users.json', users);
+
+  recordActivity({
+    type: 'USER_LOGIN',
+    userId: user.id,
+    username: user.username,
+    details: { status: 'SUCCESS', role: user.role }
+  });
 
   const token = generateToken();
   const sessions = readJson('sessions.json', {});
@@ -334,6 +349,36 @@ export function logoutUser(token) {
   return { success: true };
 }
 
+// User Password Update
+export function changeUserPassword({ userId, oldPassword, newPassword }) {
+  if (!userId) throw new Error('User ID is required.');
+  if (!oldPassword) throw new Error('Current password is required.');
+  if (!newPassword || newPassword.length < 6) {
+    throw new Error('New password must be at least 6 characters long.');
+  }
+
+  const users = readJson('users.json', []);
+  const user = users.find(u => u && u.id === userId);
+  if (!user) throw new Error('User account not found.');
+
+  if (user.passwordHash && user.salt) {
+    const isValid = verifyPassword(oldPassword, user.passwordHash, user.salt);
+    if (!isValid) {
+      throw new Error('Current password does not match.');
+    }
+  }
+
+  const salt = generateSalt();
+  const passwordHash = hashPassword(newPassword, salt);
+  user.passwordHash = passwordHash;
+  user.salt = salt;
+  user.isInitialized = true;
+  user.updatedAt = new Date().toISOString();
+
+  writeJson('users.json', users);
+  return { success: true };
+}
+
 // Auth Session Verification
 export function getUserByToken(token) {
   if (!token) return null;
@@ -362,11 +407,54 @@ export function getUserDesigns(userId) {
   return designs.filter(d => d && d.userId === userId);
 }
 
+// Work In Progress (WIP) and Private Project Access Control Policy:
+// 1. Projects that are still Work In Progress (Draft, Prompt Saved, Output Ready, Reviewed) are strictly locked to others.
+// 2. Projects set to Private are strictly restricted to the author only.
+// 3. Projects that are Completed AND marked Public can be accessed and viewed by other educators.
+export function getDesignById(designId, requesterUserId) {
+  const designs = readJson('designs.json', []);
+  const design = designs.find(d => d.id === designId);
+  if (!design) return null;
+
+  const isOwner = !design.userId || design.userId === requesterUserId;
+  const isCompleted = design.status === 'Completed';
+  const isPublic = design.visibility === 'public' || design.isPublic === true;
+
+  let isAdmin = false;
+  if (requesterUserId) {
+    const users = readJson('users.json', []);
+    const user = users.find(u => u.id === requesterUserId);
+    if (user && user.role === 'admin') isAdmin = true;
+  }
+
+  // Owner and Admin always have full access
+  if (isOwner || isAdmin) {
+    return design;
+  }
+
+  // If another person tries to access a project that is still Work In Progress (Draft, Prompt Saved, Output Ready, Reviewed):
+  if (!isCompleted) {
+    throw new Error('PROJECT_LOCKED_WIP: This project is currently work in progress and locked. Other people cannot access it until it reaches the Completed stage.');
+  }
+
+  // If another person tries to access a Completed project that is set to Private:
+  if (!isPublic) {
+    throw new Error('PROJECT_PRIVATE: This project is set to Private by its author. Only the author can access it.');
+  }
+
+  return design;
+}
+
 export function saveUserDesign(userId, design) {
   if (!userId) throw new Error('Authenticated user session required to save designs.');
   const designs = readJson('designs.json', []);
   const cleanId = design.id || ('des-' + Date.now() + '-' + crypto.randomBytes(3).toString('hex'));
   const now = new Date().toISOString();
+
+  const visibility = design.visibility !== undefined
+    ? design.visibility
+    : (design.isPublic !== undefined ? (design.isPublic ? 'public' : 'private') : 'private');
+  const isPublic = visibility === 'public';
 
   const existingIndex = designs.findIndex(d => d.id === cleanId);
   if (existingIndex >= 0) {
@@ -374,9 +462,14 @@ export function saveUserDesign(userId, design) {
     if (designs[existingIndex].userId !== userId) {
       throw new Error('Access denied: You do not have permission to modify this design.');
     }
+    const currentVis = designs[existingIndex].visibility || (designs[existingIndex].isPublic ? 'public' : 'private');
+    const resolvedVis = design.visibility !== undefined ? design.visibility : (design.isPublic !== undefined ? (design.isPublic ? 'public' : 'private') : currentVis);
+
     designs[existingIndex] = {
       ...designs[existingIndex],
       ...design,
+      visibility: resolvedVis,
+      isPublic: resolvedVis === 'public',
       id: cleanId,
       userId,
       updatedAt: now
@@ -386,6 +479,8 @@ export function saveUserDesign(userId, design) {
       ...design,
       id: cleanId,
       userId,
+      visibility,
+      isPublic,
       createdAt: design.createdAt || now,
       updatedAt: now,
       versionHistory: design.versionHistory || [
@@ -400,6 +495,36 @@ export function saveUserDesign(userId, design) {
   }
 
   writeJson('designs.json', designs);
+
+  // Telemetry: Record output / project creation
+  try {
+    const users = readJson('users.json', []);
+    const author = users.find(u => u.id === userId);
+    recordActivity({
+      type: design.output ? 'OUTPUT_CREATED' : 'PROJECT_SAVED',
+      userId,
+      username: author ? author.username : 'Educator',
+      details: {
+        designId: cleanId,
+        title: design.title || 'Instructional Design',
+        stage: design.status || 'Draft',
+        visibility: isPublic ? 'public' : 'private'
+      }
+    });
+
+    // Milestone Trigger: If project reached Completed, dispatch milestone email update
+    if (design.status === 'Completed' && design.emailNotifications?.enabled !== false && design.emailNotifications?.onStageChange !== false) {
+      sendProjectEmailUpdate({
+        userId,
+        designId: cleanId,
+        eventType: 'STAGE_COMPLETED',
+        details: { stage: 'Completed' }
+      });
+    }
+  } catch (logErr) {
+    console.warn('[Server DB] Activity record for design save error:', logErr.message);
+  }
+
   return designs.find(d => d.id === cleanId);
 }
 
@@ -454,6 +579,43 @@ export function saveUserOutput(userId, output) {
   }
 
   writeJson('outputs.json', outputs);
+
+  // Telemetry: Record output made
+  try {
+    const users = readJson('users.json', []);
+    const author = users.find(u => u.id === userId);
+    recordActivity({
+      type: existingIndex >= 0 ? 'OUTPUT_MODIFIED' : 'OUTPUT_CREATED',
+      userId,
+      username: author ? author.username : 'Educator',
+      details: {
+        outputId: cleanId,
+        title: output.title || output.topic || 'Educational Output',
+        outputType: output.type || output.format || 'AI Material',
+        designId: output.designId || null
+      }
+    });
+
+    // Email trigger: if tied to a project, dispatch output email notification
+    if (output.designId) {
+      const designs = readJson('designs.json', []);
+      const design = designs.find(d => d.id === output.designId);
+      if (design && design.emailNotifications?.enabled !== false && design.emailNotifications?.onOutputGenerated !== false) {
+        sendProjectEmailUpdate({
+          userId,
+          designId: design.id,
+          eventType: 'OUTPUT_GENERATED',
+          details: {
+            outputTitle: output.title || output.topic || 'Curricular Artifact',
+            outputType: output.type || 'Lesson Output'
+          }
+        });
+      }
+    }
+  } catch (outLogErr) {
+    console.warn('[Server DB] Activity record for output save error:', outLogErr.message);
+  }
+
   return outputs.find(o => o.id === cleanId);
 }
 
@@ -519,4 +681,323 @@ export function listAllUsers(adminUserId) {
     createdAt: u.createdAt,
     lastLogin: u.lastLogin
   }));
+}
+
+// ============================================================================
+// Activity Telemetry & Audit Logs (Admin-Only Telemetry)
+// Takes note of those who accessed the website, logged in, or made outputs
+// ============================================================================
+
+export function recordActivity({ type, userId = null, username = null, details = {}, ip = '127.0.0.1', userAgent = '' }) {
+  try {
+    const logs = readJson('activity_logs.json', []);
+    const id = 'act_' + Date.now() + '_' + crypto.randomBytes(3).toString('hex');
+    
+    // Resolve clean username if not explicitly passed
+    let resolvedUsername = username;
+    if (!resolvedUsername && userId) {
+      const users = readJson('users.json', []);
+      const user = users.find(u => u.id === userId);
+      resolvedUsername = user ? user.username : 'User';
+    } else if (!resolvedUsername) {
+      resolvedUsername = 'Guest Visitor';
+    }
+
+    const entry = {
+      id,
+      type: type || 'WEBSITE_ACCESS',
+      userId: userId || null,
+      username: resolvedUsername,
+      details: details || {},
+      ip: ip || '127.0.0.1',
+      userAgent: userAgent || '',
+      timestamp: new Date().toISOString()
+    };
+
+    logs.unshift(entry);
+    // Keep last 1500 records to prevent file bloat
+    if (logs.length > 1500) {
+      logs.length = 1500;
+    }
+    writeJson('activity_logs.json', logs);
+    return entry;
+  } catch (err) {
+    console.error('[Server DB] Error recording activity:', err.message);
+    return null;
+  }
+}
+
+export function getActivityLogs({ adminUserId, type = 'ALL', search = '', limit = 100, offset = 0 }) {
+  if (!adminUserId) throw new Error('Administrator privileges required.');
+  const users = readJson('users.json', []);
+  const admin = users.find(u => u && u.id === adminUserId);
+  if (!admin || admin.role !== 'admin') {
+    throw new Error('Access denied: Administrator privileges required.');
+  }
+
+  const logs = readJson('activity_logs.json', []);
+  
+  // Calculate summary telemetry metrics
+  const totalVisits = logs.filter(l => l.type === 'WEBSITE_ACCESS').length;
+  const uniqueVisitorIps = new Set(logs.filter(l => l.type === 'WEBSITE_ACCESS').map(l => l.ip)).size;
+  const totalLogins = logs.filter(l => l.type === 'USER_LOGIN' && l.details?.status !== 'FAILED').length;
+  const totalOutputs = logs.filter(l => l.type === 'OUTPUT_CREATED' || l.type === 'OUTPUT_MODIFIED' || l.type === 'PROJECT_SAVED').length;
+  const totalEmails = logs.filter(l => l.type === 'EMAIL_SENT' || l.type === 'EMAIL_UPDATE_SENT').length;
+
+  let filtered = logs;
+  if (type && type !== 'ALL') {
+    if (type === 'WEBSITE_ACCESS') {
+      filtered = filtered.filter(l => l.type === 'WEBSITE_ACCESS');
+    } else if (type === 'USER_LOGIN') {
+      filtered = filtered.filter(l => l.type === 'USER_LOGIN' || l.type === 'USER_LOGOUT');
+    } else if (type === 'OUTPUT_CREATED') {
+      filtered = filtered.filter(l => l.type === 'OUTPUT_CREATED' || l.type === 'OUTPUT_MODIFIED' || l.type === 'PROJECT_SAVED');
+    } else if (type === 'EMAIL_SENT') {
+      filtered = filtered.filter(l => l.type === 'EMAIL_SENT' || l.type === 'EMAIL_UPDATE_SENT');
+    } else {
+      filtered = filtered.filter(l => l.type === type);
+    }
+  }
+
+  if (search && typeof search === 'string') {
+    const q = search.trim().toLowerCase();
+    filtered = filtered.filter(l => {
+      const matchUser = l.username && l.username.toLowerCase().includes(q);
+      const matchIp = l.ip && l.ip.toLowerCase().includes(q);
+      const matchType = l.type && l.type.toLowerCase().includes(q);
+      const matchDetails = l.details ? JSON.stringify(l.details).toLowerCase().includes(q) : false;
+      return matchUser || matchIp || matchType || matchDetails;
+    });
+  }
+
+  const paginated = filtered.slice(offset, offset + limit);
+
+  return {
+    logs: paginated,
+    total: filtered.length,
+    stats: {
+      totalVisits,
+      uniqueVisitors: uniqueVisitorIps,
+      totalLogins,
+      totalOutputs,
+      totalEmails,
+      totalEvents: logs.length
+    }
+  };
+}
+
+export function clearActivityLogs(adminUserId) {
+  if (!adminUserId) throw new Error('Administrator privileges required.');
+  const users = readJson('users.json', []);
+  const admin = users.find(u => u && u.id === adminUserId);
+  if (!admin || admin.role !== 'admin') {
+    throw new Error('Access denied: Administrator privileges required.');
+  }
+
+  writeJson('activity_logs.json', []);
+  recordActivity({
+    type: 'ADMIN_PURGE',
+    userId: admin.id,
+    username: admin.username,
+    details: { action: 'Activity logs purged by administrator' }
+  });
+  return { success: true };
+}
+
+// ============================================================================
+// Project Email Notifications & Updates Engine
+// Gives educators rich, automated and on-demand email updates for their projects
+// ============================================================================
+
+export function sendProjectEmailUpdate({ userId, designId, eventType = 'PROJECT_UPDATE', details = {}, customRecipient = null }) {
+  if (!userId) throw new Error('Authentication required to send project email.');
+  const designs = readJson('designs.json', []);
+  const design = designs.find(d => d.id === designId);
+  if (!design) throw new Error('Project design not found.');
+
+  const users = readJson('users.json', []);
+  const requester = users.find(u => u.id === userId);
+  if (!requester) throw new Error('User account not found.');
+  if (design.userId !== userId && requester.role !== 'admin') {
+    throw new Error('Access denied: You can only send email updates for your own projects.');
+  }
+
+  const profiles = readJson('profiles.json', {});
+  const userProfile = profiles[design.userId] || {};
+  const projectAuthor = users.find(u => u.id === design.userId) || requester;
+  
+  const recipientEmail = customRecipient || 
+    design.notificationEmail || 
+    userProfile.email || 
+    projectAuthor.email;
+
+  if (!recipientEmail || typeof recipientEmail !== 'string' || !recipientEmail.includes('@')) {
+    throw new Error('No valid recipient email address found for this project.');
+  }
+
+  const now = new Date().toISOString();
+  const emailId = 'eml_' + Date.now() + '_' + crypto.randomBytes(3).toString('hex');
+  
+  let subject = `[PEDAIA] Project Update: "${design.title || 'Instructional Design'}"`;
+  let headline = `Project Update: ${design.title || 'Instructional Design'}`;
+  let messageBody = details.message || 'An educational update is ready for your project.';
+
+  if (eventType === 'OUTPUT_GENERATED') {
+    subject = `[PEDAIA] ✨ New AI Educational Output Ready for "${design.title || 'Instructional Design'}"`;
+    headline = `✨ New Educational Material Generated`;
+    messageBody = details.outputTitle 
+      ? `A new educational output "${details.outputTitle}" (${details.outputType || 'Curricular Artifact'}) has been generated for your project.`
+      : `New instructional materials have been generated and added to your project dossier.`;
+  } else if (eventType === 'STAGE_COMPLETED') {
+    subject = `[PEDAIA] 🎉 Milestone Reached: "${design.title || 'Instructional Design'}" is Completed!`;
+    headline = `🎉 Project Marked as Completed`;
+    messageBody = `Congratulations! Your instructional design project has successfully completed its pedagogical review and is marked as Completed.`;
+  } else if (eventType === 'STAGE_CHANGED') {
+    subject = `[PEDAIA] 📌 Stage Progress: "${design.title || 'Instructional Design'}" moved to ${details.stage || 'Next Stage'}`;
+    headline = `📌 Stage Milestone: ${details.stage || 'Updated'}`;
+    messageBody = `Your project stage has been advanced to "${details.stage}".`;
+  } else if (eventType === 'VISIBILITY_CHANGED') {
+    subject = `[PEDAIA] 🔒 Project Visibility Updated for "${design.title || 'Instructional Design'}"`;
+    headline = `🔒 Project Visibility: ${details.visibility === 'public' ? 'Public (Community Access)' : 'Private (Confidential Author Access)'}`;
+    messageBody = `Your project visibility was changed to ${details.visibility === 'public' ? 'Public' : 'Private'}.`;
+  }
+
+  const snippet = design.output 
+    ? (design.output.length > 300 ? design.output.substring(0, 300) + '...' : design.output)
+    : 'Instructional design materials ready for classroom deployment.';
+
+  const htmlBody = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f8fafc; color: #1e293b; margin: 0; padding: 24px; }
+        .card { max-width: 600px; margin: 0 auto; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+        .header { background: linear-gradient(135deg, #4f46e5 0%, #312e81 100%); padding: 24px 28px; color: #ffffff; }
+        .logo { font-size: 18px; font-weight: 800; letter-spacing: 0.05em; }
+        .content { padding: 28px; }
+        .badge { display: inline-block; padding: 4px 10px; border-radius: 9999px; font-size: 11px; font-weight: 700; text-transform: uppercase; margin-bottom: 12px; }
+        .badge-stage { background-color: #e0e7ff; color: #3730a3; }
+        .snippet-box { background-color: #f1f5f9; border-left: 4px solid #6366f1; padding: 14px; border-radius: 8px; font-size: 13px; font-style: italic; color: #334155; margin: 16px 0; }
+        .meta-table { width: 100%; border-collapse: collapse; font-size: 13px; margin: 16px 0; }
+        .meta-table td { padding: 6px 0; border-bottom: 1px solid #f1f5f9; }
+        .meta-table td:first-child { color: #64748b; font-weight: 600; width: 35%; }
+        .footer { padding: 20px 28px; background-color: #f8fafc; border-top: 1px solid #e2e8f0; font-size: 12px; color: #64748b; text-align: center; }
+      </style>
+    </head>
+    <body>
+      <div class="card">
+        <div class="header">
+          <div class="logo">⚡ PEDAIA INSTRUCTIONAL DESIGN STUDIO</div>
+          <h2 style="margin: 8px 0 0 0; font-size: 20px;">${headline}</h2>
+        </div>
+        <div class="content">
+          <p style="font-size: 14px; margin-top: 0;">Hello <strong>${projectAuthor.username}</strong>,</p>
+          <p style="font-size: 14px; line-height: 1.5;">${messageBody}</p>
+          
+          <table class="meta-table">
+            <tr><td>Project Title:</td><td><strong>${design.title || 'Untitled Design'}</strong></td></tr>
+            <tr><td>Subject / Field:</td><td>${design.subject || 'Interdisciplinary'}</td></tr>
+            <tr><td>Grade / Level:</td><td>${design.gradeLevel || 'Standard'}</td></tr>
+            <tr><td>Current Stage:</td><td><span class="badge badge-stage">${design.status || 'Draft'}</span></td></tr>
+            <tr><td>Visibility:</td><td>${design.visibility === 'public' ? '🌐 Public' : '🔒 Private'}</td></tr>
+          </table>
+
+          <div class="snippet-box">
+            <strong>Preview:</strong><br/>
+            ${snippet.replace(/</g, '&lt;').replace(/>/g, '&gt;')}
+          </div>
+
+          <p style="font-size: 12px; color: #64748b; margin-top: 24px;">
+            Log in to your PEDAIA account anytime to inspect, export, refine, or present this instructional design.
+          </p>
+        </div>
+        <div class="footer">
+          Dispatched by PEDAIA Project Notification Engine • ${new Date().toLocaleDateString(undefined, { dateStyle: 'full' })}
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  const emailRecord = {
+    id: emailId,
+    designId,
+    designTitle: design.title || 'Untitled Design',
+    userId: design.userId,
+    recipientEmail,
+    eventType,
+    subject,
+    headline,
+    messageBody,
+    htmlBody,
+    status: 'delivered',
+    sentAt: now
+  };
+
+  const emails = readJson('email_notifications.json', []);
+  emails.unshift(emailRecord);
+  if (emails.length > 500) emails.length = 500;
+  writeJson('email_notifications.json', emails);
+
+  // Record in activity logs so it appears in the Admin tab!
+  recordActivity({
+    type: 'EMAIL_SENT',
+    userId: design.userId,
+    username: projectAuthor.username,
+    details: {
+      recipient: recipientEmail,
+      designId,
+      designTitle: design.title,
+      eventType,
+      subject
+    }
+  });
+
+  return {
+    success: true,
+    email: {
+      id: emailId,
+      recipientEmail,
+      subject,
+      headline,
+      sentAt: now
+    }
+  };
+}
+
+export function getProjectEmailNotifications({ userId, designId }) {
+  if (!userId) return [];
+  const emails = readJson('email_notifications.json', []);
+  return emails.filter(e => e && e.userId === userId && (!designId || e.designId === designId));
+}
+
+export function getAllEmailNotifications(adminUserId) {
+  if (!adminUserId) throw new Error('Administrator privileges required.');
+  const users = readJson('users.json', []);
+  const admin = users.find(u => u && u.id === adminUserId);
+  if (!admin || admin.role !== 'admin') {
+    throw new Error('Access denied: Administrator privileges required.');
+  }
+  return readJson('email_notifications.json', []);
+}
+
+export function saveProjectNotificationSettings(userId, designId, settings = {}) {
+  if (!userId) throw new Error('Authentication required.');
+  const designs = readJson('designs.json', []);
+  const design = designs.find(d => d.id === designId);
+  if (!design) throw new Error('Design not found.');
+  if (design.userId !== userId) throw new Error('Access denied: Not design owner.');
+
+  design.notificationEmail = typeof settings.notificationEmail === 'string' ? settings.notificationEmail.trim() : design.notificationEmail;
+  design.emailNotifications = {
+    enabled: settings.enabled !== undefined ? Boolean(settings.enabled) : true,
+    onOutputGenerated: settings.onOutputGenerated !== undefined ? Boolean(settings.onOutputGenerated) : true,
+    onStageChange: settings.onStageChange !== undefined ? Boolean(settings.onStageChange) : true,
+    onVisibilityChange: settings.onVisibilityChange !== undefined ? Boolean(settings.onVisibilityChange) : false
+  };
+
+  writeJson('designs.json', designs);
+  return design;
 }

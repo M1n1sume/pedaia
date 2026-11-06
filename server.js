@@ -51,6 +51,8 @@ const MIME_TYPES = {
   '.zip': 'application/zip'
 };
 
+const recentAccessMap = new Map();
+
 const server = http.createServer(async (req, res) => {
   // Universal Cross-Device & Security Headers
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -72,6 +74,28 @@ const server = http.createServer(async (req, res) => {
   // Helper to get authenticated user
   const authHeader = req.headers['authorization'];
   const authUser = authHeader ? db.getUserByToken(authHeader) : null;
+
+  // Telemetry: Record Website Access (Takes note of who accessed the website)
+  const clientIp = (req.headers['x-forwarded-for']?.split(',')[0].trim()) || req.socket?.remoteAddress || '127.0.0.1';
+  const userAgent = req.headers['user-agent'] || '';
+  if (req.method === 'GET' && (pathname === '/' || pathname === '/index.html' || pathname === '/dashboard' || pathname === '/designs')) {
+    const now = Date.now();
+    const lastVisit = recentAccessMap.get(clientIp) || 0;
+    if (now - lastVisit > 45000) {
+      recentAccessMap.set(clientIp, now);
+      db.recordActivity({
+        type: 'WEBSITE_ACCESS',
+        userId: authUser ? authUser.id : null,
+        username: authUser ? authUser.username : 'Guest Visitor',
+        details: {
+          path: pathname,
+          device: userAgent.includes('Mobile') ? 'Mobile Device' : (userAgent.includes('Tablet') ? 'Tablet' : 'Desktop Browser')
+        },
+        ip: clientIp,
+        userAgent
+      });
+    }
+  }
 
   // API Routes
   if (pathname.startsWith('/api/')) {
@@ -137,6 +161,29 @@ const server = http.createServer(async (req, res) => {
       return;
     }
 
+    // Auth: Change Password
+    if (pathname === '/api/auth/change-password' && req.method === 'POST') {
+      if (!authUser) {
+        res.writeHead(401, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'UNAUTHORIZED', message: 'Authentication required to update password.' }));
+        return;
+      }
+      try {
+        const body = await parseJsonBody(req);
+        db.changeUserPassword({
+          userId: authUser.id,
+          oldPassword: body.oldPassword,
+          newPassword: body.newPassword
+        });
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: true, message: 'Password updated successfully.' }));
+      } catch (err) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'PASSWORD_ERROR', message: err.message }));
+      }
+      return;
+    }
+
     // Educator Profile: GET
     if (pathname === '/api/profile' && req.method === 'GET') {
       if (!authUser) {
@@ -197,6 +244,50 @@ const server = http.createServer(async (req, res) => {
       } catch (err) {
         res.writeHead(403, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ error: 'SAVE_FAILED', message: err.message }));
+      }
+      return;
+    }
+
+    // Single Design by ID: GET /api/designs/:id (with Work In Progress Project Lock Enforcement)
+    if (pathname.startsWith('/api/designs/') && req.method === 'GET') {
+      const designId = pathname.replace('/api/designs/', '').trim();
+      if (!designId) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'INVALID_ID', message: 'Design ID is required.' }));
+        return;
+      }
+      try {
+        const design = db.getDesignById(designId, authUser ? authUser.id : null);
+        if (!design) {
+          res.writeHead(404, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: 'NOT_FOUND', message: 'Design not found.' }));
+          return;
+        }
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: true, design }));
+      } catch (err) {
+        if (err.message && err.message.includes('PROJECT_LOCKED_WIP')) {
+          res.writeHead(403, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({
+            error: 'PROJECT_LOCKED_WIP',
+            message: err.message,
+            locked: true,
+            stage: 'Work In Progress'
+          }));
+          return;
+        }
+        if (err.message && err.message.includes('PROJECT_PRIVATE')) {
+          res.writeHead(403, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({
+            error: 'PROJECT_PRIVATE',
+            message: err.message,
+            locked: true,
+            visibility: 'private'
+          }));
+          return;
+        }
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'FETCH_ERROR', message: err.message }));
       }
       return;
     }
@@ -286,6 +377,148 @@ const server = http.createServer(async (req, res) => {
         res.writeHead(403, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ error: 'ADMIN_ERROR', message: err.message }));
       }
+      return;
+    }
+
+    // Admin Activity Telemetry: GET /api/admin/activity
+    // Takes note of those who accessed the website, logged in, or made outputs
+    if (pathname === '/api/admin/activity' && req.method === 'GET') {
+      if (!authUser || authUser.role !== 'admin') {
+        res.writeHead(403, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'FORBIDDEN', message: 'Administrator privileges required.' }));
+        return;
+      }
+      try {
+        const type = parsedUrl.searchParams.get('type') || 'ALL';
+        const search = parsedUrl.searchParams.get('search') || '';
+        const limit = parseInt(parsedUrl.searchParams.get('limit') || '100', 10);
+        const offset = parseInt(parsedUrl.searchParams.get('offset') || '0', 10);
+
+        const result = db.getActivityLogs({
+          adminUserId: authUser.id,
+          type,
+          search,
+          limit,
+          offset
+        });
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: true, ...result }));
+      } catch (err) {
+        res.writeHead(403, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'ADMIN_ERROR', message: err.message }));
+      }
+      return;
+    }
+
+    // Admin Activity Purge: POST /api/admin/activity/clear
+    if (pathname === '/api/admin/activity/clear' && req.method === 'POST') {
+      if (!authUser || authUser.role !== 'admin') {
+        res.writeHead(403, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'FORBIDDEN', message: 'Administrator privileges required.' }));
+        return;
+      }
+      try {
+        db.clearActivityLogs(authUser.id);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: true, message: 'Activity telemetry reset successfully.' }));
+      } catch (err) {
+        res.writeHead(403, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'ADMIN_ERROR', message: err.message }));
+      }
+      return;
+    }
+
+    // Admin Email Notifications Archive: GET /api/admin/emails
+    if (pathname === '/api/admin/emails' && req.method === 'GET') {
+      if (!authUser || authUser.role !== 'admin') {
+        res.writeHead(403, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'FORBIDDEN', message: 'Administrator privileges required.' }));
+        return;
+      }
+      try {
+        const emails = db.getAllEmailNotifications(authUser.id);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: true, emails }));
+      } catch (err) {
+        res.writeHead(403, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'ADMIN_ERROR', message: err.message }));
+      }
+      return;
+    }
+
+    // Project Email Notifications: POST /api/projects/:id/notify-email
+    if (pathname.startsWith('/api/projects/') && pathname.endsWith('/notify-email') && req.method === 'POST') {
+      if (!authUser) {
+        res.writeHead(401, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'UNAUTHORIZED', message: 'Authentication required to dispatch project emails.' }));
+        return;
+      }
+      const parts = pathname.split('/');
+      const designId = parts[3];
+      try {
+        const body = await parseJsonBody(req);
+        const result = db.sendProjectEmailUpdate({
+          userId: authUser.id,
+          designId,
+          eventType: body.eventType || 'PROJECT_UPDATE',
+          details: body.details || {},
+          customRecipient: body.recipient || null
+        });
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(result));
+      } catch (err) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'EMAIL_ERROR', message: err.message }));
+      }
+      return;
+    }
+
+    // Project Email Notifications History: GET /api/projects/:id/notifications
+    if (pathname.startsWith('/api/projects/') && pathname.endsWith('/notifications') && req.method === 'GET') {
+      if (!authUser) {
+        res.writeHead(401, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'UNAUTHORIZED', message: 'Authentication required.' }));
+        return;
+      }
+      const parts = pathname.split('/');
+      const designId = parts[3];
+      const notifications = db.getProjectEmailNotifications({ userId: authUser.id, designId });
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: true, notifications }));
+      return;
+    }
+
+    // Project Notification Settings: PUT /api/projects/:id/notification-settings
+    if (pathname.startsWith('/api/projects/') && pathname.endsWith('/notification-settings') && req.method === 'PUT') {
+      if (!authUser) {
+        res.writeHead(401, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'UNAUTHORIZED', message: 'Authentication required.' }));
+        return;
+      }
+      const parts = pathname.split('/');
+      const designId = parts[3];
+      try {
+        const body = await parseJsonBody(req);
+        const updated = db.saveProjectNotificationSettings(authUser.id, designId, body);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: true, design: updated }));
+      } catch (err) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'SETTINGS_ERROR', message: err.message }));
+      }
+      return;
+    }
+
+    // User Email Notifications: GET /api/notifications
+    if (pathname === '/api/notifications' && req.method === 'GET') {
+      if (!authUser) {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: true, notifications: [] }));
+        return;
+      }
+      const notifications = db.getProjectEmailNotifications({ userId: authUser.id });
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: true, notifications }));
       return;
     }
 

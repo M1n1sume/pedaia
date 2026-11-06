@@ -9,12 +9,13 @@ let selectedCategoryFilter = 'all';
 let selectedSubjectFilter = 'all';
 let selectedLevelFilter = 'all';
 let selectedStatusFilter = 'all';
+let selectedVisibilityFilter = 'all';
 let sortBy = 'date-desc';
 
 export function renderMyDesignsView() {
   let allDesigns = store.getDesigns();
 
-  // Status Counts for filter tabs
+  // Status & Visibility Counts for filters
   const counts = {
     all: allDesigns.filter(d => !d.isArchived).length,
     'Draft': allDesigns.filter(d => d.status === 'Draft' && !d.isArchived).length,
@@ -22,10 +23,21 @@ export function renderMyDesignsView() {
     'Output Generated': allDesigns.filter(d => d.status === 'Output Generated' && !d.isArchived).length,
     'Reviewed': allDesigns.filter(d => d.status === 'Reviewed' && !d.isArchived).length,
     'Completed': allDesigns.filter(d => d.status === 'Completed' && !d.isArchived).length,
-    'Archived': allDesigns.filter(d => d.isArchived).length
+    'Archived': allDesigns.filter(d => d.isArchived).length,
+    public: allDesigns.filter(d => (d.visibility === 'public' || d.isPublic) && !d.isArchived).length,
+    private: allDesigns.filter(d => d.visibility !== 'public' && !d.isPublic && !d.isArchived).length
   };
 
   let designs = [...allDesigns];
+
+  // Visibility filter (Private vs Public)
+  if (selectedVisibilityFilter !== 'all') {
+    if (selectedVisibilityFilter === 'public') {
+      designs = designs.filter(d => d.visibility === 'public' || d.isPublic);
+    } else if (selectedVisibilityFilter === 'private') {
+      designs = designs.filter(d => d.visibility !== 'public' && !d.isPublic);
+    }
+  }
 
   // Status filter
   if (selectedStatusFilter === 'Archived') {
@@ -185,15 +197,25 @@ export function renderMyDesignsView() {
 
         </div>
 
-        <div class="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-750 text-xs text-slate-500 dark:text-slate-400">
+        <div class="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-750 text-xs text-slate-500 dark:text-slate-400 flex-wrap gap-2">
           <span>Displaying <strong>${designs.length}</strong> instructional designs</span>
-          <div class="flex items-center gap-2">
-            <span>Sort by:</span>
-            <select id="designs-sort-select" class="text-xs p-1 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-850 text-slate-800 dark:text-slate-100 outline-none">
-              <option value="date-desc" ${sortBy === 'date-desc' ? 'selected' : ''}>Date Revised (Newest)</option>
-              <option value="date-asc" ${sortBy === 'date-asc' ? 'selected' : ''}>Date Revised (Oldest)</option>
-              <option value="title-asc" ${sortBy === 'title-asc' ? 'selected' : ''}>Title (A-Z)</option>
-            </select>
+          <div class="flex items-center gap-3">
+            <div class="flex items-center gap-1.5">
+              <span>Access Option:</span>
+              <select id="designs-visibility-filter" class="text-xs p-1 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-850 text-slate-800 dark:text-slate-100 outline-none">
+                <option value="all" ${selectedVisibilityFilter === 'all' ? 'selected' : ''}>All Visibility</option>
+                <option value="private" ${selectedVisibilityFilter === 'private' ? 'selected' : ''}>🔒 Private (${counts.private})</option>
+                <option value="public" ${selectedVisibilityFilter === 'public' ? 'selected' : ''}>🌐 Public (${counts.public})</option>
+              </select>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <span>Sort by:</span>
+              <select id="designs-sort-select" class="text-xs p-1 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-850 text-slate-800 dark:text-slate-100 outline-none">
+                <option value="date-desc" ${sortBy === 'date-desc' ? 'selected' : ''}>Date Revised (Newest)</option>
+                <option value="date-asc" ${sortBy === 'date-asc' ? 'selected' : ''}>Date Revised (Oldest)</option>
+                <option value="title-asc" ${sortBy === 'title-asc' ? 'selected' : ''}>Title (A-Z)</option>
+              </select>
+            </div>
           </div>
         </div>
       </div>
@@ -254,13 +276,28 @@ export function renderMyDesignsView() {
                 <div>
                   
                   <!-- Top Card Meta Bar -->
-                  <div class="flex items-center justify-between mb-2.5">
+                  <div class="flex items-center justify-between mb-2.5 flex-wrap gap-1.5">
                     <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${categoryBadgeColor}">
                       ${escapeHtml(d.categoryLabel || d.category)}
                     </span>
                     
-                    <!-- Real Lifecycle Status Badge -->
-                    ${getStatusBadgeHtml(d)}
+                    <div class="flex items-center gap-1.5 flex-wrap">
+                      <!-- Project Visibility Option Badge -->
+                      ${d.visibility === 'public' || d.isPublic ? `
+                        <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/30 inline-flex items-center gap-1" title="Public Project: Accessible to other educators once completed">
+                          <svg class="w-2.5 h-2.5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                          <span>Public</span>
+                        </span>
+                      ` : `
+                        <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-500/10 text-slate-500 dark:text-slate-400 border border-slate-500/30 inline-flex items-center gap-1" title="Private Project: Restricted strictly to you">
+                          <svg class="w-2.5 h-2.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                          <span>Private</span>
+                        </span>
+                      `}
+
+                      <!-- Real Lifecycle Status Badge -->
+                      ${getStatusBadgeHtml(d)}
+                    </div>
                   </div>
 
                   <!-- Title with Inline Rename Trigger -->
@@ -301,16 +338,41 @@ export function renderMyDesignsView() {
                 <!-- Card Functional Controls Bar -->
                 <div>
                   
-                  <!-- Status Changer Dropdown -->
-                  <div class="flex items-center justify-between mb-2.5 text-[11px]">
-                    <span class="text-slate-400 dark:text-slate-500">Status Workflow:</span>
-                    <select class="status-change-select text-[11px] font-semibold py-0.5 px-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 outline-none" data-id="${d.id}">
-                      <option value="Draft" ${d.status === 'Draft' ? 'selected' : ''}>Draft</option>
-                      <option value="Prompt Saved" ${d.status === 'Prompt Saved' ? 'selected' : ''}>Prompt Saved</option>
-                      <option value="Output Generated" ${d.status === 'Output Generated' ? 'selected' : ''}>Output Generated</option>
-                      <option value="Reviewed" ${d.status === 'Reviewed' ? 'selected' : ''}>Reviewed</option>
-                      <option value="Completed" ${d.status === 'Completed' ? 'selected' : ''}>Completed</option>
-                    </select>
+                  <!-- Status Changer & Lock State Control -->
+                  <div class="flex items-center justify-between mb-2.5 text-[11px] gap-2">
+                    <span class="text-slate-400 dark:text-slate-500 font-medium">Stage & Access:</span>
+                    <div class="flex items-center gap-1.5">
+                      <select class="status-change-select text-[11px] font-semibold py-0.5 px-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 outline-none" data-id="${d.id}">
+                        <option value="Draft" ${d.status === 'Draft' ? 'selected' : ''}>🔒 Draft (WIP Locked)</option>
+                        <option value="Prompt Saved" ${d.status === 'Prompt Saved' ? 'selected' : ''}>🔒 Prompt Saved (WIP Locked)</option>
+                        <option value="Output Generated" ${d.status === 'Output Generated' ? 'selected' : ''}>🔒 Output Ready (WIP Locked)</option>
+                        <option value="Reviewed" ${d.status === 'Reviewed' ? 'selected' : ''}>🔒 Reviewed (WIP Locked)</option>
+                        <option value="Completed" ${d.status === 'Completed' ? 'selected' : ''}>✓ Completed (Unlocked)</option>
+                      </select>
+                      ${d.status === 'Completed' ? `
+                        <button class="toggle-wip-btn px-2 py-0.5 text-[10.5px] font-semibold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/60 hover:bg-amber-100 rounded border border-amber-200 dark:border-amber-800 transition-colors" data-id="${d.id}" title="Revert to WIP (Locks project from other users)">
+                          🔒 Lock
+                        </button>
+                      ` : `
+                        <button class="toggle-complete-btn px-2 py-0.5 text-[10.5px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 rounded border border-emerald-200 dark:border-emerald-800 transition-colors" data-id="${d.id}" title="Mark Completed (Unlocks project for other users to view)">
+                          ✓ Unlock
+                        </button>
+                      `}
+                    </div>
+                  </div>
+
+                  <!-- Project Visibility Option Row -->
+                  <div class="flex items-center justify-between mb-2.5 text-[11px] gap-2 pt-1.5 border-t border-slate-100 dark:border-slate-750">
+                    <span class="text-slate-400 dark:text-slate-500 font-medium">Project Visibility:</span>
+                    <button class="toggle-visibility-btn px-2.5 py-0.5 text-[11px] font-semibold rounded-lg border transition-colors inline-flex items-center gap-1.5 ${d.visibility === 'public' || d.isPublic ? 'bg-blue-50 dark:bg-blue-950/60 hover:bg-blue-100 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800' : 'bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-700'}" data-id="${d.id}" title="${d.visibility === 'public' || d.isPublic ? 'Currently Public: Click to set to Private' : 'Currently Private: Click to set to Public'}">
+                      ${d.visibility === 'public' || d.isPublic ? `
+                        <svg class="w-3 h-3 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        <span>🌐 Public (Shared)</span>
+                      ` : `
+                        <svg class="w-3 h-3 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                        <span>🔒 Private (Only You)</span>
+                      `}
+                    </button>
                   </div>
 
                   <div class="flex items-center gap-1.5 pt-1">
@@ -338,6 +400,13 @@ export function renderMyDesignsView() {
                     <button data-duplicate-id="${d.id}" title="Duplicate Design" class="duplicate-btn p-1.5 text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-750 rounded-lg transition-colors border border-slate-200 dark:border-slate-700">
                       <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                      </svg>
+                    </button>
+
+                    <!-- Send Project Update to Email Button -->
+                    <button data-email-id="${d.id}" title="Send Project Update to Email" class="email-btn p-1.5 text-slate-500 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/50 rounded-lg transition-colors border border-slate-200 dark:border-slate-700 cursor-pointer">
+                      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                       </svg>
                     </button>
 
@@ -382,7 +451,8 @@ function getStatusBadgeHtml(d) {
   if (status === 'Reviewed') {
     return `
       <span class="status-pill-reviewed text-[11px] font-bold px-2 py-0.5 rounded-full inline-flex items-center gap-1">
-        <span>Reviewed</span>
+        <svg class="w-3 h-3 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+        <span>Reviewed • WIP Locked</span>
         ${d.reviewScore ? `<span class="opacity-80">(${d.reviewScore}/7)</span>` : ''}
       </span>
     `;
@@ -391,7 +461,8 @@ function getStatusBadgeHtml(d) {
   if (status === 'Completed') {
     return `
       <span class="status-pill-completed text-[11px] font-bold px-2 py-0.5 rounded-full inline-flex items-center gap-1">
-        <span>✓ Completed</span>
+        <svg class="w-3 h-3 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+        <span>✓ Completed • Unlocked</span>
       </span>
     `;
   }
@@ -399,7 +470,8 @@ function getStatusBadgeHtml(d) {
   if (status === 'Output Generated') {
     return `
       <span class="status-pill-output-generated text-[11px] font-bold px-2 py-0.5 rounded-full inline-flex items-center gap-1">
-        <span>Output Ready</span>
+        <svg class="w-3 h-3 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+        <span>Output Ready • WIP Locked</span>
       </span>
     `;
   }
@@ -407,15 +479,17 @@ function getStatusBadgeHtml(d) {
   if (status === 'Prompt Saved') {
     return `
       <span class="status-pill-prompt-saved text-[11px] font-bold px-2 py-0.5 rounded-full inline-flex items-center gap-1">
-        <span>Prompt Saved</span>
+        <svg class="w-3 h-3 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+        <span>Prompt Saved • WIP Locked</span>
       </span>
     `;
   }
 
   // Default: Draft
   return `
-    <span class="status-pill-draft text-[11px] font-medium px-2 py-0.5 rounded-full">
-      Draft
+    <span class="status-pill-draft text-[11px] font-medium px-2 py-0.5 rounded-full inline-flex items-center gap-1">
+      <svg class="w-3 h-3 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+      <span>Draft • WIP Locked</span>
     </span>
   `;
 }
@@ -530,9 +604,74 @@ export function setupMyDesignsListeners(container, navigateToWorkspace, showToas
       const id = sel.getAttribute('data-id');
       const newStatus = e.target.value;
       store.updateDesign(id, { status: newStatus });
-      showToast(`Status updated to "${newStatus}"`, 'success');
+      if (newStatus === 'Completed') {
+        showToast('Project marked as Completed: Unlocked for other educators to access.', 'success');
+      } else {
+        showToast(`Project stage set to "${newStatus}": Locked as Work In Progress.`, 'info');
+      }
       container.innerHTML = renderMyDesignsView();
       setupMyDesignsListeners(container, navigateToWorkspace, showToast);
+    });
+  });
+
+  // Quick Toggle Completed (Unlock)
+  container.querySelectorAll('.toggle-complete-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const id = btn.getAttribute('data-id');
+      store.updateDesign(id, { status: 'Completed' });
+      showToast('Project marked as Completed: Unlocked for other educators to access.', 'success');
+      container.innerHTML = renderMyDesignsView();
+      setupMyDesignsListeners(container, navigateToWorkspace, showToast);
+    });
+  });
+
+  // Quick Toggle WIP (Lock)
+  container.querySelectorAll('.toggle-wip-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const id = btn.getAttribute('data-id');
+      store.updateDesign(id, { status: 'Draft' });
+      showToast('Project reverted to Work In Progress: Locked from other viewers.', 'info');
+      container.innerHTML = renderMyDesignsView();
+      setupMyDesignsListeners(container, navigateToWorkspace, showToast);
+    });
+  });
+
+  // Toggle Visibility Button (Private vs Public)
+  container.querySelectorAll('.toggle-visibility-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const id = btn.getAttribute('data-id');
+      const design = store.getDesignById(id);
+      if (design) {
+        const isPub = design.visibility === 'public' || design.isPublic;
+        const nextVis = isPub ? 'private' : 'public';
+        store.updateDesign(id, { visibility: nextVis, isPublic: !isPub });
+        showToast(nextVis === 'public' ? 'Project is now Public: Other educators can view this once completed.' : 'Project is now Private: Restricted strictly to you.', 'info');
+        container.innerHTML = renderMyDesignsView();
+        setupMyDesignsListeners(container, navigateToWorkspace, showToast);
+      }
+    });
+  });
+
+  // Visibility Filter Dropdown
+  container.querySelector('#designs-visibility-filter')?.addEventListener('change', (e) => {
+    selectedVisibilityFilter = e.target.value;
+    container.innerHTML = renderMyDesignsView();
+    setupMyDesignsListeners(container, navigateToWorkspace, showToast);
+  });
+
+  // Send Project Update Email Button
+  container.querySelectorAll('.email-btn').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      const id = btn.getAttribute('data-email-id');
+      const design = store.getDesignById(id);
+      if (design) {
+        const { openProjectEmailModal } = await import('./outputWorkspace.js');
+        openProjectEmailModal(design, showToast);
+      }
     });
   });
 

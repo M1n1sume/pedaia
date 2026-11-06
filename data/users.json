@@ -3,10 +3,12 @@
     "id": "usr_admin_m1n1sume",
     "username": "M1n1sume",
     "email": "admin@pedaia.internal",
-    "passwordHash": null,
+    "passwordHash": "3886f5eabb8c4aff80e8ed3007e6c51283241f53a6e250a7cadc390c4018c34476738efc90c759251c074edbdbe52ca9c10173604f4a85ac32a9b9b911cb3d78",
     "role": "admin",
-    "createdAt": "2026-11-06T22:26:29.144Z",
-    "updatedAt": "2026-11-06T22:26:29.144Z",
-    "isInitialized": false
+    "createdAt": "2026-11-06T22:59:09.330Z",
+    "updatedAt": "2026-11-06T23:07:20.260Z",
+    "isInitialized": true,
+    "salt": "76acdae74f45ca56bd8eb1f49c3477a5",
+    "lastLogin": "2026-11-06T23:22:29.206Z"
   }
 ]

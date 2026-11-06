@@ -82,6 +82,7 @@ export function openEducatorReviewModal(design, onSaveCallback) {
   const currentScore = design.reviewScore || Object.values(existingChecks).filter(Boolean).length;
   const currentNotes = design.reviewNotes || '';
   const currentStatus = design.status || 'Draft';
+  const currentVisibility = design.visibility || (design.isPublic ? 'public' : 'private');
 
   const modalHtml = `
     <div id="review-modal-overlay" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
@@ -145,25 +146,69 @@ export function openEducatorReviewModal(design, onSaveCallback) {
             <textarea id="review-notes-input" rows="3" class="w-full text-xs p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none" placeholder="Record classroom adaptations, student accommodation notes, or curricular considerations...">${currentNotes}</textarea>
           </div>
 
-          <!-- Status Selector -->
-          <div class="flex items-center justify-between pt-2">
-            <label class="text-xs font-semibold text-slate-700 dark:text-slate-300">Design Lifecycle State:</label>
-            <div class="flex items-center gap-3 flex-wrap">
-              <label class="inline-flex items-center gap-1.5 text-xs text-slate-600 dark:text-slate-400 cursor-pointer">
+          <!-- Status Selector & WIP Lock Policy Notice -->
+          <div class="pt-3 border-t border-slate-100 dark:border-slate-800 space-y-2">
+            <div class="flex items-center justify-between">
+              <label class="text-xs font-bold text-slate-850 dark:text-slate-200">Design Lifecycle State & Access Control:</label>
+              <span class="text-[11px] text-slate-500 dark:text-slate-400">WIP projects are locked to other users</span>
+            </div>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <label class="flex items-center gap-2 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer transition-colors ${currentStatus === 'Draft' ? 'bg-indigo-50/50 dark:bg-indigo-950/40 border-indigo-300 dark:border-indigo-800' : ''}">
                 <input type="radio" name="design-status" value="Draft" class="text-indigo-600" ${currentStatus === 'Draft' ? 'checked' : ''}>
-                <span>Draft</span>
+                <div>
+                  <span class="text-xs font-semibold text-slate-800 dark:text-slate-200 block">🔒 Draft (WIP)</span>
+                  <span class="text-[10px] text-slate-400 block">Locked — visible only to you</span>
+                </div>
               </label>
-              <label class="inline-flex items-center gap-1.5 text-xs text-slate-600 dark:text-slate-400 cursor-pointer">
+
+              <label class="flex items-center gap-2 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer transition-colors ${currentStatus === 'Output Generated' ? 'bg-indigo-50/50 dark:bg-indigo-950/40 border-indigo-300 dark:border-indigo-800' : ''}">
                 <input type="radio" name="design-status" value="Output Generated" class="text-indigo-600" ${currentStatus === 'Output Generated' ? 'checked' : ''}>
-                <span>Output Ready</span>
+                <div>
+                  <span class="text-xs font-semibold text-slate-800 dark:text-slate-200 block">🔒 Output Ready (WIP)</span>
+                  <span class="text-[10px] text-slate-400 block">Locked — drafting & editing</span>
+                </div>
               </label>
-              <label class="inline-flex items-center gap-1.5 text-xs text-emerald-700 dark:text-emerald-400 font-medium cursor-pointer">
+
+              <label class="flex items-center gap-2 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer transition-colors ${currentStatus === 'Reviewed' || currentStatus === 'Verified' ? 'bg-emerald-50/50 dark:bg-emerald-950/40 border-emerald-300 dark:border-emerald-800' : ''}">
                 <input type="radio" name="design-status" value="Reviewed" class="text-emerald-600" ${currentStatus === 'Reviewed' || currentStatus === 'Verified' ? 'checked' : ''}>
-                <span>Reviewed (Passed Quality Audit)</span>
+                <div>
+                  <span class="text-xs font-semibold text-emerald-800 dark:text-emerald-300 block">🔒 Reviewed (WIP Verified)</span>
+                  <span class="text-[10px] text-emerald-600 dark:text-emerald-400 block">Passed audit, still locked as WIP</span>
+                </div>
               </label>
-              <label class="inline-flex items-center gap-1.5 text-xs text-indigo-700 dark:text-indigo-400 font-medium cursor-pointer">
-                <input type="radio" name="design-status" value="Completed" class="text-indigo-600" ${currentStatus === 'Completed' ? 'checked' : ''}>
-                <span>Completed</span>
+
+              <label class="flex items-center gap-2 p-2.5 rounded-xl border border-emerald-300 dark:border-emerald-800/80 bg-emerald-50/70 dark:bg-emerald-950/40 hover:bg-emerald-100/60 cursor-pointer transition-colors">
+                <input type="radio" name="design-status" value="Completed" class="text-emerald-600" ${currentStatus === 'Completed' ? 'checked' : ''}>
+                <div>
+                  <span class="text-xs font-bold text-emerald-900 dark:text-emerald-200 block">✓ Completed (Unlocked)</span>
+                  <span class="text-[10px] text-emerald-700 dark:text-emerald-400 block">Finalized — other educators can access</span>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Project Visibility Option (Private or Public) -->
+          <div class="pt-3 border-t border-slate-100 dark:border-slate-800 space-y-2">
+            <div class="flex items-center justify-between">
+              <label class="text-xs font-bold text-slate-850 dark:text-slate-200">Project Visibility Option:</label>
+              <span class="text-[11px] text-slate-500 dark:text-slate-400">Choose who can access this project</span>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <label class="flex items-center gap-2 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer transition-colors ${currentVisibility === 'private' ? 'bg-slate-100/70 dark:bg-slate-800/80 border-slate-400' : ''}">
+                <input type="radio" name="design-visibility" value="private" class="text-indigo-600" ${currentVisibility === 'private' ? 'checked' : ''}>
+                <div>
+                  <span class="text-xs font-semibold text-slate-800 dark:text-slate-200 block">🔒 Private (Only You)</span>
+                  <span class="text-[10px] text-slate-500 block">Personal instructional asset</span>
+                </div>
+              </label>
+
+              <label class="flex items-center gap-2 p-2.5 rounded-xl border border-blue-200 dark:border-blue-900/60 hover:bg-blue-50/50 dark:hover:bg-blue-950/40 cursor-pointer transition-colors ${currentVisibility === 'public' ? 'bg-blue-50/80 dark:bg-blue-950/50 border-blue-400' : ''}">
+                <input type="radio" name="design-visibility" value="public" class="text-blue-600" ${currentVisibility === 'public' ? 'checked' : ''}>
+                <div>
+                  <span class="text-xs font-semibold text-blue-900 dark:text-blue-200 block">🌐 Public (Community)</span>
+                  <span class="text-[10px] text-blue-600 dark:text-blue-400 block">Visible to other educators when Completed</span>
+                </div>
               </label>
             </div>
           </div>
@@ -224,12 +269,15 @@ export function openEducatorReviewModal(design, onSaveCallback) {
 
     const notes = document.getElementById('review-notes-input').value.trim();
     const selectedStatus = modal.querySelector('input[name="design-status"]:checked')?.value || (score >= 6 ? 'Reviewed' : 'Draft');
+    const selectedVisibility = modal.querySelector('input[name="design-visibility"]:checked')?.value || currentVisibility;
 
     const updates = {
       reviewChecks: checks,
       reviewScore: score,
       reviewNotes: notes,
-      status: selectedStatus
+      status: selectedStatus,
+      visibility: selectedVisibility,
+      isPublic: selectedVisibility === 'public'
     };
 
     store.updateDesign(design.id, updates);

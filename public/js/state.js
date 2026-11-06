@@ -693,25 +693,47 @@ class StateStore {
     if (!newPassword || newPassword.length < 6) {
       throw new Error('New password must be at least 6 characters long.');
     }
+
+    // Call backend API if session token is available
+    if (session.token) {
+      try {
+        const resp = await fetch('/api/auth/change-password', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.token}`
+          },
+          body: JSON.stringify({ oldPassword, newPassword })
+        });
+        const data = await resp.json();
+        if (!resp.ok) {
+          throw new Error(data.message || 'Failed to update password.');
+        }
+      } catch (err) {
+        if (err.message && !err.message.includes('fetch') && !err.message.includes('Failed to fetch')) {
+          throw err;
+        }
+        console.warn('[PEDAIA Auth] Change password API unreachable, falling back to local vault:', err.message);
+      }
+    }
+
     const users = this.getAuthUsers();
     const user = users[session.userId];
-    if (!user) {
-      throw new Error('User record not found.');
+    if (user && user.passwordHash && user.salt) {
+      const isValid = await verifyPassword(oldPassword, user.passwordHash, user.salt);
+      if (!isValid && !session.token) {
+        throw new Error('Current password does not match.');
+      }
+      const newSalt = generateSalt();
+      const newHash = await hashPassword(newPassword, newSalt);
+      user.salt = newSalt;
+      user.passwordHash = newHash;
+      users[user.id] = user;
+      localStorage.setItem(STORAGE_KEYS.AUTH_USERS, JSON.stringify(users));
+      this.recordVaultSnapshot(STORAGE_KEYS.AUTH_USERS, users);
     }
 
-    const isValid = await verifyPassword(oldPassword, user.passwordHash, user.salt);
-    if (!isValid) {
-      throw new Error('Current password does not match.');
-    }
-
-    const newSalt = generateSalt();
-    const newHash = await hashPassword(newPassword, newSalt);
-    user.salt = newSalt;
-    user.passwordHash = newHash;
-    users[user.id] = user;
-    localStorage.setItem(STORAGE_KEYS.AUTH_USERS, JSON.stringify(users));
-    this.recordVaultSnapshot(STORAGE_KEYS.AUTH_USERS, users);
-    this.recordAdminAudit('PASSWORD_CHANGED', { userId: user.id, username: user.username });
+    this.recordAdminAudit('PASSWORD_CHANGED', { userId: session.userId, username: session.username });
     return { success: true };
   }
 
@@ -766,6 +788,99 @@ class StateStore {
     });
   }
 
+  async fetchAdminActivity({ type = 'ALL', search = '', limit = 100, offset = 0 } = {}) {
+    const session = this.getAuthSession();
+    if (!session || !session.token || !this.isAdmin()) {
+      return { logs: this.getAdminAuditLogs(), total: 0, stats: { totalVisits: 0, uniqueVisitors: 0, totalLogins: 0, totalOutputs: 0, totalEmails: 0 } };
+    }
+
+    try {
+      const q = new URLSearchParams({ type, search, limit: String(limit), offset: String(offset) });
+      const resp = await fetch(`/api/admin/activity?${q.toString()}`, {
+        headers: { 'Authorization': `Bearer ${session.token}` }
+      });
+      if (!resp.ok) throw new Error('Failed to fetch admin telemetry');
+      return await resp.json();
+    } catch (e) {
+      console.warn('[PEDAIA Telemetry] Using local audit fallback:', e.message);
+      return { logs: this.getAdminAuditLogs(), total: 0, stats: { totalVisits: 0, uniqueVisitors: 0, totalLogins: 0, totalOutputs: 0, totalEmails: 0 } };
+    }
+  }
+
+  async clearAdminActivity() {
+    const session = this.getAuthSession();
+    if (!session || !session.token || !this.isAdmin()) return false;
+    try {
+      const resp = await fetch('/api/admin/activity/clear', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${session.token}` }
+      });
+      return resp.ok;
+    } catch {
+      return false;
+    }
+  }
+
+  async sendProjectEmailUpdate(designId, { eventType = 'PROJECT_UPDATE', recipient = null, details = {} } = {}) {
+    const session = this.getAuthSession();
+    if (!session || !session.token) {
+      throw new Error('Please sign in to send project email updates.');
+    }
+
+    const resp = await fetch(`/api/projects/${designId}/notify-email`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session.token}`
+      },
+      body: JSON.stringify({ eventType, recipient, details })
+    });
+    const data = await resp.json();
+    if (!resp.ok) {
+      throw new Error(data.message || 'Failed to dispatch email update.');
+    }
+    return data;
+  }
+
+  async getProjectEmailHistory(designId) {
+    const session = this.getAuthSession();
+    if (!session || !session.token) return [];
+    try {
+      const resp = await fetch(`/api/projects/${designId}/notifications`, {
+        headers: { 'Authorization': `Bearer ${session.token}` }
+      });
+      const data = await resp.json();
+      return data.notifications || [];
+    } catch {
+      return [];
+    }
+  }
+
+  async saveProjectNotificationSettings(designId, settings) {
+    const session = this.getAuthSession();
+    if (!session || !session.token) {
+      const design = this.getDesignById(designId);
+      if (design) {
+        design.notificationEmail = settings.notificationEmail;
+        design.emailNotifications = settings;
+        this.saveDesign(design);
+      }
+      return design;
+    }
+
+    const resp = await fetch(`/api/projects/${designId}/notification-settings`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session.token}`
+      },
+      body: JSON.stringify(settings)
+    });
+    const data = await resp.json();
+    if (!resp.ok) throw new Error(data.message || 'Failed to save settings.');
+    return data.design;
+  }
+
   // --- Designs ---
   getDesigns() {
     const activeUid = this.getCurrentUserId();
@@ -788,8 +903,104 @@ class StateStore {
   }
 
   getDesignById(id) {
-    const list = this.getDesigns();
-    return list.find(d => d.id === id) || null;
+    if (!id) return null;
+    const activeUid = this.getCurrentUserId();
+    const isAdmin = this.isAdmin();
+
+    let allList = [];
+    try {
+      const data = localStorage.getItem(STORAGE_KEYS.DESIGNS);
+      if (data) {
+        allList = JSON.parse(data);
+      }
+      if (!Array.isArray(allList) || allList.length === 0) {
+        const fromVault = this.recoverFromVault(STORAGE_KEYS.DESIGNS);
+        allList = Array.isArray(fromVault) ? fromVault : [];
+      }
+    } catch {
+      const fromVault = this.recoverFromVault(STORAGE_KEYS.DESIGNS);
+      allList = Array.isArray(fromVault) ? fromVault : [];
+    }
+
+    const design = allList.find(d => d && d.id === id);
+    if (!design) return null;
+
+    const isOwner = !design.userId || design.userId === activeUid;
+    const isCompleted = design.status === 'Completed';
+    const isPublic = design.visibility === 'public' || design.isPublic === true;
+
+    // Access evaluation for non-owners and non-admins:
+    if (!isOwner && !isAdmin) {
+      // 1. If still Work In Progress (not Completed), locked!
+      if (!isCompleted) {
+        return {
+          ...design,
+          isLockedToViewer: true,
+          lockReason: 'PROJECT_LOCKED_WIP',
+          output: '', // Blank out secret WIP content from unauthorized viewer
+          rawPrompt: ''
+        };
+      }
+      // 2. If Completed but Private, locked!
+      if (!isPublic) {
+        return {
+          ...design,
+          isLockedToViewer: true,
+          lockReason: 'PROJECT_PRIVATE',
+          output: '', // Blank out confidential private content
+          rawPrompt: ''
+        };
+      }
+    }
+
+    return {
+      ...design,
+      isLockedToViewer: false,
+      visibility: isPublic ? 'public' : 'private',
+      isPublic
+    };
+  }
+
+  getCompletedDesigns() {
+    let allList = [];
+    const activeUid = this.getCurrentUserId();
+    const isAdmin = this.isAdmin();
+    try {
+      allList = JSON.parse(localStorage.getItem(STORAGE_KEYS.DESIGNS) || '[]');
+      if (!Array.isArray(allList)) allList = [];
+    } catch {
+      allList = [];
+    }
+    return allList.filter(d => d && d.status === 'Completed' && (d.visibility === 'public' || d.isPublic || d.userId === activeUid || isAdmin));
+  }
+
+  isProjectLockedToOthers(design) {
+    if (!design) return false;
+    const isCompleted = design.status === 'Completed';
+    const isPublic = design.visibility === 'public' || design.isPublic === true;
+    return !isCompleted || !isPublic;
+  }
+
+  setDesignStatus(id, newStatus) {
+    return this.updateDesign(id, { status: newStatus });
+  }
+
+  setDesignVisibility(id, visibility) {
+    const isPub = visibility === 'public';
+    return this.updateDesign(id, { visibility: isPub ? 'public' : 'private', isPublic: isPub });
+  }
+
+  toggleDesignVisibility(id) {
+    const design = this.getDesignById(id);
+    if (!design) return null;
+    const currentVis = design.visibility || (design.isPublic ? 'public' : 'private');
+    const newVis = currentVis === 'public' ? 'private' : 'public';
+    return this.setDesignVisibility(id, newVis);
+  }
+
+  isProjectPrivate(design) {
+    if (!design) return true;
+    return design.visibility !== 'public' && !design.isPublic;
   }
 
   saveDesign(design) {
@@ -806,10 +1017,17 @@ class StateStore {
     const existingIndex = allList.findIndex(d => d.id === cleanId);
     const now = new Date().toISOString();
 
+    const visibility = design.visibility !== undefined
+      ? design.visibility
+      : (design.isPublic !== undefined ? (design.isPublic ? 'public' : 'private') : 'private');
+    const isPublic = visibility === 'public';
+
     const cleanDesign = {
       ...design,
       id: cleanId,
       userId: design.userId || activeUid,
+      visibility,
+      isPublic,
       updatedAt: now,
       createdAt: design.createdAt || now,
       versionHistory: design.versionHistory || [
@@ -874,9 +1092,19 @@ class StateStore {
       ].slice(0, 10); // keep last 10 versions
     }
 
+    let visibility = current.visibility || (current.isPublic ? 'public' : 'private');
+    if (updates.visibility !== undefined) {
+      visibility = updates.visibility;
+    } else if (updates.isPublic !== undefined) {
+      visibility = updates.isPublic ? 'public' : 'private';
+    }
+    const isPublic = visibility === 'public';
+
     const updated = {
       ...current,
       ...updates,
+      visibility,
+      isPublic,
       versionHistory,
       updatedAt: now
     };
@@ -885,6 +1113,20 @@ class StateStore {
     localStorage.setItem(STORAGE_KEYS.DESIGNS, JSON.stringify(allList));
     this.recordVaultSnapshot(STORAGE_KEYS.DESIGNS, allList);
     this.notify('designsUpdated', { list: this.getDesigns(), updatedId: id });
+
+    // Sync updated design to server if session exists
+    const session = this.getAuthSession();
+    if (session && session.token) {
+      fetch('/api/designs', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.token}`
+        },
+        body: JSON.stringify(updated)
+      }).catch(e => console.warn('[State] Server design update sync notice:', e.message));
+    }
+
     return updated;
   }
 
