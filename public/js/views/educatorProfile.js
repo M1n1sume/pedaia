@@ -121,6 +121,78 @@ export function generateAIPortfolioStatement(profile = {}) {
 // ----------------------------------------------------------------------------
 // 4. MAIN COMPONENT RENDERER
 // ----------------------------------------------------------------------------
+function renderAuthCredentialsBanner() {
+  const currentUser = store.getCurrentUser();
+  const isAdmin = store.isAdmin();
+
+  if (currentUser) {
+    return `
+      <div class="bg-white dark:bg-slate-850 rounded-2xl border border-slate-200/80 dark:border-slate-750 p-5 shadow-2xs space-y-3">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl ${isAdmin ? 'bg-amber-600 text-white' : 'bg-indigo-600 text-white'} flex items-center justify-center font-bold text-sm shadow-xs shrink-0">
+              ${isAdmin ? '👑' : currentUser.username.charAt(0).toUpperCase()}
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-mono font-bold text-slate-900 dark:text-white">
+                  ${escapeHtml(currentUser.username)}
+                </span>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${isAdmin ? 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 border border-amber-300 dark:border-amber-800' : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300'}">
+                  ${isAdmin ? '👑 System Administrator' : 'Educator Account'}
+                </span>
+              </div>
+              <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                Authentication status: <span class="text-emerald-600 dark:text-emerald-400 font-semibold">Active Session</span> • Isolated Workspace
+              </p>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2 flex-wrap">
+            ${isAdmin ? `
+              <button type="button" id="prof-go-to-admin-console-btn" class="px-3 py-1.5 text-xs font-bold text-amber-900 dark:text-amber-200 bg-amber-50 dark:bg-amber-950/70 hover:bg-amber-100 dark:hover:bg-amber-900/60 border border-amber-200 dark:border-amber-800 rounded-xl transition-all shadow-2xs flex items-center gap-1.5 cursor-pointer">
+                <span>👑 Admin Console</span>
+              </button>
+            ` : ''}
+            <button type="button" id="prof-change-password-btn" class="px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-750 border border-slate-200 dark:border-slate-700 rounded-xl transition-colors shadow-2xs flex items-center gap-1.5 cursor-pointer">
+              <svg class="w-3.5 h-3.5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+              <span>Change Password</span>
+            </button>
+            <button type="button" id="prof-auth-switch-btn" class="px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-750 border border-slate-200 dark:border-slate-700 rounded-xl transition-colors shadow-2xs cursor-pointer">
+              Switch Account
+            </button>
+          </div>
+        </div>
+
+        <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/70 dark:border-slate-700/60 text-[11px] text-slate-500 dark:text-slate-400">
+          <strong>Security Note:</strong> Your username and password are saved separately in your private authentication store. Your public Educator Profile fields below (Full Name, Title, Institution, Bio) represent your scholarly identity on generated materials.
+        </div>
+      </div>
+    `;
+  }
+
+  return `
+    <div class="bg-indigo-50/80 dark:bg-indigo-950/40 rounded-2xl border border-indigo-100 dark:border-indigo-800/60 p-5 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="text-base">🔐</span>
+          <h3 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">Account Authentication</h3>
+        </div>
+        <p class="text-xs text-slate-600 dark:text-slate-300 mt-1">
+          Sign in or create your personal account to ensure your instructional designs and outputs are securely saved to your private workspace.
+        </p>
+      </div>
+      <div class="flex items-center gap-2 shrink-0">
+        <button type="button" id="prof-auth-signin-btn" class="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-xs transition-colors cursor-pointer">
+          Sign In / Create Account
+        </button>
+      </div>
+    </div>
+  `;
+}
+
 export function renderEducatorProfileView(options = {}) {
   const currentProfile = (store.getEducatorProfile ? store.getEducatorProfile() : store.getSettings()?.educatorProfile) || { ...BLANK_EDUCATOR_PROFILE };
   const activeProfile = isEditMode && editDraft ? editDraft : currentProfile;
@@ -129,6 +201,10 @@ export function renderEducatorProfileView(options = {}) {
 
   return `
     <div id="educator-profile-protected-root" class="space-y-6">
+      
+      <!-- Authentication Credentials & Privacy Isolation Banner -->
+      ${renderAuthCredentialsBanner()}
+
       <div class="bg-white dark:bg-slate-850 rounded-2xl border border-slate-200/80 dark:border-slate-750 p-6 shadow-2xs space-y-6 transition-colors">
         
         ${isEditMode ? renderEditModeHeader() : renderViewModeHeader(activeProfile, completion)}
@@ -571,6 +647,105 @@ export function setupEducatorProfileListeners(container, { showToast, onProfileU
 
   container.querySelector('#prof-save-profile-btn')?.addEventListener('click', handleSave);
   container.querySelector('#prof-save-profile-btn-bottom')?.addEventListener('click', handleSave);
+
+  // Authentication & Security Handlers
+  container.querySelector('#prof-auth-signin-btn')?.addEventListener('click', async () => {
+    const { openAuthModal } = await import('./authModal.js');
+    openAuthModal({
+      showToast: toast,
+      onSuccess: () => reRender()
+    });
+  });
+
+  container.querySelector('#prof-auth-switch-btn')?.addEventListener('click', async () => {
+    const { openAuthModal } = await import('./authModal.js');
+    openAuthModal({
+      showToast: toast,
+      onSuccess: () => reRender()
+    });
+  });
+
+  container.querySelector('#prof-go-to-admin-console-btn')?.addEventListener('click', () => {
+    if (window.navigateTo) window.navigateTo('admin');
+  });
+
+  container.querySelector('#prof-change-password-btn')?.addEventListener('click', () => {
+    openChangePasswordModal(toast);
+  });
+}
+
+function openChangePasswordModal(toast) {
+  const modalHtml = `
+    <div id="change-password-modal-overlay" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
+      <div class="bg-white dark:bg-slate-900 rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+          <h3 class="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+            <span>🔐</span>
+            <span>Update Password</span>
+          </h3>
+          <button id="close-change-pass-modal-btn" class="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        </div>
+
+        <form id="change-pass-form" class="space-y-3.5 mt-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Current Password</label>
+            <input type="password" id="cp-current-pass" required class="w-full text-xs px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white outline-none focus:border-indigo-500" placeholder="Enter current password..." />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">New Password (min 6 chars)</label>
+            <input type="password" id="cp-new-pass" required minlength="6" class="w-full text-xs px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white outline-none focus:border-indigo-500" placeholder="Enter new password..." />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Confirm New Password</label>
+            <input type="password" id="cp-confirm-pass" required minlength="6" class="w-full text-xs px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white outline-none focus:border-indigo-500" placeholder="Confirm new password..." />
+          </div>
+
+          <div id="cp-error" class="hidden text-xs text-rose-600 p-2.5 rounded-xl bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-900"></div>
+
+          <div class="flex justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+            <button type="button" id="cp-cancel-btn" class="px-3.5 py-1.5 text-xs text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">Cancel</button>
+            <button type="submit" class="px-4 py-1.5 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl cursor-pointer">Save New Password</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  `;
+
+  const existing = document.getElementById('change-password-modal-overlay');
+  if (existing) existing.remove();
+
+  const div = document.createElement('div');
+  div.innerHTML = modalHtml;
+  document.body.appendChild(div.firstElementChild);
+
+  const m = document.getElementById('change-password-modal-overlay');
+  const close = () => m.remove();
+
+  document.getElementById('close-change-pass-modal-btn')?.addEventListener('click', close);
+  document.getElementById('cp-cancel-btn')?.addEventListener('click', close);
+
+  document.getElementById('change-pass-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const cur = document.getElementById('cp-current-pass')?.value;
+    const n = document.getElementById('cp-new-pass')?.value;
+    const c = document.getElementById('cp-confirm-pass')?.value;
+    const err = document.getElementById('cp-error');
+
+    if (n !== c) {
+      if (err) { err.textContent = 'New passwords do not match.'; err.classList.remove('hidden'); }
+      return;
+    }
+
+    try {
+      await store.changePassword({ oldPassword: cur, newPassword: n });
+      toast('✓ Password updated successfully!', 'success');
+      close();
+    } catch (ex) {
+      if (err) { err.textContent = ex.message || 'Failed to update password.'; err.classList.remove('hidden'); }
+    }
+  });
 }
 
 // Default export

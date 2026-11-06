@@ -7,8 +7,9 @@ import { SUBJECT_OPTIONS, EDUCATIONAL_LEVEL_OPTIONS } from './sharedContext.js';
 import { lmsService } from '../lmsService.js';
 import { openExtensionModal } from './extensionModal.js';
 import { renderEducatorProfileView, setupEducatorProfileListeners } from './educatorProfile.js';
+import { renderAdminDashboardView, setupAdminDashboardListeners } from './adminDashboard.js';
 
-let activeSettingsTab = 'ai-providers'; // 'general' | 'ai-providers' | 'lms' | 'prompt-preferences' | 'appearance' | 'privacy' | 'import-export' | 'extension'
+let activeSettingsTab = 'ai-providers'; // 'general' | 'ai-providers' | 'admin' | 'lms' | 'prompt-preferences' | 'appearance' | 'privacy' | 'import-export' | 'extension'
 
 export function setSettingsActiveTab(tab) {
   if (tab === 'account') tab = 'general';
@@ -31,6 +32,7 @@ export function renderSettingsView() {
   const activeApiKey = provSettings.apiKey || (activeProviderId === 'gemini' ? settings.apiKey : '');
   const activeModel = provSettings.model || activeProvider.defaultModel;
   const activeEndpoint = provSettings.endpoint || activeProvider.defaultEndpoint || '';
+  const isAdmin = store.isAdmin ? store.isAdmin() : false;
 
   const educator = (store.getEducatorProfile ? store.getEducatorProfile() : settings.educatorProfile) || {};
 
@@ -58,6 +60,11 @@ export function renderSettingsView() {
         <button class="settings-tab-nav px-3.5 py-2 rounded-xl font-bold whitespace-nowrap transition-all ${activeSettingsTab === 'general' ? 'bg-indigo-600 text-white shadow-2xs' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'}" data-tab="general">
           Account Profile
         </button>
+        ${isAdmin ? `
+          <button class="settings-tab-nav px-3.5 py-2 rounded-xl font-bold whitespace-nowrap transition-all ${activeSettingsTab === 'admin' ? 'bg-amber-600 text-white shadow-2xs' : 'text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/60'}" data-tab="admin">
+            👑 Admin Console
+          </button>
+        ` : ''}
         <button class="settings-tab-nav px-3.5 py-2 rounded-xl font-bold whitespace-nowrap transition-all ${activeSettingsTab === 'ai-providers' ? 'bg-indigo-600 text-white shadow-2xs' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'}" data-tab="ai-providers">
           AI Providers & Models (15)
         </button>
@@ -105,6 +112,8 @@ function renderTabContent(tab, ctx) {
     case 'general':
     case 'account':
       return renderGeneralAndAccountSettings(ctx);
+    case 'admin':
+      return renderAdminDashboardView();
     case 'lms':
       return renderLmsSettings(ctx);
     case 'prompt-preferences':
@@ -1062,6 +1071,13 @@ export function setupSettingsListeners(container, showToast) {
       setupSettingsListeners(container, showToast);
     }
   });
+
+  // Admin Dashboard Listeners (M1n1sume Console)
+  if (activeSettingsTab === 'admin') {
+    setupAdminDashboardListeners(container, (dest, param) => {
+      if (window.navigateTo) window.navigateTo(dest, param);
+    }, showToast);
+  }
   
   // Appearance Mode Toggles (Light / Dark / System)
   const handleModeChange = (mode) => {

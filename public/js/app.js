@@ -15,6 +15,8 @@ import { renderMyDesignsView, setupMyDesignsListeners } from './views/myDesigns.
 import { renderPromptLibraryView, setupPromptLibraryListeners } from './views/promptLibrary.js';
 import { renderSettingsView, setupSettingsListeners, setSettingsActiveTab } from './views/settings.js';
 import { renderAiOutputStudioView, setupAiOutputStudioListeners } from './views/aiOutputStudio.js';
+import { renderAdminDashboardView, setupAdminDashboardListeners } from './views/adminDashboard.js';
+import { openAuthModal } from './views/authModal.js';
 import { openExtensionModal } from './views/extensionModal.js';
 import { initCommandPalette, openCommandPalette } from './views/commandPalette.js';
 
@@ -32,7 +34,8 @@ const PAGE_TITLES = {
   'workspace': 'Output & Refinement Workspace',
   'designs': 'My Instructional Designs',
   'prompt-library': 'Prompt Library',
-  'settings': 'Settings & AI Setup'
+  'settings': 'Settings & AI Setup',
+  'admin': 'Admin Console & User Directory'
 };
 
 export function showToast(message, type = 'info') {
@@ -168,6 +171,10 @@ function renderCurrentView() {
     case 'settings':
       container.innerHTML = renderSettingsView();
       setupSettingsListeners(container, showToast);
+      break;
+    case 'admin':
+      container.innerHTML = renderAdminDashboardView();
+      setupAdminDashboardListeners(container, navigateTo, showToast);
       break;
     default:
       container.innerHTML = renderDashboardView();
@@ -439,9 +446,179 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (headerNameEl) headerNameEl.textContent = hasName ? prof.name : 'Educator';
   };
   updateSidebarProfile();
+
+  // Update header and mobile user authentication status
+  const updateAuthUI = () => {
+    const user = store.getCurrentUser();
+    const isAdmin = store.isAdmin();
+
+    const usernameDisplay = document.getElementById('header-username-display');
+    const roleBadge = document.getElementById('header-role-badge');
+    const avatar = document.getElementById('header-user-avatar');
+    const dropdownUsername = document.getElementById('dropdown-username-text');
+    const dropdownRole = document.getElementById('dropdown-role-text');
+    const adminMenuItem = document.getElementById('menu-item-admin');
+    const changePassItem = document.getElementById('menu-item-change-pass');
+    const logoutSection = document.getElementById('dropdown-logout-section');
+    const switchLabel = document.getElementById('menu-switch-label');
+
+    const mobileUsername = document.getElementById('mobile-username-text');
+    const mobileRole = document.getElementById('mobile-user-role');
+    const mobileAvatar = document.getElementById('mobile-user-avatar');
+    const mobileAuthAction = document.getElementById('mobile-auth-action-btn');
+    const mobileExtraActions = document.getElementById('mobile-auth-extra-actions');
+    const mobileAdminBtn = document.getElementById('mobile-admin-console-btn');
+
+    if (user && user.username) {
+      if (usernameDisplay) usernameDisplay.textContent = user.username;
+      if (dropdownUsername) dropdownUsername.textContent = user.username;
+      if (mobileUsername) mobileUsername.textContent = user.username;
+
+      if (isAdmin) {
+        if (roleBadge) {
+          roleBadge.textContent = 'Admin';
+          roleBadge.className = 'px-1.5 py-0.2 rounded text-[9px] font-bold uppercase tracking-wider bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 border border-amber-300 dark:border-amber-800';
+          roleBadge.classList.remove('hidden');
+        }
+        if (avatar) {
+          avatar.className = 'w-6 h-6 rounded-lg bg-amber-600 text-white flex items-center justify-center font-bold text-[10px] shadow-2xs shrink-0';
+          avatar.textContent = '👑';
+        }
+        if (mobileAvatar) {
+          mobileAvatar.className = 'w-7 h-7 rounded-lg bg-amber-600 text-white flex items-center justify-center font-bold text-xs';
+          mobileAvatar.textContent = '👑';
+        }
+        if (dropdownRole) dropdownRole.textContent = 'System Administrator';
+        if (mobileRole) mobileRole.textContent = 'System Administrator';
+        if (adminMenuItem) adminMenuItem.classList.remove('hidden');
+        if (mobileAdminBtn) mobileAdminBtn.classList.remove('hidden');
+      } else {
+        if (roleBadge) roleBadge.classList.add('hidden');
+        if (avatar) {
+          avatar.className = 'w-6 h-6 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-bold text-[10px] shadow-2xs shrink-0';
+          avatar.textContent = user.username.charAt(0).toUpperCase();
+        }
+        if (mobileAvatar) {
+          mobileAvatar.className = 'w-7 h-7 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-bold text-xs';
+          mobileAvatar.textContent = user.username.charAt(0).toUpperCase();
+        }
+        if (dropdownRole) dropdownRole.textContent = 'Educator Workspace';
+        if (mobileRole) mobileRole.textContent = 'Educator Workspace';
+        if (adminMenuItem) adminMenuItem.classList.add('hidden');
+        if (mobileAdminBtn) mobileAdminBtn.classList.add('hidden');
+      }
+
+      if (changePassItem) changePassItem.classList.remove('hidden');
+      if (logoutSection) logoutSection.classList.remove('hidden');
+      if (switchLabel) switchLabel.textContent = 'Switch Account';
+      if (mobileAuthAction) mobileAuthAction.textContent = 'Switch';
+      if (mobileExtraActions) mobileExtraActions.classList.remove('hidden');
+    } else {
+      if (usernameDisplay) usernameDisplay.textContent = 'Sign In';
+      if (roleBadge) roleBadge.classList.add('hidden');
+      if (avatar) {
+        avatar.className = 'w-6 h-6 rounded-lg bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center font-bold text-[10px] shadow-2xs shrink-0';
+        avatar.innerHTML = `<svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>`;
+      }
+      if (mobileAvatar) {
+        mobileAvatar.className = 'w-7 h-7 rounded-lg bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center font-bold text-xs';
+        mobileAvatar.textContent = '👤';
+      }
+      if (dropdownUsername) dropdownUsername.textContent = 'Guest User';
+      if (dropdownRole) dropdownRole.textContent = 'Not authenticated';
+      if (mobileUsername) mobileUsername.textContent = 'Guest User';
+      if (mobileRole) mobileRole.textContent = 'Not authenticated';
+      if (adminMenuItem) adminMenuItem.classList.add('hidden');
+      if (changePassItem) changePassItem.classList.add('hidden');
+      if (logoutSection) logoutSection.classList.add('hidden');
+      if (switchLabel) switchLabel.textContent = 'Sign In / Create Account';
+      if (mobileAuthAction) mobileAuthAction.textContent = 'Sign In';
+      if (mobileExtraActions) mobileExtraActions.classList.add('hidden');
+      if (mobileAdminBtn) mobileAdminBtn.classList.add('hidden');
+    }
+  };
+  updateAuthUI();
+
+  // User dropdown toggle
+  const userBtn = document.getElementById('header-user-btn');
+  const userDropdown = document.getElementById('header-user-dropdown');
+  userBtn?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    userDropdown?.classList.toggle('hidden');
+  });
+  document.addEventListener('click', (e) => {
+    if (!userDropdown?.contains(e.target) && !userBtn?.contains(e.target)) {
+      userDropdown?.classList.add('hidden');
+    }
+  });
+
+  document.getElementById('menu-item-profile')?.addEventListener('click', () => {
+    userDropdown?.classList.add('hidden');
+    navigateTo('settings', 'general');
+  });
+
+  document.getElementById('menu-item-admin')?.addEventListener('click', () => {
+    userDropdown?.classList.add('hidden');
+    navigateTo('admin');
+  });
+
+  document.getElementById('menu-item-change-pass')?.addEventListener('click', () => {
+    userDropdown?.classList.add('hidden');
+    navigateTo('settings', 'general');
+  });
+
+  document.getElementById('menu-item-switch-account')?.addEventListener('click', () => {
+    userDropdown?.classList.add('hidden');
+    openAuthModal({
+      showToast,
+      onSuccess: () => {
+        updateAuthUI();
+        updateSidebarProfile();
+        renderCurrentView();
+      }
+    });
+  });
+
+  document.getElementById('menu-item-logout')?.addEventListener('click', () => {
+    userDropdown?.classList.add('hidden');
+    store.logoutUser();
+    showToast('✓ Successfully signed out of PEDAIA.', 'info');
+    updateAuthUI();
+    updateSidebarProfile();
+    renderCurrentView();
+  });
+
+  // Mobile drawer auth actions
+  document.getElementById('mobile-auth-action-btn')?.addEventListener('click', () => {
+    closeMobileSidebar();
+    openAuthModal({
+      showToast,
+      onSuccess: () => {
+        updateAuthUI();
+        updateSidebarProfile();
+        renderCurrentView();
+      }
+    });
+  });
+
+  document.getElementById('mobile-admin-console-btn')?.addEventListener('click', () => {
+    closeMobileSidebar();
+    navigateTo('admin');
+  });
+
+  document.getElementById('mobile-logout-btn')?.addEventListener('click', () => {
+    closeMobileSidebar();
+    store.logoutUser();
+    showToast('✓ Successfully signed out.', 'info');
+    updateAuthUI();
+    updateSidebarProfile();
+    renderCurrentView();
+  });
+
   store.subscribe((evt) => {
-    if (evt === 'settingsUpdated' || evt === 'profileUpdated' || evt === 'userSwitched') {
+    if (evt === 'settingsUpdated' || evt === 'profileUpdated' || evt === 'userSwitched' || evt === 'sessionChanged') {
       updateSidebarProfile();
+      updateAuthUI();
       updateApiStatusIndicator();
       updateHeaderPalette();
     }

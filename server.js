@@ -51,6 +51,18 @@ const server = http.createServer(async (req, res) => {
 
   // API Routes
   if (pathname.startsWith('/api/')) {
+    if (pathname === '/api/auth/info' && req.method === 'GET') {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({
+        authModel: 'client-secure-salted-sha256',
+        adminAccount: 'M1n1sume',
+        multiUserSupported: true,
+        dataIsolation: 'per-user',
+        serverTime: new Date().toISOString()
+      }));
+      return;
+    }
+
     if (pathname === '/api/status' && req.method === 'GET') {
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({

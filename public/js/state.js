@@ -1,6 +1,7 @@
 // PEDAIA Central State Management with LocalStorage Persistence
 import { INITIAL_SAVED_DESIGNS, INITIAL_PROMPT_TEMPLATES } from './sampleData.js';
 import { applyThemeMode, getThemeMode, getResolvedTheme, THEME_MODES } from './palette.js';
+import { hashPassword, verifyPassword, generateSalt } from './cryptoUtils.js';
 
 const STORAGE_KEYS = {
   DESIGNS: 'pedaia_saved_designs_v1',
@@ -17,7 +18,10 @@ const STORAGE_KEYS = {
   WEEKLY_SCHEDULES: 'pedaia_weekly_schedules_v1',
   STANDARDS: 'pedaia_curriculum_standards_v1',
   INTEGRITY_VAULT: 'pedaia_integrity_vault_v1',
-  OUTPUTS: 'pedaia_ai_outputs_v1'
+  OUTPUTS: 'pedaia_ai_outputs_v1',
+  AUTH_USERS: 'pedaia_auth_users_v1',
+  AUTH_SESSION: 'pedaia_auth_session_v1',
+  ADMIN_AUDIT: 'pedaia_admin_audit_v1'
 };
 
 export const BLANK_EDUCATOR_PROFILE = Object.freeze({
@@ -178,6 +182,9 @@ class StateStore {
     if (!localStorage.getItem(STORAGE_KEYS.SETTINGS)) {
       localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(DEFAULT_SETTINGS));
     }
+
+    // Initialize Auth Store & Admin M1n1sume
+    this.initAuthStore();
   }
 
   // --- Data Integrity & Disaster Recovery Vault ---
@@ -225,23 +232,375 @@ class StateStore {
     }
   }
 
+  // =========================================================================
+  // --- Authentication, Multi-User, and Administrative Atelier Subsystem ---
+  // =========================================================================
+
+  initAuthStore() {
+    if (typeof localStorage === 'undefined') return;
+    try {
+      const rawUsers = localStorage.getItem(STORAGE_KEYS.AUTH_USERS);
+      let users = rawUsers ? JSON.parse(rawUsers) : null;
+      if (!users || typeof users !== 'object' || Array.isArray(users)) {
+        users = {};
+      }
+
+      // Seed Administrator M1n1sume if not yet existing
+      if (!users['usr_m1n1sume']) {
+        users['usr_m1n1sume'] = {
+          id: 'usr_m1n1sume',
+          username: 'M1n1sume',
+          role: 'admin',
+          passwordHash: null,
+          salt: generateSalt(),
+          isInitialized: false,
+          createdAt: new Date().toISOString(),
+          lastLogin: null
+        };
+        localStorage.setItem(STORAGE_KEYS.AUTH_USERS, JSON.stringify(users));
+        this.recordVaultSnapshot(STORAGE_KEYS.AUTH_USERS, users);
+      }
+
+      // Restore session if active
+      const rawSession = localStorage.getItem(STORAGE_KEYS.AUTH_SESSION);
+      if (rawSession) {
+        try {
+          const session = JSON.parse(rawSession);
+          if (session && session.userId && users[session.userId]) {
+            localStorage.setItem(STORAGE_KEYS.ACTIVE_USER, session.userId);
+          }
+        } catch {}
+      }
+    } catch (e) {
+      console.warn('Auth store init warning:', e);
+    }
+  }
+
+  getAuthUsers() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEYS.AUTH_USERS);
+      if (!raw) return {};
+      const users = JSON.parse(raw);
+      return (users && typeof users === 'object') ? users : {};
+    } catch {
+      return {};
+    }
+  }
+
+  getAuthSession() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEYS.AUTH_SESSION);
+      if (!raw) return null;
+      const session = JSON.parse(raw);
+      return (session && session.userId) ? session : null;
+    } catch {
+      return null;
+    }
+  }
+
+  getCurrentUser() {
+    const session = this.getAuthSession();
+    if (!session) return null;
+    const users = this.getAuthUsers();
+    const user = users[session.userId];
+    return {
+      userId: session.userId,
+      username: session.username,
+      role: session.role || 'educator',
+      isInitialized: user ? user.isInitialized !== false : true,
+      loginTime: session.loginTime
+    };
+  }
+
+  isAuthenticated() {
+    const session = this.getAuthSession();
+    return Boolean(session && session.userId);
+  }
+
+  isAdmin() {
+    const user = this.getCurrentUser();
+    return Boolean(user && (user.role === 'admin' || user.username?.toLowerCase() === 'm1n1sume'));
+  }
+
+  isM1n1sumeInitialized() {
+    const users = this.getAuthUsers();
+    const admin = users['usr_m1n1sume'];
+    return Boolean(admin && admin.isInitialized && admin.passwordHash);
+  }
+
+  async setupAdminPassword(password) {
+    if (!password || typeof password !== 'string') {
+      throw new Error('Master password is required.');
+    }
+    const cleanPass = password.trim();
+    if (cleanPass.length < 4) {
+      throw new Error('Master administrator password must be at least 4 characters.');
+    }
+
+    const users = this.getAuthUsers();
+    let admin = users['usr_m1n1sume'];
+    if (!admin) {
+      admin = {
+        id: 'usr_m1n1sume',
+        username: 'M1n1sume',
+        role: 'admin',
+        createdAt: new Date().toISOString()
+      };
+    }
+
+    const salt = generateSalt();
+    const hash = await hashPassword(cleanPass, salt);
+    admin.passwordHash = hash;
+    admin.salt = salt;
+    admin.isInitialized = true;
+    admin.lastLogin = new Date().toISOString();
+    users['usr_m1n1sume'] = admin;
+
+    localStorage.setItem(STORAGE_KEYS.AUTH_USERS, JSON.stringify(users));
+    this.recordVaultSnapshot(STORAGE_KEYS.AUTH_USERS, users);
+
+    const session = {
+      userId: admin.id,
+      username: admin.username,
+      role: 'admin',
+      token: 'sess_' + Date.now(),
+      loginTime: admin.lastLogin
+    };
+    localStorage.setItem(STORAGE_KEYS.AUTH_SESSION, JSON.stringify(session));
+    localStorage.setItem(STORAGE_KEYS.ACTIVE_USER, admin.id);
+
+    this.recordAdminAudit('ADMIN_PASSWORD_INITIALIZED', { username: 'M1n1sume' });
+    this.notify('sessionChanged', session);
+    this.notify('userSwitched', { userId: admin.id, username: admin.username, role: 'admin' });
+    return { success: true, user: admin, session };
+  }
+
+  async registerUser({ username, password, initialName = '' }) {
+    if (!username || typeof username !== 'string') {
+      throw new Error('Username is required.');
+    }
+    const cleanUsername = username.trim();
+    if (cleanUsername.length < 3 || cleanUsername.length > 30) {
+      throw new Error('Username must be between 3 and 30 characters.');
+    }
+    if (!/^[a-zA-Z0-9_.-]+$/.test(cleanUsername)) {
+      throw new Error('Username may only contain letters, numbers, underscores, hyphens, and periods.');
+    }
+    if (!password || password.length < 6) {
+      throw new Error('Password must be at least 6 characters.');
+    }
+
+    const users = this.getAuthUsers();
+    const exists = Object.values(users).some(u => u && u.username && u.username.toLowerCase() === cleanUsername.toLowerCase());
+    if (exists) {
+      throw new Error(`The username "${cleanUsername}" is already registered. Please choose another username or log in.`);
+    }
+
+    const isReservedAdmin = cleanUsername.toLowerCase() === 'm1n1sume';
+    const userId = isReservedAdmin ? 'usr_m1n1sume' : ('usr_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7));
+    const salt = generateSalt();
+    const hash = await hashPassword(password, salt);
+
+    const newUser = {
+      id: userId,
+      username: cleanUsername,
+      role: isReservedAdmin ? 'admin' : 'educator',
+      passwordHash: hash,
+      salt: salt,
+      isInitialized: true,
+      createdAt: new Date().toISOString(),
+      lastLogin: new Date().toISOString()
+    };
+
+    users[newUser.id] = newUser;
+    localStorage.setItem(STORAGE_KEYS.AUTH_USERS, JSON.stringify(users));
+    this.recordVaultSnapshot(STORAGE_KEYS.AUTH_USERS, users);
+
+    // Initialize Educator Profile: strictly separated from authentication credentials
+    const newProfile = {
+      ...BLANK_EDUCATOR_PROFILE,
+      name: initialName ? initialName.trim() : ''
+    };
+    this.saveEducatorProfile(newProfile, newUser.id);
+
+    const session = {
+      userId: newUser.id,
+      username: newUser.username,
+      role: newUser.role,
+      token: 'sess_' + Date.now(),
+      loginTime: newUser.lastLogin
+    };
+    localStorage.setItem(STORAGE_KEYS.AUTH_SESSION, JSON.stringify(session));
+    localStorage.setItem(STORAGE_KEYS.ACTIVE_USER, newUser.id);
+
+    this.recordAdminAudit('USER_REGISTERED', { userId: newUser.id, username: newUser.username });
+    this.notify('sessionChanged', session);
+    this.notify('userSwitched', { userId: newUser.id, username: newUser.username, role: newUser.role });
+    return { success: true, user: newUser, session };
+  }
+
+  async loginUser({ username, password }) {
+    if (!username || typeof username !== 'string') {
+      throw new Error('Username is required.');
+    }
+    const cleanUsername = username.trim();
+    const users = this.getAuthUsers();
+
+    const user = Object.values(users).find(u => u && u.username && u.username.toLowerCase() === cleanUsername.toLowerCase());
+    if (!user) {
+      throw new Error(`Account "${cleanUsername}" not found. Please verify your username or sign up for a new account.`);
+    }
+
+    // Special check for M1n1sume first-time initialization
+    if (user.username.toLowerCase() === 'm1n1sume' && (!user.isInitialized || !user.passwordHash)) {
+      return {
+        success: false,
+        requiresAdminSetup: true,
+        username: user.username,
+        message: 'Welcome M1n1sume. Please create your master administrator password to initialize your account.'
+      };
+    }
+
+    if (!password) {
+      throw new Error('Password is required.');
+    }
+
+    const isValid = await verifyPassword(password, user.passwordHash, user.salt);
+    if (!isValid) {
+      throw new Error('Incorrect password. Please try again.');
+    }
+
+    user.lastLogin = new Date().toISOString();
+    users[user.id] = user;
+    localStorage.setItem(STORAGE_KEYS.AUTH_USERS, JSON.stringify(users));
+
+    const session = {
+      userId: user.id,
+      username: user.username,
+      role: user.role || 'educator',
+      token: 'sess_' + Date.now(),
+      loginTime: user.lastLogin
+    };
+    localStorage.setItem(STORAGE_KEYS.AUTH_SESSION, JSON.stringify(session));
+    localStorage.setItem(STORAGE_KEYS.ACTIVE_USER, user.id);
+
+    this.recordAdminAudit('USER_LOGGED_IN', { userId: user.id, username: user.username });
+    this.notify('sessionChanged', session);
+    this.notify('userSwitched', { userId: user.id, username: user.username, role: session.role });
+    return { success: true, user, session };
+  }
+
+  logoutUser() {
+    const session = this.getAuthSession();
+    const prevUsername = session?.username;
+    localStorage.removeItem(STORAGE_KEYS.AUTH_SESSION);
+    localStorage.setItem(STORAGE_KEYS.ACTIVE_USER, 'usr_guest');
+
+    this.recordAdminAudit('USER_LOGGED_OUT', { username: prevUsername });
+    this.notify('sessionChanged', null);
+    this.notify('userSwitched', { userId: 'usr_guest', username: 'Guest' });
+    return { success: true };
+  }
+
+  async changePassword({ oldPassword, newPassword }) {
+    const session = this.getAuthSession();
+    if (!session || !session.userId) {
+      throw new Error('You must be signed in to change your password.');
+    }
+    if (!newPassword || newPassword.length < 6) {
+      throw new Error('New password must be at least 6 characters long.');
+    }
+    const users = this.getAuthUsers();
+    const user = users[session.userId];
+    if (!user) {
+      throw new Error('User record not found.');
+    }
+
+    const isValid = await verifyPassword(oldPassword, user.passwordHash, user.salt);
+    if (!isValid) {
+      throw new Error('Current password does not match.');
+    }
+
+    const newSalt = generateSalt();
+    const newHash = await hashPassword(newPassword, newSalt);
+    user.salt = newSalt;
+    user.passwordHash = newHash;
+    users[user.id] = user;
+    localStorage.setItem(STORAGE_KEYS.AUTH_USERS, JSON.stringify(users));
+    this.recordVaultSnapshot(STORAGE_KEYS.AUTH_USERS, users);
+    this.recordAdminAudit('PASSWORD_CHANGED', { userId: user.id, username: user.username });
+    return { success: true };
+  }
+
+  recordAdminAudit(action, details = {}) {
+    if (typeof localStorage === 'undefined') return;
+    try {
+      const raw = localStorage.getItem(STORAGE_KEYS.ADMIN_AUDIT);
+      const audit = raw ? JSON.parse(raw) : [];
+      audit.unshift({
+        id: 'aud-' + Date.now(),
+        action,
+        details,
+        timestamp: new Date().toISOString()
+      });
+      localStorage.setItem(STORAGE_KEYS.ADMIN_AUDIT, JSON.stringify(audit.slice(0, 50)));
+    } catch {}
+  }
+
+  getAdminAuditLogs() {
+    if (!this.isAdmin()) return [];
+    try {
+      const raw = localStorage.getItem(STORAGE_KEYS.ADMIN_AUDIT);
+      return raw ? JSON.parse(raw) : [];
+    } catch {
+      return [];
+    }
+  }
+
+  getAllUsersForAdmin() {
+    if (!this.isAdmin()) return [];
+    const users = this.getAuthUsers();
+    const profiles = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_PROFILES) || '{}');
+    const allDesigns = JSON.parse(localStorage.getItem(STORAGE_KEYS.DESIGNS) || '[]');
+    const allOutputs = JSON.parse(localStorage.getItem(STORAGE_KEYS.OUTPUTS) || '[]');
+
+    return Object.values(users).map(u => {
+      const p = profiles[u.id] || {};
+      const userDesigns = allDesigns.filter(d => d.userId === u.id);
+      const userOutputs = allOutputs.filter(o => o.userId === u.id);
+      return {
+        id: u.id,
+        username: u.username,
+        role: u.role || 'educator',
+        isInitialized: u.isInitialized !== false,
+        createdAt: u.createdAt,
+        lastLogin: u.lastLogin,
+        profileName: p.name || '',
+        institution: p.institution || '',
+        designsCount: userDesigns.length,
+        outputsCount: userOutputs.length
+      };
+    });
+  }
+
   // --- Designs ---
   getDesigns() {
+    const activeUid = this.getCurrentUserId();
     try {
       const data = localStorage.getItem(STORAGE_KEYS.DESIGNS);
+      let list = [];
       if (!data) {
         const fromVault = this.recoverFromVault(STORAGE_KEYS.DESIGNS);
-        return Array.isArray(fromVault) ? fromVault.filter(d => d && !String(d.id || '').startsWith('sample-')) : [];
+        list = Array.isArray(fromVault) ? fromVault.filter(d => d && !String(d.id || '').startsWith('sample-')) : [];
+      } else {
+        const parsed = JSON.parse(data);
+        list = Array.isArray(parsed) ? parsed.filter(d => d && !String(d.id || '').startsWith('sample-')) : [];
       }
-      const list = JSON.parse(data);
-      if (Array.isArray(list)) {
-        return list.filter(d => d && !String(d.id || '').startsWith('sample-'));
-      }
-      return [];
+      return list.filter(d => !d.userId || d.userId === activeUid);
     } catch (e) {
       console.warn('Non-destructive recovery for saved designs:', e);
       const fromVault = this.recoverFromVault(STORAGE_KEYS.DESIGNS);
-      return Array.isArray(fromVault) ? fromVault : [];
+      return Array.isArray(fromVault) ? fromVault.filter(d => !d.userId || d.userId === activeUid) : [];
     }
   }
 
@@ -251,14 +610,23 @@ class StateStore {
   }
 
   saveDesign(design) {
-    const list = this.getDesigns();
+    const activeUid = this.getCurrentUserId();
+    let allList = [];
+    try {
+      allList = JSON.parse(localStorage.getItem(STORAGE_KEYS.DESIGNS) || '[]');
+      if (!Array.isArray(allList)) allList = [];
+    } catch {
+      allList = [];
+    }
+
     const cleanId = design.id || ('des-' + Date.now() + '-' + Math.random().toString(36).substring(2, 7));
-    const existingIndex = list.findIndex(d => d.id === cleanId);
+    const existingIndex = allList.findIndex(d => d.id === cleanId);
     const now = new Date().toISOString();
 
     const cleanDesign = {
       ...design,
       id: cleanId,
+      userId: design.userId || activeUid,
       updatedAt: now,
       createdAt: design.createdAt || now,
       versionHistory: design.versionHistory || [
@@ -271,23 +639,29 @@ class StateStore {
     };
 
     if (existingIndex >= 0) {
-      list[existingIndex] = { ...list[existingIndex], ...cleanDesign };
+      allList[existingIndex] = { ...allList[existingIndex], ...cleanDesign };
     } else {
-      list.unshift(cleanDesign);
+      allList.unshift(cleanDesign);
     }
 
-    localStorage.setItem(STORAGE_KEYS.DESIGNS, JSON.stringify(list));
-    this.recordVaultSnapshot(STORAGE_KEYS.DESIGNS, list);
-    this.notify('designsUpdated', { list, activeId: cleanDesign.id });
+    localStorage.setItem(STORAGE_KEYS.DESIGNS, JSON.stringify(allList));
+    this.recordVaultSnapshot(STORAGE_KEYS.DESIGNS, allList);
+    this.notify('designsUpdated', { list: this.getDesigns(), activeId: cleanDesign.id });
     return cleanDesign;
   }
 
   updateDesign(id, updates) {
-    const list = this.getDesigns();
-    const index = list.findIndex(d => d.id === id);
+    let allList = [];
+    try {
+      allList = JSON.parse(localStorage.getItem(STORAGE_KEYS.DESIGNS) || '[]');
+      if (!Array.isArray(allList)) allList = [];
+    } catch {
+      allList = [];
+    }
+    const index = allList.findIndex(d => d.id === id);
     if (index === -1) return null;
 
-    const current = list[index];
+    const current = allList[index];
     const now = new Date().toISOString();
 
     // If output changed, record into version history
@@ -310,17 +684,25 @@ class StateStore {
       updatedAt: now
     };
 
-    list[index] = updated;
-    localStorage.setItem(STORAGE_KEYS.DESIGNS, JSON.stringify(list));
-    this.notify('designsUpdated', { list, updatedId: id });
+    allList[index] = updated;
+    localStorage.setItem(STORAGE_KEYS.DESIGNS, JSON.stringify(allList));
+    this.recordVaultSnapshot(STORAGE_KEYS.DESIGNS, allList);
+    this.notify('designsUpdated', { list: this.getDesigns(), updatedId: id });
     return updated;
   }
 
   deleteDesign(id) {
-    let list = this.getDesigns();
-    list = list.filter(d => d.id !== id);
-    localStorage.setItem(STORAGE_KEYS.DESIGNS, JSON.stringify(list));
-    this.notify('designsUpdated', { list, deletedId: id });
+    let allList = [];
+    try {
+      allList = JSON.parse(localStorage.getItem(STORAGE_KEYS.DESIGNS) || '[]');
+      if (!Array.isArray(allList)) allList = [];
+    } catch {
+      allList = [];
+    }
+    allList = allList.filter(d => d.id !== id);
+    localStorage.setItem(STORAGE_KEYS.DESIGNS, JSON.stringify(allList));
+    this.recordVaultSnapshot(STORAGE_KEYS.DESIGNS, allList);
+    this.notify('designsUpdated', { list: this.getDesigns(), deletedId: id });
     return true;
   }
 
@@ -447,6 +829,10 @@ class StateStore {
   // --- Protected Multi-User Educator Profile System ---
   getCurrentUserId() {
     try {
+      const session = this.getAuthSession();
+      if (session && session.userId) {
+        return session.userId;
+      }
       let uid = localStorage.getItem(STORAGE_KEYS.ACTIVE_USER);
       if (!uid) {
         uid = 'usr_default';
@@ -698,17 +1084,21 @@ class StateStore {
 
   // --- Dedicated AI Output Studio Outputs & Materials ---
   getOutputs() {
+    const activeUid = this.getCurrentUserId();
     try {
       const data = localStorage.getItem(STORAGE_KEYS.OUTPUTS);
+      let list = [];
       if (!data) {
         const fromVault = this.recoverFromVault(STORAGE_KEYS.OUTPUTS);
-        return Array.isArray(fromVault) ? fromVault : [];
+        list = Array.isArray(fromVault) ? fromVault : [];
+      } else {
+        const parsed = JSON.parse(data);
+        list = Array.isArray(parsed) ? parsed : [];
       }
-      const list = JSON.parse(data);
-      return Array.isArray(list) ? list : [];
+      return list.filter(o => !o.userId || o.userId === activeUid);
     } catch {
       const fromVault = this.recoverFromVault(STORAGE_KEYS.OUTPUTS);
-      return Array.isArray(fromVault) ? fromVault : [];
+      return Array.isArray(fromVault) ? fromVault.filter(o => !o.userId || o.userId === activeUid) : [];
     }
   }
 
@@ -718,34 +1108,49 @@ class StateStore {
   }
 
   saveOutput(output) {
-    const list = this.getOutputs();
+    const activeUid = this.getCurrentUserId();
+    let allList = [];
+    try {
+      allList = JSON.parse(localStorage.getItem(STORAGE_KEYS.OUTPUTS) || '[]');
+      if (!Array.isArray(allList)) allList = [];
+    } catch {
+      allList = [];
+    }
+
     const cleanId = output.id || ('out-' + Date.now() + '-' + Math.random().toString(36).substring(2, 7));
     const now = new Date().toISOString();
     const cleanOutput = {
       ...output,
       id: cleanId,
+      userId: output.userId || activeUid,
       updatedAt: now,
       createdAt: output.createdAt || now
     };
-    const idx = list.findIndex(o => o.id === cleanId);
+    const idx = allList.findIndex(o => o.id === cleanId);
     if (idx >= 0) {
-      list[idx] = { ...list[idx], ...cleanOutput };
+      allList[idx] = { ...allList[idx], ...cleanOutput };
     } else {
-      list.unshift(cleanOutput);
+      allList.unshift(cleanOutput);
     }
-    localStorage.setItem(STORAGE_KEYS.OUTPUTS, JSON.stringify(list));
-    this.recordVaultSnapshot(STORAGE_KEYS.OUTPUTS, list);
+    localStorage.setItem(STORAGE_KEYS.OUTPUTS, JSON.stringify(allList));
+    this.recordVaultSnapshot(STORAGE_KEYS.OUTPUTS, allList);
     this.recordMaterialGenerated();
-    this.notify('outputsUpdated', { list, activeId: cleanOutput.id });
+    this.notify('outputsUpdated', { list: this.getOutputs(), activeId: cleanOutput.id });
     return cleanOutput;
   }
 
   deleteOutput(id) {
-    let list = this.getOutputs();
-    list = list.filter(o => o.id !== id);
-    localStorage.setItem(STORAGE_KEYS.OUTPUTS, JSON.stringify(list));
-    this.recordVaultSnapshot(STORAGE_KEYS.OUTPUTS, list);
-    this.notify('outputsUpdated', { list });
+    let allList = [];
+    try {
+      allList = JSON.parse(localStorage.getItem(STORAGE_KEYS.OUTPUTS) || '[]');
+      if (!Array.isArray(allList)) allList = [];
+    } catch {
+      allList = [];
+    }
+    allList = allList.filter(o => o.id !== id);
+    localStorage.setItem(STORAGE_KEYS.OUTPUTS, JSON.stringify(allList));
+    this.recordVaultSnapshot(STORAGE_KEYS.OUTPUTS, allList);
+    this.notify('outputsUpdated', { list: this.getOutputs() });
   }
 
   duplicateOutput(id) {
