@@ -83,6 +83,23 @@ export function renderDashboardView() {
               </button>
 
             </div>
+
+            <!-- Dedicated Output Studio Hero Callout -->
+            <div class="mt-3.5 p-3.5 rounded-xl bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-950/80 dark:to-purple-950/80 border border-indigo-200/80 dark:border-indigo-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div class="flex items-center gap-2.5">
+                <span class="text-2xl">🎨</span>
+                <div>
+                  <div class="flex items-center gap-2">
+                    <span class="text-xs font-bold text-indigo-950 dark:text-white">AI Output Studio</span>
+                    <span class="px-1.5 py-0.2 rounded-full text-[9px] font-mono font-bold bg-indigo-600 text-white uppercase">Dedicated</span>
+                  </div>
+                  <span class="text-[11.5px] text-slate-600 dark:text-slate-300">Generate PowerPoint presentations, classroom posters, worksheets, flashcards & diagrams</span>
+                </div>
+              </div>
+              <button data-action="nav" data-dest="ai-output-studio" class="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white transition-colors shrink-0 shadow-2xs flex items-center gap-1.5">
+                <span>Launch Output Studio →</span>
+              </button>
+            </div>
           </div>
 
         </div>

@@ -14,6 +14,7 @@ import { renderOutputWorkspaceView, setupOutputWorkspaceListeners, setActiveWork
 import { renderMyDesignsView, setupMyDesignsListeners } from './views/myDesigns.js';
 import { renderPromptLibraryView, setupPromptLibraryListeners } from './views/promptLibrary.js';
 import { renderSettingsView, setupSettingsListeners, setSettingsActiveTab } from './views/settings.js';
+import { renderAiOutputStudioView, setupAiOutputStudioListeners } from './views/aiOutputStudio.js';
 import { openExtensionModal } from './views/extensionModal.js';
 import { initCommandPalette, openCommandPalette } from './views/commandPalette.js';
 
@@ -22,6 +23,8 @@ let isSidebarCollapsed = false;
 
 const PAGE_TITLES = {
   'dashboard': 'Dashboard',
+  'ai-output-studio': 'AI Output Studio',
+  'output-studio': 'AI Output Studio',
   'lesson-planning': 'AI Lesson Planner',
   'activity-design': 'AI Activity Designer',
   'questioning': 'AI Questioning Studio',
@@ -144,6 +147,11 @@ function renderCurrentView() {
     case 'differentiation':
       container.innerHTML = renderDifferentiationStudioView();
       setupDifferentiationStudioListeners(container, (id) => navigateTo('workspace', id), showToast, () => navigateTo('settings'));
+      break;
+    case 'ai-output-studio':
+    case 'output-studio':
+      container.innerHTML = renderAiOutputStudioView();
+      setupAiOutputStudioListeners(container, navigateTo, showToast);
       break;
     case 'workspace':
       container.innerHTML = renderOutputWorkspaceView();

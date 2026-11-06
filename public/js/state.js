@@ -16,7 +16,8 @@ const STORAGE_KEYS = {
   REFLECTIONS: 'pedaia_reflections_v1',
   WEEKLY_SCHEDULES: 'pedaia_weekly_schedules_v1',
   STANDARDS: 'pedaia_curriculum_standards_v1',
-  INTEGRITY_VAULT: 'pedaia_integrity_vault_v1'
+  INTEGRITY_VAULT: 'pedaia_integrity_vault_v1',
+  OUTPUTS: 'pedaia_ai_outputs_v1'
 };
 
 export const BLANK_EDUCATOR_PROFILE = Object.freeze({
@@ -155,6 +156,19 @@ class StateStore {
         }
       }
     } catch {}
+
+    // Safety: ensure AI outputs store exists without disrupting educator outputs
+    if (localStorage.getItem(STORAGE_KEYS.OUTPUTS) === null) {
+      const fromVault = this.recoverFromVault(STORAGE_KEYS.OUTPUTS);
+      localStorage.setItem(STORAGE_KEYS.OUTPUTS, JSON.stringify(Array.isArray(fromVault) ? fromVault : []));
+    } else {
+      try {
+        const existing = JSON.parse(localStorage.getItem(STORAGE_KEYS.OUTPUTS) || '[]');
+        if (Array.isArray(existing) && existing.length > 0) {
+          this.recordVaultSnapshot(STORAGE_KEYS.OUTPUTS, existing);
+        }
+      } catch {}
+    }
 
     // Ensure templates exist
     if (!localStorage.getItem(STORAGE_KEYS.TEMPLATES)) {
@@ -682,6 +696,71 @@ class StateStore {
     this.notify('projectsUpdated', { list });
   }
 
+  // --- Dedicated AI Output Studio Outputs & Materials ---
+  getOutputs() {
+    try {
+      const data = localStorage.getItem(STORAGE_KEYS.OUTPUTS);
+      if (!data) {
+        const fromVault = this.recoverFromVault(STORAGE_KEYS.OUTPUTS);
+        return Array.isArray(fromVault) ? fromVault : [];
+      }
+      const list = JSON.parse(data);
+      return Array.isArray(list) ? list : [];
+    } catch {
+      const fromVault = this.recoverFromVault(STORAGE_KEYS.OUTPUTS);
+      return Array.isArray(fromVault) ? fromVault : [];
+    }
+  }
+
+  getOutputById(id) {
+    const list = this.getOutputs();
+    return list.find(o => o.id === id) || null;
+  }
+
+  saveOutput(output) {
+    const list = this.getOutputs();
+    const cleanId = output.id || ('out-' + Date.now() + '-' + Math.random().toString(36).substring(2, 7));
+    const now = new Date().toISOString();
+    const cleanOutput = {
+      ...output,
+      id: cleanId,
+      updatedAt: now,
+      createdAt: output.createdAt || now
+    };
+    const idx = list.findIndex(o => o.id === cleanId);
+    if (idx >= 0) {
+      list[idx] = { ...list[idx], ...cleanOutput };
+    } else {
+      list.unshift(cleanOutput);
+    }
+    localStorage.setItem(STORAGE_KEYS.OUTPUTS, JSON.stringify(list));
+    this.recordVaultSnapshot(STORAGE_KEYS.OUTPUTS, list);
+    this.recordMaterialGenerated();
+    this.notify('outputsUpdated', { list, activeId: cleanOutput.id });
+    return cleanOutput;
+  }
+
+  deleteOutput(id) {
+    let list = this.getOutputs();
+    list = list.filter(o => o.id !== id);
+    localStorage.setItem(STORAGE_KEYS.OUTPUTS, JSON.stringify(list));
+    this.recordVaultSnapshot(STORAGE_KEYS.OUTPUTS, list);
+    this.notify('outputsUpdated', { list });
+  }
+
+  duplicateOutput(id) {
+    const original = this.getOutputById(id);
+    if (!original) return null;
+    const copy = {
+      ...JSON.parse(JSON.stringify(original)),
+      id: 'out-' + Date.now() + '-' + Math.random().toString(36).substring(2, 7),
+      title: `${original.title} (Copy)`,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    return this.saveOutput(copy);
+  }
+
   // --- Instructional Organizer & Checklists ---
   getChecklists() {
     try {
@@ -894,6 +973,7 @@ class StateStore {
   resetToDefaults() {
     localStorage.setItem(STORAGE_KEYS.DESIGNS, JSON.stringify([]));
     localStorage.setItem(STORAGE_KEYS.PROJECTS, JSON.stringify([]));
+    localStorage.setItem(STORAGE_KEYS.OUTPUTS, JSON.stringify([]));
     localStorage.setItem(STORAGE_KEYS.CHECKLISTS, JSON.stringify([]));
     localStorage.setItem(STORAGE_KEYS.CURRICULUM_MAPS, JSON.stringify([]));
     localStorage.setItem(STORAGE_KEYS.REFLECTIONS, JSON.stringify([]));

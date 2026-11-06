@@ -79,6 +79,7 @@ function getAvailableCommands() {
 
   const systemCommands = [
     // Studios
+    { id: 'nav-output-studio', category: 'Instructional Studios', icon: '🎨', title: 'AI Output Studio', subtitle: 'Generate PowerPoint presentations, posters, worksheets, flashcards & diagrams', action: () => safeNavigate('ai-output-studio') },
     { id: 'nav-lp', category: 'Instructional Studios', icon: '📖', title: 'AI Lesson Planner', subtitle: '5E, UbD, 4As, Direct Instruction, and Madeline Hunter models', action: () => safeNavigate('lesson-planning') },
     { id: 'nav-act', category: 'Instructional Studios', icon: '🔬', title: 'AI Activity Designer', subtitle: 'Guided inquiry, station rotations, and experiential designs', action: () => safeNavigate('activity-design') },
     { id: 'nav-quest', category: 'Instructional Studios', icon: '💡', title: 'AI Questioning Studio', subtitle: "Calibrated Bloom's Revised Taxonomy cognitive matrices", action: () => safeNavigate('questioning') },
