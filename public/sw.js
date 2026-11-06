@@ -1,12 +1,11 @@
 // PEDAIA Universal Service Worker for Multi-Device & Offline Accessibility
-const CACHE_NAME = 'pedaia-cache-v2';
+const CACHE_NAME = 'pedaia-cache-v4';
 const APP_SHELL = [
   './',
   './index.html',
   './favicon.svg',
   './manifest.json',
-  './css/styles.css',
-  './js/app.js'
+  './css/styles.css'
 ];
 
 self.addEventListener('install', (event) => {
@@ -58,7 +57,25 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Static Assets: Stale-While-Revalidate for instant loading on any network
+  // JavaScript files & HTML: Network-First so code updates take effect immediately
+  if (url.pathname.endsWith('.js') || url.pathname.endsWith('.html') || url.pathname === '/') {
+    event.respondWith(
+      fetch(event.request).then((networkResponse) => {
+        if (networkResponse && networkResponse.status === 200) {
+          const responseToCache = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, responseToCache);
+          });
+        }
+        return networkResponse;
+      }).catch(() => {
+        return caches.match(event.request);
+      })
+    );
+    return;
+  }
+
+  // Other Static Assets (fonts, images, styles): Stale-While-Revalidate
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       const fetchPromise = fetch(event.request).then((networkResponse) => {
@@ -70,7 +87,6 @@ self.addEventListener('fetch', (event) => {
         }
         return networkResponse;
       }).catch(() => {
-        // Return cached response if network fails
         return cachedResponse;
       });
 

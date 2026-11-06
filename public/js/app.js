@@ -95,16 +95,16 @@ export function navigateTo(route, param = null) {
       } else {
         isActive = true;
       }
-    } else if (navVal === route || (route === 'workspace' && navVal === 'designs')) {
+    } else if (navVal === route || (route === 'workspace' && navVal === 'designs') || ((route === 'ai-output-studio' || route === 'output-studio') && navVal === 'ai-output-studio')) {
       isActive = true;
     }
 
     if (isActive) {
       item.classList.add('active', 'bg-indigo-600', 'text-white', 'shadow-xs');
-      item.classList.remove('text-slate-600', 'dark:text-slate-300', 'hover:bg-slate-100', 'dark:hover:bg-slate-800');
+      item.classList.remove('text-slate-600', 'dark:text-slate-300', 'text-slate-700', 'dark:text-slate-200', 'text-indigo-700', 'dark:text-indigo-300', 'hover:bg-slate-100', 'dark:hover:bg-slate-800', 'bg-indigo-50/90', 'dark:bg-indigo-950/70', 'border-indigo-200/80', 'dark:border-indigo-800');
     } else {
-      item.classList.remove('active', 'bg-indigo-600', 'text-white', 'shadow-xs');
-      item.classList.add('text-slate-600', 'dark:text-slate-300', 'hover:bg-slate-100', 'dark:hover:bg-slate-800');
+      item.classList.remove('active', 'bg-indigo-600', 'text-white', 'shadow-xs', 'bg-indigo-50/90', 'dark:bg-indigo-950/70', 'border-indigo-200/80', 'dark:border-indigo-800', 'text-indigo-700', 'dark:text-indigo-300');
+      item.classList.add('text-slate-600', 'dark:text-slate-300');
     }
   });
 

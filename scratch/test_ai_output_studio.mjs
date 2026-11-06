@@ -75,7 +75,7 @@ const html = renderAiOutputStudioView();
 console.log('   HTML length:', html.length);
 console.log('   Contains "AI Output Studio":', html.includes('AI Output Studio') ? '✓ PASS' : '✗ FAIL');
 console.log('   Contains category selection:', html.includes('Choose Educational Output Type') ? '✓ PASS' : '✗ FAIL');
-console.log('   Contains 8 categories:', (html.includes('Presentation &amp; Slides') || html.includes('Presentation & Slides')) && (html.includes('Posters &amp; Infographics') || html.includes('Posters & Infographics')) ? '✓ PASS' : '✗ FAIL');
+console.log('   Contains 8 categories:', (html.includes('Presentations &amp; PowerPoint') || html.includes('Presentations & PowerPoint')) && (html.includes('Posters &amp; Infographics') || html.includes('Posters & Infographics')) ? '✓ PASS' : '✗ FAIL');
 console.log('   Contains "Generate Educational Output":', html.includes('Generate Educational Output') ? '✓ PASS' : '✗ FAIL');
 
 console.log('\n======================================================');

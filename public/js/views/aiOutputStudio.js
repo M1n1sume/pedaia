@@ -8,7 +8,7 @@ import { exportToDocx, exportToMarkdown, openPrintableWindow } from '../exportUt
 export const OUTPUT_CATEGORIES = [
   {
     id: 'presentation',
-    name: 'Presentation & Slides',
+    name: 'Presentations & PowerPoint',
     icon: '🖥️',
     badge: 'Slide Decks',
     color: 'indigo',
@@ -87,7 +87,7 @@ export const OUTPUT_CATEGORIES = [
   },
   {
     id: 'assessment',
-    name: 'Assessment Outputs',
+    name: 'Assessment Materials',
     icon: '📝',
     badge: 'Tests & Rubrics',
     color: 'amber',
@@ -123,7 +123,7 @@ export const OUTPUT_CATEGORIES = [
   },
   {
     id: 'banner',
-    name: 'Digital & Creative Assets',
+    name: 'Digital Creative Assets',
     icon: '🎨',
     badge: 'Covers & Banners',
     color: 'rose',
@@ -140,7 +140,7 @@ export const OUTPUT_CATEGORIES = [
   },
   {
     id: 'custom',
-    name: 'Custom Educational Material',
+    name: 'Custom Output',
     icon: '⚡',
     badge: 'Custom Specification',
     color: 'slate',
@@ -151,6 +151,138 @@ export const OUTPUT_CATEGORIES = [
     defaultOptions: {
       format: 'custom-markdown-doc'
     }
+  }
+];
+
+// Pre-Configured Educational Output Templates (Ready to load directly)
+export const OUTPUT_TEMPLATES = [
+  {
+    id: 'tpl-pres-5e',
+    title: '5E Science Inquiry Lecture Deck',
+    categoryId: 'presentation',
+    typeId: 'powerpoint',
+    subject: 'Science / Biology',
+    educationalLevel: 'Junior High School',
+    gradeLevel: 'Grade 8',
+    topic: 'Cellular Respiration & Energy Transformation',
+    objectives: '1. Model glucose oxidation pathways.\n2. Contrast aerobic ATP yield with fermentation.\n3. Formulate conclusions from respiration lab data.',
+    competency: 'Explain energy transformations in cellular metabolism',
+    targetAudience: 'Grade 8 Science Learners',
+    purpose: 'Direct Interactive Lecture with Speaker Notes',
+    contentRequirements: 'Include mitochondria diagrams, equation breakdowns, and 2 check-for-understanding slides.',
+    desc: '8-slide classroom deck structured through Engage, Explore, Explain, Elaborate, and Evaluate phases.'
+  },
+  {
+    id: 'tpl-poster-blooms',
+    title: "Bloom's Cognitive Taxonomy Classroom Poster",
+    categoryId: 'poster',
+    typeId: 'concept-infographic',
+    subject: 'General Pedagogy',
+    educationalLevel: 'Senior High School',
+    gradeLevel: 'Grade 11',
+    topic: "Bloom's Revised Taxonomy Cognitive Dimensions",
+    objectives: '1. Distinguish lower-order from higher-order cognitive domains.\n2. Apply action verbs to assess understanding.\n3. Formulate analytical inquiry questions.',
+    competency: 'Integrate cognitive rigor across instructional tasks',
+    targetAudience: 'Educators & High School Scholars',
+    purpose: 'Classroom Reference & Study Wall Poster',
+    contentRequirements: 'Color-coded levels from Remember to Create with indicative active verbs.',
+    desc: 'High-contrast visual poster mapping 6 cognitive domains with active classroom action verbs.'
+  },
+  {
+    id: 'tpl-sheet-socratic',
+    title: 'Socratic Dialogue Guided Discussion Worksheet',
+    categoryId: 'worksheet',
+    typeId: 'student-worksheet',
+    subject: 'English & Humanities',
+    educationalLevel: 'Junior High School',
+    gradeLevel: 'Grade 9',
+    topic: 'Textual Evidence, Symbolism & Ethical Themes in Literature',
+    objectives: '1. Cite textual evidence supporting thematic claims.\n2. Evaluate speaker motivations and rhetorical choices.\n3. Participate in active peer inquiry.',
+    competency: 'Analyze literary themes using explicit textual evidence',
+    targetAudience: 'Grade 9 English Language Arts',
+    purpose: 'Guided Student Worksheet with Teacher Scoring Rubric',
+    contentRequirements: 'Include quote analysis organizer, paired discussion prompts, and teacher exemplar answers.',
+    desc: 'Guided worksheet featuring open prompts, quote analysis matrix, and teacher answer key.'
+  },
+  {
+    id: 'tpl-diag-flowchart',
+    title: 'Biochemical Synthesis Mechanism Flowchart',
+    categoryId: 'diagram',
+    typeId: 'concept-map',
+    subject: 'Chemistry & Biology',
+    educationalLevel: 'Senior High School',
+    gradeLevel: 'Grade 11',
+    topic: 'Light-Dependent Reactions to Calvin Cycle',
+    objectives: '1. Trace electron transport in thylakoid membranes.\n2. Map ATP and NADPH utilization in stroma.\n3. Predict impacts of light intensity on glucose synthesis.',
+    competency: 'Demonstrate molecular energy transfer in living systems',
+    targetAudience: 'Advanced Biology Students',
+    purpose: 'Visual Learning Concept Map & Socratic Flowchart',
+    contentRequirements: 'Step-by-step chemical intermediate nodes and inputs/outputs.',
+    desc: 'Connected conceptual diagram mapping reactants, electron transport carriers, and high-energy glucose products.'
+  },
+  {
+    id: 'tpl-assess-matrix',
+    title: 'Mendelian Genetics Formative Test & TOS Matrix',
+    categoryId: 'assessment',
+    typeId: 'tos',
+    subject: 'Life Science',
+    educationalLevel: 'Senior High School',
+    gradeLevel: 'Grade 10',
+    topic: 'Monohybrid Crosses & Punnett Square Probabilities',
+    objectives: '1. Calculate phenotypic and genotypic ratios.\n2. Differentiate dominant, recessive, and codominant alleles.\n3. Solve real-world pedigree puzzle problems.',
+    competency: 'Predict genotypic and phenotypic inheritance outcomes',
+    targetAudience: 'Grade 10 Biology Students',
+    purpose: '15-Item Test Paper with Table of Specifications & 4-Level Rubric',
+    contentRequirements: 'Multiple choice, Punnett square problems, short response, and complete answer key.',
+    desc: 'Table of Specifications aligned across 15 test items with an analytic 4-level scoring rubric.'
+  },
+  {
+    id: 'tpl-cards-vocab',
+    title: 'Academic STEM Vocabulary Flashcards (12 Cards)',
+    categoryId: 'flashcards',
+    typeId: 'vocabulary-flashcards',
+    subject: 'Integrated STEM',
+    educationalLevel: 'Junior High School',
+    gradeLevel: 'Grade 8',
+    topic: 'Thermodynamics & Kinetic Molecular Theory',
+    objectives: '1. Define thermal equilibrium, entropy, and convection.\n2. Connect macroscopic heat phenomena to particulate motion.\n3. Use academic STEM terms in scientific explanations.',
+    competency: 'Communicate scientific ideas using precise domain terminology',
+    targetAudience: 'Middle School STEM Learners',
+    purpose: 'Interactive 3D Study Cards & Printable Cutouts',
+    contentRequirements: '12 cards with term, definition, contextual sentence, and mnemonic visual cue.',
+    desc: '12 interactive 3D flip cards with definitions, formula contexts, and double-sided printable cutout layout.'
+  },
+  {
+    id: 'tpl-banner-lms',
+    title: 'Digital LMS Course Cover & Classroom Banner',
+    categoryId: 'banner',
+    typeId: 'course-banner',
+    subject: 'Mathematics',
+    educationalLevel: 'Senior High School',
+    gradeLevel: 'Grade 11',
+    topic: 'Pre-Calculus & Trigonometric Functions',
+    objectives: '1. Introduce course roadmap and unit milestones.\n2. Establish academic tone and discipline identity.',
+    competency: 'Engage with digital curriculum resources and learning pathways',
+    targetAudience: 'Pre-Calculus Scholars',
+    purpose: 'Canvas / Google Classroom Course Banner & Syllabus Header',
+    contentRequirements: 'Modern academic typography with unit icon, course code, and institution tag.',
+    desc: 'Modern scholarly LMS header banner optimized for Canvas, Google Classroom, and syllabus covers.'
+  },
+  {
+    id: 'tpl-custom-pbl',
+    title: 'Problem-Based Learning Multi-Phase Deliverable Rubric',
+    categoryId: 'custom',
+    typeId: 'custom-format',
+    subject: 'Social Studies',
+    educationalLevel: 'College / Undergraduate',
+    gradeLevel: 'Year 1-2',
+    topic: 'Urban Environmental Sustainability Simulation',
+    objectives: '1. Formulate policy proposals addressing urban heat islands.\n2. Evaluate ecological trade-offs in city planning.\n3. Present findings in collaborative public hearing simulation.',
+    competency: 'Apply multidisciplinary inquiry to complex civic challenges',
+    targetAudience: 'Undergraduate Environmental Policy Students',
+    purpose: 'PBL Project Guide & Authentic Defense Rubric',
+    contentRequirements: 'Milestone checklists, team roles, evaluation criteria, and reflection questions.',
+    desc: 'Authentic multi-stage inquiry project guide with research milestones and oral defense evaluation criteria.'
   }
 ];
 
@@ -188,6 +320,7 @@ let activeStudioState = {
 
 export function renderAiOutputStudioView() {
   const isLibrary = activeStudioState.viewMode === 'library';
+  const isTemplates = activeStudioState.viewMode === 'templates';
   const savedOutputs = store.getOutputs ? store.getOutputs() : [];
   const activeCat = OUTPUT_CATEGORIES.find(c => c.id === activeStudioState.activeCategoryId) || OUTPUT_CATEGORIES[0];
 
@@ -195,36 +328,46 @@ export function renderAiOutputStudioView() {
     <div class="space-y-6 animate-fade-in pb-16">
       
       <!-- Studio Header & Mode Navigation -->
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200 dark:border-slate-800">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-200 dark:border-slate-800">
         <div>
           <div class="flex items-center gap-2 mb-1">
-            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950/80 border border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 text-xs font-semibold">
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-violet-50 dark:bg-violet-950/80 border border-violet-200 dark:border-violet-800 text-violet-700 dark:text-violet-300 text-xs font-semibold">
               <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-              <span>Dedicated Output Studio</span>
+              <span>AI Output Studio</span>
             </span>
-            <span class="text-xs text-slate-500 dark:text-slate-400 font-medium">PowerPoint • Posters • Worksheets • Diagrams • Flashcards</span>
+            <span class="text-xs text-slate-500 dark:text-slate-400 font-medium hidden sm:inline">Deliverable Creation Workspace • Multi-Format Engine</span>
           </div>
           <h1 class="text-2xl sm:text-3xl font-bold font-scholarly text-slate-900 dark:text-white tracking-tight">
             AI Output Studio
           </h1>
-          <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 max-w-3xl">
-            Transform educational concepts, lesson plans, and competencies into publication-ready teaching materials, slide decks, worksheets, and classroom visual assets.
+          <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 max-w-2xl mt-0.5">
+            Transform your lesson ideas into engaging educational materials.
           </p>
         </div>
 
-        <!-- Top Mode Switcher -->
-        <div class="flex items-center p-1 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shrink-0 self-start sm:self-center">
-          <button id="mode-creator-btn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${!isLibrary ? 'bg-indigo-600 text-white shadow-xs' : 'text-slate-600 dark:text-slate-300 hover:text-indigo-600'}">
-            <span>✨ Creative Workspace</span>
+        <!-- Prominent Create Button & Repertoire Mode Switcher -->
+        <div class="flex items-center gap-2.5 flex-wrap shrink-0">
+          <button id="output-studio-create-btn" class="px-4 py-2 text-xs font-bold rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white shadow-xs transition-all flex items-center gap-1.5 active:scale-95">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+            <span>+ Create New Output</span>
           </button>
-          <button id="mode-library-btn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${isLibrary ? 'bg-indigo-600 text-white shadow-xs' : 'text-slate-600 dark:text-slate-300 hover:text-indigo-600'}">
-            <span>🗃️ Output Library (${savedOutputs.length})</span>
-          </button>
+
+          <div class="flex items-center p-1 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shrink-0">
+            <button id="mode-creator-btn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${!isLibrary && !isTemplates ? 'bg-indigo-600 text-white shadow-xs' : 'text-slate-600 dark:text-slate-300 hover:text-indigo-600'}">
+              <span>✨ Workspace</span>
+            </button>
+            <button id="mode-library-btn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${isLibrary ? 'bg-indigo-600 text-white shadow-xs' : 'text-slate-600 dark:text-slate-300 hover:text-indigo-600'}">
+              <span>🗃️ My Saved Outputs (${savedOutputs.length})</span>
+            </button>
+            <button id="mode-templates-btn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${isTemplates ? 'bg-indigo-600 text-white shadow-xs' : 'text-slate-600 dark:text-slate-300 hover:text-indigo-600'}">
+              <span>📋 Output Templates</span>
+            </button>
+          </div>
         </div>
       </div>
 
-      <!-- MAIN CONTAINER: Switch between Studio Workspace and Library -->
-      ${isLibrary ? renderOutputLibraryView(savedOutputs) : renderCreatorWorkspaceView(activeCat)}
+      <!-- MAIN CONTAINER: Creator Workspace, Saved Library, or Templates -->
+      ${isLibrary ? renderOutputLibraryView(savedOutputs) : isTemplates ? renderOutputTemplatesView() : renderCreatorWorkspaceView(activeCat, savedOutputs)}
 
     </div>
   `;
@@ -233,7 +376,7 @@ export function renderAiOutputStudioView() {
 // =========================================================================
 // 1. CREATOR WORKSPACE VIEW (Steps 1 to 6)
 // =========================================================================
-function renderCreatorWorkspaceView(activeCat) {
+function renderCreatorWorkspaceView(activeCat, savedOutputs = []) {
   const hasOutput = Boolean(activeStudioState.activeOutput);
   const designs = store.getDesigns ? store.getDesigns() : [];
 
@@ -562,6 +705,16 @@ function renderCreatorWorkspaceView(activeCat) {
       <section id="output-workspace-container" class="scroll-mt-20 ${hasOutput ? '' : 'hidden'}">
         ${hasOutput ? renderActiveOutputWorkspace(activeStudioState.activeOutput) : ''}
       </section>
+
+      <!-- ================================================================= -->
+      <!-- RECENT GENERATED OUTPUTS (Deliverables Created in this Atelier)   -->
+      <!-- ================================================================= -->
+      ${renderRecentOutputsSection(savedOutputs)}
+
+      <!-- ================================================================= -->
+      <!-- OUTPUT TEMPLATES REPERTOIRE (Curated Educational Deliverables)    -->
+      <!-- ================================================================= -->
+      ${renderOutputTemplatesSection()}
 
     </div>
   `;
@@ -1065,6 +1218,128 @@ function renderGenericWorkspace(output) {
 }
 
 // =========================================================================
+// 2.5 RECENT OUTPUTS & OUTPUT TEMPLATES SHOWCASE
+// =========================================================================
+function renderRecentOutputsSection(outputs) {
+  const recent = (outputs || []).slice(0, 4);
+  return `
+    <section class="rounded-2xl bg-white dark:bg-slate-850 border border-slate-200/90 dark:border-slate-750 p-6 shadow-sm transition-colors">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
+        <div>
+          <h3 class="text-base font-bold font-scholarly text-slate-900 dark:text-white">Recent Generated Outputs</h3>
+          <p class="text-xs text-slate-500 dark:text-slate-400">Classroom-ready deliverables created in this atelier</p>
+        </div>
+        ${outputs && outputs.length > 0 ? `
+          <button id="see-all-outputs-btn" class="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1">
+            <span>View All Saved (${outputs.length})</span>
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+          </button>
+        ` : ''}
+      </div>
+
+      ${recent.length === 0 ? `
+        <div class="py-10 px-6 text-center">
+          <div class="w-12 h-12 rounded-xl bg-violet-50 dark:bg-violet-950/60 border border-violet-100 dark:border-violet-800/60 flex items-center justify-center text-xl text-violet-600 dark:text-violet-400 mx-auto mb-3">
+            🎨
+          </div>
+          <h4 class="text-sm font-bold text-slate-800 dark:text-white mb-1">No outputs created yet.</h4>
+          <p class="text-xs text-slate-500 dark:text-slate-400 max-w-md mx-auto mb-4">
+            Start creating your first educational material using AI Output Studio.
+          </p>
+          <button class="scroll-to-create-btn px-4 py-2 text-xs font-bold rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white shadow-xs transition-colors inline-flex items-center gap-1.5">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+            <span>+ Create New Output</span>
+          </button>
+        </div>
+      ` : `
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-4">
+          ${recent.map(out => `
+            <div class="p-4 rounded-xl border border-slate-200/90 dark:border-slate-750 bg-slate-50/50 dark:bg-slate-900/40 hover:border-violet-400 dark:hover:border-violet-600 transition-all flex flex-col justify-between group cursor-pointer open-output-card" data-output-id="${out.id}">
+              <div>
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-lg">${out.icon || '📄'}</span>
+                  <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-violet-100 dark:bg-violet-950/80 text-violet-700 dark:text-violet-300 border border-violet-200 dark:border-violet-800">
+                    ${escapeHtml(out.typeLabel || out.category)}
+                  </span>
+                </div>
+                <h4 class="text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100 line-clamp-2 group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors">
+                  ${escapeHtml(out.title)}
+                </h4>
+                <p class="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-2 mt-1">
+                  ${escapeHtml(out.topic || out.prompt || 'Classroom Deliverable')}
+                </p>
+              </div>
+              <div class="mt-3 pt-2.5 border-t border-slate-200/60 dark:border-slate-800 flex items-center justify-between">
+                <span class="text-[10.5px] text-slate-400">${formatDate(out.updatedAt || out.createdAt)}</span>
+                <span class="text-xs font-semibold text-violet-600 dark:text-violet-400 flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
+                  Open in Workspace →
+                </span>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `}
+    </section>
+  `;
+}
+
+function renderOutputTemplatesSection() {
+  return `
+    <section class="rounded-2xl bg-white dark:bg-slate-850 border border-slate-200/90 dark:border-slate-750 p-6 shadow-sm transition-colors">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
+        <div>
+          <h3 class="text-base font-bold font-scholarly text-slate-900 dark:text-white">Output Templates</h3>
+          <p class="text-xs text-slate-500 dark:text-slate-400">Curated starting points configured for immediate deliverable generation</p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-4">
+        ${OUTPUT_TEMPLATES.map(tpl => `
+          <div class="p-4 rounded-xl border border-slate-200/90 dark:border-slate-750 hover:border-indigo-400 dark:hover:border-indigo-600 bg-slate-50/50 dark:bg-slate-900/40 transition-all flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950/70 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
+                  ${escapeHtml(tpl.subject)}
+                </span>
+                <span class="text-[10.5px] text-slate-400">${escapeHtml(tpl.gradeLevel || tpl.educationalLevel)}</span>
+              </div>
+              <h4 class="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100 mb-1 leading-snug">
+                ${escapeHtml(tpl.title)}
+              </h4>
+              <p class="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 mb-3">
+                ${escapeHtml(tpl.desc)}
+              </p>
+            </div>
+            <button class="load-output-template-btn w-full py-2 px-3 text-xs font-semibold text-indigo-600 dark:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-950/80 rounded-xl transition-colors border border-indigo-200 dark:border-indigo-800 flex items-center justify-center gap-1.5" data-template-id="${tpl.id}">
+              <span>Use Template</span>
+              <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+            </button>
+          </div>
+        `).join('')}
+      </div>
+    </section>
+  `;
+}
+
+function renderOutputTemplatesView() {
+  return `
+    <div class="space-y-6 animate-fade-in">
+      <div class="bg-white dark:bg-slate-850 p-4 rounded-2xl border border-slate-200/90 dark:border-slate-750 shadow-sm flex items-center justify-between">
+        <div>
+          <h2 class="text-base font-bold font-scholarly text-slate-900 dark:text-white">Curated Output Repertoire</h2>
+          <p class="text-xs text-slate-500 dark:text-slate-400">Pre-configured pedagogical templates that populate the creation workspace</p>
+        </div>
+        <button id="templates-back-to-workspace-btn" class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-indigo-600 text-white hover:bg-indigo-700 transition-colors flex items-center gap-1.5 shadow-2xs">
+          <span>← Back to Workspace</span>
+        </button>
+      </div>
+
+      ${renderOutputTemplatesSection()}
+    </div>
+  `;
+}
+
+// =========================================================================
 // 3. OUTPUT LIBRARY VIEW (Saved Materials Management)
 // =========================================================================
 function renderOutputLibraryView(outputs) {
@@ -1082,22 +1357,22 @@ function renderOutputLibraryView(outputs) {
         </div>
 
         <button id="create-new-output-shortcut-btn" class="px-4 py-2 rounded-xl text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 transition-colors shadow-xs flex items-center gap-1.5 self-start sm:self-auto">
-          <span>+ Create New Educational Output</span>
+          <span>+ Create New Output</span>
         </button>
       </div>
 
       <!-- Outputs Grid -->
       ${outputs.length === 0 ? `
         <div class="bg-white dark:bg-slate-850 rounded-2xl border border-slate-200 dark:border-slate-750 p-12 text-center max-w-md mx-auto shadow-2xs">
-          <div class="w-12 h-12 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 flex items-center justify-center text-indigo-600 dark:text-indigo-400 mx-auto mb-3 text-2xl">
-            ✨
+          <div class="w-12 h-12 rounded-xl bg-violet-50 dark:bg-violet-950/60 border border-violet-100 dark:border-violet-800/60 flex items-center justify-center text-violet-600 dark:text-violet-400 mx-auto mb-3 text-2xl">
+            🎨
           </div>
-          <h3 class="text-sm font-bold text-slate-800 dark:text-white mb-1">No Saved Educational Outputs Yet</h3>
-          <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">
-            Generate your first PowerPoint presentation, classroom poster, worksheet, or flashcard deck in the Creative Workspace.
+          <h3 class="text-base font-bold font-scholarly text-slate-800 dark:text-white mb-1">No outputs created yet.</h3>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mb-5">
+            Start creating your first educational material using AI Output Studio.
           </p>
-          <button id="library-get-started-btn" class="px-4 py-2 text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-xs transition-colors">
-            Open Creative Workspace
+          <button id="library-get-started-btn" class="px-4 py-2 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-xs transition-colors inline-flex items-center gap-1.5">
+            <span>+ Create New Output</span>
           </button>
         </div>
       ` : `
@@ -1159,7 +1434,22 @@ function renderOutputLibraryView(outputs) {
 // 4. EVENT LISTENERS & INTERACTION WIRING
 // =========================================================================
 export function setupAiOutputStudioListeners(container, navigateTo, showToast) {
-  // Mode Tabs (Creative Workspace vs Library)
+  // Prominent Header & Empty State Create Output Buttons
+  const triggerCreateFlow = () => {
+    activeStudioState.viewMode = 'creator';
+    refreshView(container, navigateTo, showToast);
+    setTimeout(() => {
+      const target = container.querySelector('#step-1-category-section') || container.querySelector('#step-2-content-section');
+      target?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 50);
+  };
+
+  container.querySelector('#output-studio-create-btn')?.addEventListener('click', triggerCreateFlow);
+  container.querySelectorAll('.scroll-to-create-btn').forEach(btn => btn.addEventListener('click', triggerCreateFlow));
+  container.querySelector('#library-get-started-btn')?.addEventListener('click', triggerCreateFlow);
+  container.querySelector('#create-new-output-shortcut-btn')?.addEventListener('click', triggerCreateFlow);
+
+  // Mode Tabs (Creative Workspace vs Library vs Templates)
   container.querySelector('#mode-creator-btn')?.addEventListener('click', () => {
     activeStudioState.viewMode = 'creator';
     refreshView(container, navigateTo, showToast);
@@ -1170,14 +1460,47 @@ export function setupAiOutputStudioListeners(container, navigateTo, showToast) {
     refreshView(container, navigateTo, showToast);
   });
 
-  container.querySelector('#library-get-started-btn')?.addEventListener('click', () => {
+  container.querySelector('#mode-templates-btn')?.addEventListener('click', () => {
+    activeStudioState.viewMode = 'templates';
+    refreshView(container, navigateTo, showToast);
+  });
+
+  container.querySelector('#templates-back-to-workspace-btn')?.addEventListener('click', () => {
     activeStudioState.viewMode = 'creator';
     refreshView(container, navigateTo, showToast);
   });
 
-  container.querySelector('#create-new-output-shortcut-btn')?.addEventListener('click', () => {
-    activeStudioState.viewMode = 'creator';
+  container.querySelector('#see-all-outputs-btn')?.addEventListener('click', () => {
+    activeStudioState.viewMode = 'library';
     refreshView(container, navigateTo, showToast);
+  });
+
+  // Load Template Buttons
+  container.querySelectorAll('.load-output-template-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const tplId = btn.getAttribute('data-template-id');
+      const tpl = OUTPUT_TEMPLATES.find(t => t.id === tplId);
+      if (tpl) {
+        activeStudioState.activeCategoryId = tpl.categoryId;
+        activeStudioState.activeTypeId = tpl.typeId;
+        activeStudioState.formData.subject = tpl.subject;
+        activeStudioState.formData.educationalLevel = tpl.educationalLevel;
+        activeStudioState.formData.gradeLevel = tpl.gradeLevel;
+        activeStudioState.formData.topic = tpl.topic;
+        activeStudioState.formData.objectives = tpl.objectives;
+        activeStudioState.formData.competency = tpl.competency;
+        activeStudioState.formData.targetAudience = tpl.targetAudience;
+        activeStudioState.formData.purpose = tpl.purpose;
+        activeStudioState.formData.contentRequirements = tpl.contentRequirements;
+        activeStudioState.viewMode = 'creator';
+        refreshView(container, navigateTo, showToast);
+        if (showToast) showToast(`Loaded template: "${tpl.title}"`, 'success');
+        setTimeout(() => {
+          const formSec = container.querySelector('#step-2-content-section');
+          formSec?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 80);
+      }
+    });
   });
 
   // Category Selection
@@ -2057,6 +2380,16 @@ function openPrintableFlashcardsWindow(output) {
   fWin.document.open();
   fWin.document.write(html);
   fWin.document.close();
+}
+
+function formatDate(dateStr) {
+  if (!dateStr) return 'Recently';
+  try {
+    const d = new Date(dateStr);
+    return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+  } catch (e) {
+    return 'Recently';
+  }
 }
 
 function escapeHtml(str) {
