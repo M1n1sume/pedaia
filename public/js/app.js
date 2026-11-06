@@ -191,15 +191,17 @@ function updateApiStatusIndicator() {
 function setupSidebarToggle() {
   const sidebar = document.getElementById('app-sidebar');
   const mobileToggleBtn = document.getElementById('mobile-drawer-toggle-btn');
+  const mobileBottomMenuBtn = document.getElementById('mobile-bottom-menu-btn');
   const mobileCloseBtn = document.getElementById('mobile-close-sidebar-btn');
   const backdrop = document.getElementById('mobile-sidebar-backdrop');
 
-  if (mobileToggleBtn && sidebar) {
-    mobileToggleBtn.addEventListener('click', () => {
-      sidebar.classList.remove('translate-x-full');
-      backdrop?.classList.remove('hidden');
-    });
-  }
+  const openMobileSidebar = () => {
+    sidebar?.classList.remove('translate-x-full');
+    backdrop?.classList.remove('hidden');
+  };
+
+  mobileToggleBtn?.addEventListener('click', openMobileSidebar);
+  mobileBottomMenuBtn?.addEventListener('click', openMobileSidebar);
 
   if (mobileCloseBtn && sidebar) {
     mobileCloseBtn.addEventListener('click', closeMobileSidebar);

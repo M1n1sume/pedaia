@@ -1,0 +1,20 @@
+{
+  "name": "PEDAIA — AI-Powered Instructional Design Studio",
+  "short_name": "PEDAIA",
+  "description": "Professional AI-Powered Instructional Design Ecosystem. Design Better Learning. Teach with Purpose.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "theme_color": "#312E81",
+  "background_color": "#0F172A",
+  "categories": ["education", "productivity"],
+  "icons": [
+    {
+      "src": "./favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

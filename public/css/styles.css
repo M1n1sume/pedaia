@@ -979,3 +979,51 @@ html.dark .text-sky-950,
     size: letter portrait;
   }
 }
+
+/* ========================================================================= */
+/* UNIVERSAL CROSS-DEVICE, MOBILE & NETWORK ACCESSIBILITY STYLES             */
+/* ========================================================================= */
+
+/* Touch & Tap Accessibility */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Prevent iOS Safari input zooming on focus */
+@media screen and (max-width: 768px) {
+  input[type="text"],
+  input[type="email"],
+  input[type="number"],
+  input[type="search"],
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+
+  /* Safe padding at the bottom of the page so content is not obscured by the mobile bottom nav */
+  body {
+    padding-bottom: 4.5rem !important;
+  }
+}
+
+/* Safe Area Insets for iPhones & Modern Android Devices with Notches */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  #mobile-bottom-bar {
+    padding-bottom: calc(0.375rem + env(safe-area-inset-bottom)) !important;
+  }
+}
+
+/* Accessible Interactive Touch Targets */
+button, a, input, select {
+  touch-action: manipulation;
+}
+
+/* Low-Bandwidth / Reduced Motion Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -1,6 +1,7 @@
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
+import zlib from 'node:zlib';
 import { fileURLToPath } from 'node:url';
 import { synthesizePedagogicalDocument } from './public/js/pedagogicalEngine.js';
 
@@ -9,6 +10,7 @@ const __dirname = path.dirname(__filename);
 const PUBLIC_DIR = path.join(__dirname, 'public');
 
 const PORT = process.env.PORT || 3000;
+const HOST = process.env.HOST || '0.0.0.0';
 
 const MIME_TYPES = {
   '.html': 'text/html; charset=utf-8',
@@ -16,6 +18,8 @@ const MIME_TYPES = {
   '.js': 'application/javascript; charset=utf-8',
   '.mjs': 'application/javascript; charset=utf-8',
   '.json': 'application/json; charset=utf-8',
+  '.webmanifest': 'application/manifest+json; charset=utf-8',
+  '.manifest': 'application/manifest+json; charset=utf-8',
   '.svg': 'image/svg+xml',
   '.png': 'image/png',
   '.jpg': 'image/jpeg',
@@ -28,10 +32,13 @@ const MIME_TYPES = {
 };
 
 const server = http.createServer(async (req, res) => {
-  // CORS headers
+  // Universal Cross-Device & Security Headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
 
   if (req.method === 'OPTIONS') {
     res.writeHead(204);
@@ -254,6 +261,33 @@ const server = http.createServer(async (req, res) => {
 
   try {
     const content = fs.readFileSync(filePath);
+
+    // Caching Strategy for High Performance on Mobile & Global Edge
+    if (ext === '.html') {
+      res.setHeader('Cache-Control', 'public, max-age=0, must-revalidate');
+    } else if (['.js', '.mjs', '.css', '.svg', '.png', '.jpg', '.jpeg', '.woff2', '.woff', '.ttf'].includes(ext)) {
+      res.setHeader('Cache-Control', 'public, max-age=86400, stale-while-revalidate=604800');
+    }
+
+    // Gzip Compression for Low-Bandwidth Networks
+    const acceptEncoding = req.headers['accept-encoding'] || '';
+    if (/\bgzip\b/.test(acceptEncoding) && content.length > 512 && !['.png', '.jpg', '.jpeg', '.zip', '.woff2'].includes(ext)) {
+      zlib.gzip(content, (err, compressed) => {
+        if (err) {
+          res.writeHead(200, { 'Content-Type': contentType });
+          res.end(content);
+        } else {
+          res.writeHead(200, {
+            'Content-Type': contentType,
+            'Content-Encoding': 'gzip',
+            'Vary': 'Accept-Encoding'
+          });
+          res.end(compressed);
+        }
+      });
+      return;
+    }
+
     res.writeHead(200, { 'Content-Type': contentType });
     res.end(content);
   } catch (err) {
@@ -494,6 +528,6 @@ async function executeProviderGeneration({ provider, model, prompt, systemInstru
 }
 }
 
-server.listen(PORT, () => {
-  console.log(`PEDAIA server running at http://localhost:${PORT}`);
+server.listen(PORT, HOST, () => {
+  console.log(`PEDAIA server running on http://${HOST}:${PORT} (universally accessible across devices, networks, and cloud edges)`);
 });
