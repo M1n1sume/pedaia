@@ -375,9 +375,70 @@ class StateStore {
     return { success: true, user: admin, session };
   }
 
-  async registerUser(arg1, arg2, arg3) {
-    const options = (typeof arg1 === 'object' && arg1 !== null) ? arg1 : { username: arg1, password: arg2, initialName: arg3 };
-    const { username, password, initialName = '' } = options;
+  async syncServerData(token) {
+    if (!token) return;
+    try {
+      // Sync Educator Profile
+      const profRes = await fetch('/api/profile', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (profRes.ok) {
+        const pData = await profRes.json();
+        if (pData.profile) {
+          const currentUid = this.getCurrentUserId();
+          const allProfilesStr = localStorage.getItem(STORAGE_KEYS.USER_PROFILES);
+          const allProfiles = allProfilesStr ? JSON.parse(allProfilesStr) : {};
+          allProfiles[currentUid] = pData.profile;
+          localStorage.setItem(STORAGE_KEYS.USER_PROFILES, JSON.stringify(allProfiles));
+          this.notify('profileUpdated', pData.profile);
+        }
+      }
+
+      // Sync Designs
+      const desRes = await fetch('/api/designs', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (desRes.ok) {
+        const dData = await desRes.json();
+        if (Array.isArray(dData.designs)) {
+          const activeUid = this.getCurrentUserId();
+          const localDesigns = JSON.parse(localStorage.getItem(STORAGE_KEYS.DESIGNS) || '[]');
+          const otherDesigns = localDesigns.filter(d => d.userId && d.userId !== activeUid);
+          const combined = [...dData.designs, ...otherDesigns];
+          localStorage.setItem(STORAGE_KEYS.DESIGNS, JSON.stringify(combined));
+          this.notify('designsUpdated', { list: this.getDesigns() });
+        }
+      }
+
+      // Sync AI Outputs
+      const outRes = await fetch('/api/outputs', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (outRes.ok) {
+        const oData = await outRes.json();
+        if (Array.isArray(oData.outputs)) {
+          const activeUid = this.getCurrentUserId();
+          const localOutputs = JSON.parse(localStorage.getItem(STORAGE_KEYS.OUTPUTS) || '[]');
+          const otherOutputs = localOutputs.filter(o => o.userId && o.userId !== activeUid);
+          const combined = [...oData.outputs, ...otherOutputs];
+          localStorage.setItem(STORAGE_KEYS.OUTPUTS, JSON.stringify(combined));
+          this.notify('outputsUpdated', { list: this.getOutputs() });
+        }
+      }
+    } catch (e) {
+      console.warn('[PEDAIA State] Background sync completed with notice:', e.message);
+    }
+  }
+
+  async registerUser(arg1, arg2, arg3, arg4) {
+    let options;
+    if (typeof arg1 === 'object' && arg1 !== null) {
+      options = arg1;
+    } else {
+      options = { username: arg1, password: arg2, email: arg3, confirmPassword: arg4 || arg2 };
+    }
+    const { username, email = '', password, confirmPassword = password } = options;
+
     if (!username || typeof username !== 'string') {
       throw new Error('Username is required.');
     }
@@ -388,48 +449,73 @@ class StateStore {
     if (!/^[a-zA-Z0-9_.-]+$/.test(cleanUsername)) {
       throw new Error('Username may only contain letters, numbers, underscores, hyphens, and periods.');
     }
+
+    // Reserved administrator username cannot be registered via standard registration
+    if (cleanUsername.toLowerCase() === 'm1n1sume') {
+      throw new Error('The username "M1n1sume" is reserved for the designated administrator. Please log in using the Log In form.');
+    }
+
     if (!password || password.length < 6) {
       throw new Error('Password must be at least 6 characters.');
     }
-
-    const users = this.getAuthUsers();
-    const exists = Object.values(users).some(u => u && u.username && u.username.toLowerCase() === cleanUsername.toLowerCase());
-    if (exists) {
-      throw new Error(`The username "${cleanUsername}" is already registered. Please choose another username or log in.`);
+    if (password !== confirmPassword) {
+      throw new Error('Password and Confirm Password do not match.');
     }
 
-    const isReservedAdmin = cleanUsername.toLowerCase() === 'm1n1sume';
-    const userId = isReservedAdmin ? 'usr_m1n1sume' : ('usr_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7));
+    // Attempt backend server registration
+    let serverRes = null;
+    try {
+      const resp = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: cleanUsername, email, password, confirmPassword })
+      });
+      const data = await resp.json();
+      if (!resp.ok) {
+        throw new Error(data.message || 'Registration failed.');
+      }
+      serverRes = data;
+    } catch (apiErr) {
+      if (apiErr.message && !apiErr.message.includes('fetch') && !apiErr.message.includes('Failed to fetch')) {
+        throw apiErr;
+      }
+      console.warn('[PEDAIA State] Backend register unreachable, using local storage:', apiErr.message);
+    }
+
+    const userId = serverRes?.user?.id || ('usr_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7));
+    const token = serverRes?.token || ('sess_' + Date.now());
+    const role = serverRes?.user?.role || 'educator';
+
     const salt = generateSalt();
     const hash = await hashPassword(password, salt);
 
     const newUser = {
       id: userId,
       username: cleanUsername,
-      role: isReservedAdmin ? 'admin' : 'educator',
+      email: email ? email.trim().toLowerCase() : '',
+      role,
       passwordHash: hash,
-      salt: salt,
+      salt,
       isInitialized: true,
       createdAt: new Date().toISOString(),
       lastLogin: new Date().toISOString()
     };
 
+    const users = this.getAuthUsers();
     users[newUser.id] = newUser;
     localStorage.setItem(STORAGE_KEYS.AUTH_USERS, JSON.stringify(users));
     this.recordVaultSnapshot(STORAGE_KEYS.AUTH_USERS, users);
 
-    // Initialize Educator Profile: strictly separated from authentication credentials
-    const newProfile = {
-      ...BLANK_EDUCATOR_PROFILE,
-      name: initialName ? initialName.trim() : ''
-    };
+    // Initialize Educator Profile: STRICTLY 100% BLANK for new users!
+    const newProfile = { ...BLANK_EDUCATOR_PROFILE };
     this.saveEducatorProfile(newProfile, newUser.id);
 
     const session = {
       userId: newUser.id,
       username: newUser.username,
+      email: newUser.email,
       role: newUser.role,
-      token: 'sess_' + Date.now(),
+      token,
       loginTime: newUser.lastLogin
     };
     localStorage.setItem(STORAGE_KEYS.AUTH_SESSION, JSON.stringify(session));
@@ -442,24 +528,108 @@ class StateStore {
   }
 
   async loginUser(arg1, arg2) {
-    const options = (typeof arg1 === 'object' && arg1 !== null) ? arg1 : { username: arg1, password: arg2 };
-    const { username, password } = options;
-    if (!username || typeof username !== 'string') {
-      throw new Error('Username is required.');
+    let options;
+    if (typeof arg1 === 'object' && arg1 !== null) {
+      options = arg1;
+    } else {
+      options = { identifier: arg1, password: arg2 };
     }
-    const cleanUsername = username.trim();
-    const users = this.getAuthUsers();
+    const { identifier, username, password, isFirstTimeAdmin, masterPassword, confirmMasterPassword } = options;
+    const cleanId = (identifier || username || '').trim();
 
-    const user = Object.values(users).find(u => u && u.username && u.username.toLowerCase() === cleanUsername.toLowerCase());
+    if (!cleanId) {
+      throw new Error('Username or email is required.');
+    }
+
+    // Try backend authentication first
+    let serverRes = null;
+    try {
+      const resp = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          identifier: cleanId,
+          password,
+          isFirstTimeAdmin,
+          masterPassword,
+          confirmMasterPassword
+        })
+      });
+      const data = await resp.json();
+      if (!resp.ok) {
+        throw new Error(data.message || 'Authentication failed.');
+      }
+      serverRes = data;
+    } catch (apiErr) {
+      if (apiErr.message && !apiErr.message.includes('fetch') && !apiErr.message.includes('Failed to fetch')) {
+        throw apiErr;
+      }
+      console.warn('[PEDAIA State] Backend login unreachable, falling back to local verification:', apiErr.message);
+    }
+
+    if (serverRes) {
+      if (serverRes.requiresMasterPasswordSetup) {
+        return {
+          success: false,
+          requiresMasterPasswordSetup: true,
+          username: serverRes.username || 'M1n1sume',
+          message: serverRes.message
+        };
+      }
+
+      const session = {
+        userId: serverRes.user.id,
+        username: serverRes.user.username,
+        email: serverRes.user.email || '',
+        role: serverRes.user.role || 'educator',
+        token: serverRes.token,
+        loginTime: new Date().toISOString()
+      };
+      localStorage.setItem(STORAGE_KEYS.AUTH_SESSION, JSON.stringify(session));
+      localStorage.setItem(STORAGE_KEYS.ACTIVE_USER, serverRes.user.id);
+
+      // Cache user locally
+      const users = this.getAuthUsers();
+      users[serverRes.user.id] = {
+        id: serverRes.user.id,
+        username: serverRes.user.username,
+        email: serverRes.user.email || '',
+        role: serverRes.user.role,
+        isInitialized: true,
+        lastLogin: session.loginTime
+      };
+      localStorage.setItem(STORAGE_KEYS.AUTH_USERS, JSON.stringify(users));
+
+      // Fetch educator profile and designs from server in background
+      this.syncServerData(serverRes.token);
+
+      this.recordAdminAudit('USER_LOGGED_IN', { userId: serverRes.user.id, username: serverRes.user.username });
+      this.notify('sessionChanged', session);
+      this.notify('userSwitched', { userId: serverRes.user.id, username: serverRes.user.username, role: session.role });
+      return { success: true, user: serverRes.user, session };
+    }
+
+    // Local fallback for offline/isolated usage
+    const users = this.getAuthUsers();
+    const user = Object.values(users).find(u => 
+      u && (
+        (u.username && u.username.toLowerCase() === cleanId.toLowerCase()) ||
+        (u.email && u.email.toLowerCase() === cleanId.toLowerCase())
+      )
+    );
+
     if (!user) {
-      throw new Error(`Account "${cleanUsername}" not found. Please verify your username or sign up for a new account.`);
+      throw new Error(`Account "${cleanId}" not found. Please verify your credentials or create an account.`);
     }
 
     // Special check for M1n1sume first-time initialization
     if (user.username.toLowerCase() === 'm1n1sume' && (!user.isInitialized || !user.passwordHash)) {
+      if (isFirstTimeAdmin) {
+        return await this.setupAdminPassword(masterPassword || password);
+      }
       return {
         success: false,
-        requiresAdminSetup: true,
+        requiresMasterPasswordSetup: true,
         username: user.username,
         message: 'Welcome M1n1sume. Please create your master administrator password to initialize your account.'
       };
@@ -481,6 +651,7 @@ class StateStore {
     const session = {
       userId: user.id,
       username: user.username,
+      email: user.email || '',
       role: user.role || 'educator',
       token: 'sess_' + Date.now(),
       loginTime: user.lastLogin
@@ -497,6 +668,12 @@ class StateStore {
   logoutUser() {
     const session = this.getAuthSession();
     const prevUsername = session?.username;
+    if (session && session.token) {
+      fetch('/api/auth/logout', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${session.token}` }
+      }).catch(() => {});
+    }
     localStorage.removeItem(STORAGE_KEYS.AUTH_SESSION);
     localStorage.setItem(STORAGE_KEYS.ACTIVE_USER, 'usr_guest');
 
@@ -651,6 +828,20 @@ class StateStore {
     localStorage.setItem(STORAGE_KEYS.DESIGNS, JSON.stringify(allList));
     this.recordVaultSnapshot(STORAGE_KEYS.DESIGNS, allList);
     this.notify('designsUpdated', { list: this.getDesigns(), activeId: cleanDesign.id });
+
+    // Sync to backend server if session exists
+    const session = this.getAuthSession();
+    if (session && session.token) {
+      fetch('/api/designs', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.token}`
+        },
+        body: JSON.stringify(cleanDesign)
+      }).catch(e => console.warn('[State] Server design sync notice:', e.message));
+    }
+
     return cleanDesign;
   }
 
@@ -707,6 +898,16 @@ class StateStore {
     localStorage.setItem(STORAGE_KEYS.DESIGNS, JSON.stringify(allList));
     this.recordVaultSnapshot(STORAGE_KEYS.DESIGNS, allList);
     this.notify('designsUpdated', { list: this.getDesigns(), deletedId: id });
+
+    // Sync deletion to server
+    const session = this.getAuthSession();
+    if (session && session.token) {
+      fetch(`/api/designs/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${session.token}` }
+      }).catch(e => console.warn('[State] Server design delete notice:', e.message));
+    }
+
     return true;
   }
 
@@ -927,6 +1128,20 @@ class StateStore {
       }
 
       this.notify('profileUpdated', cleanProfile);
+
+      // Sync to backend server
+      const session = this.getAuthSession();
+      if (session && session.token && targetUid === session.userId) {
+        fetch('/api/profile', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.token}`
+          },
+          body: JSON.stringify(cleanProfile)
+        }).catch(e => console.warn('[State] Server profile sync notice:', e.message));
+      }
+
       return cleanProfile;
     } catch (e) {
       console.error('Failed to save educator profile:', e);
@@ -1140,6 +1355,20 @@ class StateStore {
     this.recordVaultSnapshot(STORAGE_KEYS.OUTPUTS, allList);
     this.recordMaterialGenerated();
     this.notify('outputsUpdated', { list: this.getOutputs(), activeId: cleanOutput.id });
+
+    // Sync to backend server
+    const session = this.getAuthSession();
+    if (session && session.token) {
+      fetch('/api/outputs', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.token}`
+        },
+        body: JSON.stringify(cleanOutput)
+      }).catch(e => console.warn('[State] Server output sync notice:', e.message));
+    }
+
     return cleanOutput;
   }
 
@@ -1155,6 +1384,15 @@ class StateStore {
     localStorage.setItem(STORAGE_KEYS.OUTPUTS, JSON.stringify(allList));
     this.recordVaultSnapshot(STORAGE_KEYS.OUTPUTS, allList);
     this.notify('outputsUpdated', { list: this.getOutputs() });
+
+    // Sync deletion to server
+    const session = this.getAuthSession();
+    if (session && session.token) {
+      fetch(`/api/outputs/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${session.token}` }
+      }).catch(e => console.warn('[State] Server output delete notice:', e.message));
+    }
   }
 
   duplicateOutput(id) {

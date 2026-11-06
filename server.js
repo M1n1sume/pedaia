@@ -2,8 +2,28 @@ import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
 import zlib from 'node:zlib';
+import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { synthesizePedagogicalDocument } from './public/js/pedagogicalEngine.js';
+import * as db from './serverDb.js';
+
+// Initialize server database
+db.initDb();
+
+function parseJsonBody(req) {
+  return new Promise((resolve, reject) => {
+    let bodyStr = '';
+    req.on('data', chunk => { bodyStr += chunk; });
+    req.on('end', () => {
+      try {
+        resolve(bodyStr ? JSON.parse(bodyStr) : {});
+      } catch (err) {
+        reject(err);
+      }
+    });
+    req.on('error', reject);
+  });
+}
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -34,7 +54,7 @@ const MIME_TYPES = {
 const server = http.createServer(async (req, res) => {
   // Universal Cross-Device & Security Headers
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('X-Frame-Options', 'SAMEORIGIN');
@@ -49,17 +69,223 @@ const server = http.createServer(async (req, res) => {
   const parsedUrl = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
   const pathname = parsedUrl.pathname;
 
+  // Helper to get authenticated user
+  const authHeader = req.headers['authorization'];
+  const authUser = authHeader ? db.getUserByToken(authHeader) : null;
+
   // API Routes
   if (pathname.startsWith('/api/')) {
+    // Auth Information
     if (pathname === '/api/auth/info' && req.method === 'GET') {
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({
-        authModel: 'client-secure-salted-sha256',
+        authModel: 'pbkdf2-sha512-server-enforced',
         adminAccount: 'M1n1sume',
         multiUserSupported: true,
         dataIsolation: 'per-user',
         serverTime: new Date().toISOString()
       }));
+      return;
+    }
+
+    // Auth: Register
+    if (pathname === '/api/auth/register' && req.method === 'POST') {
+      try {
+        const body = await parseJsonBody(req);
+        const result = db.registerUser(body);
+        res.writeHead(201, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(result));
+      } catch (err) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'REGISTRATION_ERROR', message: err.message }));
+      }
+      return;
+    }
+
+    // Auth: Login
+    if (pathname === '/api/auth/login' && req.method === 'POST') {
+      try {
+        const body = await parseJsonBody(req);
+        const result = db.loginUser(body);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(result));
+      } catch (err) {
+        res.writeHead(401, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'AUTH_FAILED', message: err.message }));
+      }
+      return;
+    }
+
+    // Auth: Logout
+    if (pathname === '/api/auth/logout' && req.method === 'POST') {
+      const token = authHeader ? authHeader.replace(/^Bearer\s+/i, '').trim() : '';
+      db.logoutUser(token);
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: true }));
+      return;
+    }
+
+    // Auth: Current User Status
+    if (pathname === '/api/auth/me' && req.method === 'GET') {
+      if (!authUser) {
+        res.writeHead(401, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ authenticated: false, user: null }));
+        return;
+      }
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ authenticated: true, user: authUser }));
+      return;
+    }
+
+    // Educator Profile: GET
+    if (pathname === '/api/profile' && req.method === 'GET') {
+      if (!authUser) {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ profile: { ...db.BLANK_EDUCATOR_PROFILE } }));
+        return;
+      }
+      const profile = db.getUserProfile(authUser.id);
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ profile }));
+      return;
+    }
+
+    // Educator Profile: PUT (strictly separate from login credentials)
+    if (pathname === '/api/profile' && req.method === 'PUT') {
+      if (!authUser) {
+        res.writeHead(401, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'UNAUTHORIZED', message: 'Authentication required to update profile.' }));
+        return;
+      }
+      try {
+        const body = await parseJsonBody(req);
+        const updatedProfile = db.saveUserProfile(authUser.id, body);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: true, profile: updatedProfile }));
+      } catch (err) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'PROFILE_ERROR', message: err.message }));
+      }
+      return;
+    }
+
+    // Personal Saved Designs: GET
+    if (pathname === '/api/designs' && req.method === 'GET') {
+      if (!authUser) {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ designs: [] }));
+        return;
+      }
+      const designs = db.getUserDesigns(authUser.id);
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ designs }));
+      return;
+    }
+
+    // Personal Saved Designs: POST (Create / Save)
+    if (pathname === '/api/designs' && req.method === 'POST') {
+      if (!authUser) {
+        res.writeHead(401, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'UNAUTHORIZED', message: 'Please sign in to save your instructional designs.' }));
+        return;
+      }
+      try {
+        const body = await parseJsonBody(req);
+        const saved = db.saveUserDesign(authUser.id, body);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: true, design: saved }));
+      } catch (err) {
+        res.writeHead(403, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'SAVE_FAILED', message: err.message }));
+      }
+      return;
+    }
+
+    // Personal Saved Designs: DELETE /api/designs/:id
+    if (pathname.startsWith('/api/designs/') && req.method === 'DELETE') {
+      if (!authUser) {
+        res.writeHead(401, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'UNAUTHORIZED', message: 'Authentication required.' }));
+        return;
+      }
+      const designId = pathname.replace('/api/designs/', '').trim();
+      try {
+        db.deleteUserDesign(authUser.id, designId);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: true }));
+      } catch (err) {
+        res.writeHead(403, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'DELETE_FAILED', message: err.message }));
+      }
+      return;
+    }
+
+    // Personal Generated Outputs: GET
+    if (pathname === '/api/outputs' && req.method === 'GET') {
+      if (!authUser) {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ outputs: [] }));
+        return;
+      }
+      const outputs = db.getUserOutputs(authUser.id);
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ outputs }));
+      return;
+    }
+
+    // Personal Generated Outputs: POST (Create / Save)
+    if (pathname === '/api/outputs' && req.method === 'POST') {
+      if (!authUser) {
+        res.writeHead(401, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'UNAUTHORIZED', message: 'Please sign in to save your generated outputs.' }));
+        return;
+      }
+      try {
+        const body = await parseJsonBody(req);
+        const saved = db.saveUserOutput(authUser.id, body);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: true, output: saved }));
+      } catch (err) {
+        res.writeHead(403, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'SAVE_FAILED', message: err.message }));
+      }
+      return;
+    }
+
+    // Personal Generated Outputs: DELETE /api/outputs/:id
+    if (pathname.startsWith('/api/outputs/') && req.method === 'DELETE') {
+      if (!authUser) {
+        res.writeHead(401, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'UNAUTHORIZED', message: 'Authentication required.' }));
+        return;
+      }
+      const outputId = pathname.replace('/api/outputs/', '').trim();
+      try {
+        db.deleteUserOutput(authUser.id, outputId);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: true }));
+      } catch (err) {
+        res.writeHead(403, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'DELETE_FAILED', message: err.message }));
+      }
+      return;
+    }
+
+    // Admin User Directory: GET
+    if (pathname === '/api/admin/users' && req.method === 'GET') {
+      if (!authUser || authUser.role !== 'admin') {
+        res.writeHead(403, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'FORBIDDEN', message: 'Administrator privileges required.' }));
+        return;
+      }
+      try {
+        const users = db.listAllUsers(authUser.id);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ users }));
+      } catch (err) {
+        res.writeHead(403, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'ADMIN_ERROR', message: err.message }));
+      }
       return;
     }
 

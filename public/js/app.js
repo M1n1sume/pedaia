@@ -14,7 +14,7 @@ import { renderOutputWorkspaceView, setupOutputWorkspaceListeners, setActiveWork
 import { renderMyDesignsView, setupMyDesignsListeners } from './views/myDesigns.js';
 import { renderPromptLibraryView, setupPromptLibraryListeners } from './views/promptLibrary.js';
 import { renderSettingsView, setupSettingsListeners, setSettingsActiveTab } from './views/settings.js';
-import { renderAiOutputStudioView, setupAiOutputStudioListeners } from './views/aiOutputStudio.js';
+import { renderAiOutputStudioView, setupAiOutputStudioListeners, setAiOutputStudioViewMode } from './views/aiOutputStudio.js';
 import { renderAdminDashboardView, setupAdminDashboardListeners } from './views/adminDashboard.js';
 import { openAuthModal } from './views/authModal.js';
 import { openExtensionModal } from './views/extensionModal.js';
@@ -462,29 +462,36 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Update header and mobile user authentication status
   const updateAuthUI = () => {
     const user = store.getCurrentUser();
+    const isAuthenticated = store.isAuthenticated();
     const isAdmin = store.isAdmin();
 
+    const headerAuthButtons = document.getElementById('header-auth-buttons');
+    const headerUserMenuWrapper = document.getElementById('header-user-menu-wrapper');
     const usernameDisplay = document.getElementById('header-username-display');
     const roleBadge = document.getElementById('header-role-badge');
     const avatar = document.getElementById('header-user-avatar');
     const dropdownUsername = document.getElementById('dropdown-username-text');
     const dropdownRole = document.getElementById('dropdown-role-text');
     const adminMenuItem = document.getElementById('menu-item-admin');
-    const changePassItem = document.getElementById('menu-item-change-pass');
-    const logoutSection = document.getElementById('dropdown-logout-section');
-    const switchLabel = document.getElementById('menu-switch-label');
 
     const mobileUsername = document.getElementById('mobile-username-text');
     const mobileRole = document.getElementById('mobile-user-role');
     const mobileAvatar = document.getElementById('mobile-user-avatar');
-    const mobileAuthAction = document.getElementById('mobile-auth-action-btn');
+    const mobileUnauthActions = document.getElementById('mobile-unauth-actions');
     const mobileExtraActions = document.getElementById('mobile-auth-extra-actions');
     const mobileAdminBtn = document.getElementById('mobile-admin-console-btn');
 
-    if (user && user.username) {
+    if (isAuthenticated && user && user.username) {
+      // Authenticated: show user dropdown menu, hide guest Log In & Create Account buttons
+      if (headerAuthButtons) headerAuthButtons.classList.add('hidden');
+      if (headerUserMenuWrapper) headerUserMenuWrapper.classList.remove('hidden');
+
       if (usernameDisplay) usernameDisplay.textContent = user.username;
       if (dropdownUsername) dropdownUsername.textContent = user.username;
       if (mobileUsername) mobileUsername.textContent = user.username;
+
+      if (mobileUnauthActions) mobileUnauthActions.classList.add('hidden');
+      if (mobileExtraActions) mobileExtraActions.classList.remove('hidden');
 
       if (isAdmin) {
         if (roleBadge) {
@@ -519,13 +526,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (adminMenuItem) adminMenuItem.classList.add('hidden');
         if (mobileAdminBtn) mobileAdminBtn.classList.add('hidden');
       }
-
-      if (changePassItem) changePassItem.classList.remove('hidden');
-      if (logoutSection) logoutSection.classList.remove('hidden');
-      if (switchLabel) switchLabel.textContent = 'Switch Account';
-      if (mobileAuthAction) mobileAuthAction.textContent = 'Switch';
-      if (mobileExtraActions) mobileExtraActions.classList.remove('hidden');
     } else {
+      // Unauthenticated: show explicit top-right Log In & Create Account buttons
+      if (headerAuthButtons) headerAuthButtons.classList.remove('hidden');
+      if (headerUserMenuWrapper) headerUserMenuWrapper.classList.add('hidden');
+
+      if (mobileUnauthActions) mobileUnauthActions.classList.remove('hidden');
+      if (mobileExtraActions) mobileExtraActions.classList.add('hidden');
+      if (mobileAdminBtn) mobileAdminBtn.classList.add('hidden');
+
       if (usernameDisplay) usernameDisplay.textContent = 'Sign In';
       if (roleBadge) roleBadge.classList.add('hidden');
       if (avatar) {
@@ -541,23 +550,43 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (mobileUsername) mobileUsername.textContent = 'Guest User';
       if (mobileRole) mobileRole.textContent = 'Not authenticated';
       if (adminMenuItem) adminMenuItem.classList.add('hidden');
-      if (changePassItem) changePassItem.classList.add('hidden');
-      if (logoutSection) logoutSection.classList.add('hidden');
-      if (switchLabel) switchLabel.textContent = 'Sign In / Create Account';
-      if (mobileAuthAction) mobileAuthAction.textContent = 'Sign In';
-      if (mobileExtraActions) mobileExtraActions.classList.add('hidden');
-      if (mobileAdminBtn) mobileAdminBtn.classList.add('hidden');
     }
   };
   updateAuthUI();
 
-  // User dropdown or direct authentication modal trigger
+  // Top-Right Header Unauthenticated Buttons (Log In & Create Account)
+  document.getElementById('header-login-btn')?.addEventListener('click', () => {
+    openAuthModal({
+      defaultTab: 'login',
+      showToast,
+      onSuccess: () => {
+        updateAuthUI();
+        updateSidebarProfile();
+        renderCurrentView();
+      }
+    });
+  });
+
+  document.getElementById('header-signup-btn')?.addEventListener('click', () => {
+    openAuthModal({
+      defaultTab: 'signup',
+      showToast,
+      onSuccess: () => {
+        updateAuthUI();
+        updateSidebarProfile();
+        renderCurrentView();
+      }
+    });
+  });
+
+  // User Dropdown Trigger (Only active when authenticated)
   const userBtn = document.getElementById('header-user-btn');
   const userDropdown = document.getElementById('header-user-dropdown');
   userBtn?.addEventListener('click', (e) => {
     e.stopPropagation();
     if (!store.isAuthenticated()) {
       openAuthModal({
+        defaultTab: 'login',
         showToast,
         onSuccess: () => {
           updateAuthUI();
@@ -569,37 +598,33 @@ document.addEventListener('DOMContentLoaded', async () => {
       userDropdown?.classList.toggle('hidden');
     }
   });
+
   document.addEventListener('click', (e) => {
     if (!userDropdown?.contains(e.target) && !userBtn?.contains(e.target)) {
       userDropdown?.classList.add('hidden');
     }
   });
 
+  // Account Menu Items
   document.getElementById('menu-item-profile')?.addEventListener('click', () => {
     userDropdown?.classList.add('hidden');
     navigateTo('settings', 'general');
   });
 
+  document.getElementById('menu-item-saved-designs')?.addEventListener('click', () => {
+    userDropdown?.classList.add('hidden');
+    navigateTo('designs');
+  });
+
+  document.getElementById('menu-item-generated-outputs')?.addEventListener('click', () => {
+    userDropdown?.classList.add('hidden');
+    setAiOutputStudioViewMode('library');
+    navigateTo('ai-output-studio');
+  });
+
   document.getElementById('menu-item-admin')?.addEventListener('click', () => {
     userDropdown?.classList.add('hidden');
     navigateTo('admin');
-  });
-
-  document.getElementById('menu-item-change-pass')?.addEventListener('click', () => {
-    userDropdown?.classList.add('hidden');
-    navigateTo('settings', 'general');
-  });
-
-  document.getElementById('menu-item-switch-account')?.addEventListener('click', () => {
-    userDropdown?.classList.add('hidden');
-    openAuthModal({
-      showToast,
-      onSuccess: () => {
-        updateAuthUI();
-        updateSidebarProfile();
-        renderCurrentView();
-      }
-    });
   });
 
   document.getElementById('menu-item-logout')?.addEventListener('click', () => {
@@ -612,9 +637,36 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   // Mobile drawer auth actions
+  document.getElementById('mobile-login-btn')?.addEventListener('click', () => {
+    closeMobileSidebar();
+    openAuthModal({
+      defaultTab: 'login',
+      showToast,
+      onSuccess: () => {
+        updateAuthUI();
+        updateSidebarProfile();
+        renderCurrentView();
+      }
+    });
+  });
+
+  document.getElementById('mobile-signup-btn')?.addEventListener('click', () => {
+    closeMobileSidebar();
+    openAuthModal({
+      defaultTab: 'signup',
+      showToast,
+      onSuccess: () => {
+        updateAuthUI();
+        updateSidebarProfile();
+        renderCurrentView();
+      }
+    });
+  });
+
   document.getElementById('mobile-auth-action-btn')?.addEventListener('click', () => {
     closeMobileSidebar();
     openAuthModal({
+      defaultTab: 'login',
       showToast,
       onSuccess: () => {
         updateAuthUI();
@@ -637,6 +689,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     updateSidebarProfile();
     renderCurrentView();
   });
+
+  // Background sync server data if active session exists
+  const activeSession = store.getAuthSession();
+  if (activeSession && activeSession.token && store.syncServerData) {
+    store.syncServerData(activeSession.token);
+  }
 
   store.subscribe((evt) => {
     if (evt === 'settingsUpdated' || evt === 'profileUpdated' || evt === 'userSwitched' || evt === 'sessionChanged') {

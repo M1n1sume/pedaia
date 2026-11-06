@@ -1,0 +1,13 @@
+[
+  {
+    "id": "usr_m1n1sume",
+    "username": "M1n1sume",
+    "email": "",
+    "role": "admin",
+    "passwordHash": null,
+    "salt": "49c9371e05d5d122a14eb49e06d7345a",
+    "isInitialized": false,
+    "createdAt": "2026-11-06T21:49:55.797Z",
+    "lastLogin": null
+  }
+]

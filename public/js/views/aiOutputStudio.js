@@ -318,6 +318,12 @@ let activeStudioState = {
   searchQuery: ''
 };
 
+export function setAiOutputStudioViewMode(mode) {
+  if (mode === 'library' || mode === 'creator' || mode === 'templates') {
+    activeStudioState.viewMode = mode;
+  }
+}
+
 export function renderAiOutputStudioView() {
   const isLibrary = activeStudioState.viewMode === 'library';
   const isTemplates = activeStudioState.viewMode === 'templates';

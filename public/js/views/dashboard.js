@@ -32,25 +32,19 @@ export function renderDashboardView() {
             <div>
               <div class="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-2">
                 <span>Account Access & Security</span>
-                ${isM1n1sumeUninitialized ? '<span class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 border border-amber-300">👑 Admin Setup Ready</span>' : ''}
               </div>
               <p class="text-[11.5px] text-slate-600 dark:text-slate-400 mt-0.5">
-                Create an account or sign in to isolate and save your pedagogical folios, AI outputs, and studio preferences.
+                Create an account or log in to save your personal pedagogical folios, AI outputs, and studio materials.
               </p>
             </div>
           </div>
           <div class="flex items-center gap-2 shrink-0 w-full sm:w-auto">
-            <button id="dashboard-login-btn" class="flex-1 sm:flex-none px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-2xs transition-all cursor-pointer">
-              Sign In
+            <button id="dashboard-login-btn" class="flex-1 sm:flex-none px-3.5 py-1.5 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-750 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 text-xs font-semibold shadow-2xs transition-all cursor-pointer">
+              Log In
             </button>
-            <button id="dashboard-signup-btn" class="flex-1 sm:flex-none px-3.5 py-1.5 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-750 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 text-xs font-semibold shadow-2xs transition-all cursor-pointer">
+            <button id="dashboard-signup-btn" class="flex-1 sm:flex-none px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-2xs transition-all cursor-pointer">
               Create Account
             </button>
-            ${isM1n1sumeUninitialized ? `
-              <button id="dashboard-admin-setup-btn" class="flex-1 sm:flex-none px-3.5 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold shadow-2xs transition-all cursor-pointer">
-                👑 Setup Admin
-              </button>
-            ` : ''}
           </div>
         </div>
       ` : `
@@ -584,9 +578,6 @@ export function setupDashboardListeners(container, navigateTo, showToast = null)
   });
   container.querySelector('#dashboard-signup-btn')?.addEventListener('click', () => {
     openAuthModal({ defaultTab: 'signup', showToast, onSuccess: () => navigateTo('dashboard') });
-  });
-  container.querySelector('#dashboard-admin-setup-btn')?.addEventListener('click', () => {
-    openAuthModal({ defaultTab: 'admin-setup', showToast, onSuccess: () => navigateTo('admin') });
   });
   container.querySelector('#dashboard-switch-account-btn')?.addEventListener('click', () => {
     openAuthModal({ showToast, onSuccess: () => navigateTo('dashboard') });

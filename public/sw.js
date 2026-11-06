@@ -1,5 +1,5 @@
 // PEDAIA Universal Service Worker for Multi-Device & Offline Accessibility
-const CACHE_NAME = 'pedaia-cache-v8';
+const CACHE_NAME = 'pedaia-cache-v9';
 const APP_SHELL = [
   './',
   './index.html',
