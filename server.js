@@ -274,10 +274,12 @@ const server = http.createServer(async (req, res) => {
   try {
     const content = fs.readFileSync(filePath);
 
-    // Caching Strategy for High Performance on Mobile & Global Edge
-    if (ext === '.html') {
-      res.setHeader('Cache-Control', 'public, max-age=0, must-revalidate');
-    } else if (['.js', '.mjs', '.css', '.svg', '.png', '.jpg', '.jpeg', '.woff2', '.woff', '.ttf'].includes(ext)) {
+    // Caching Strategy: Dynamic development & instant updates for code, caching for fonts/images
+    if (['.html', '.js', '.mjs', '.css', '.json'].includes(ext)) {
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
+    } else if (['.svg', '.png', '.jpg', '.jpeg', '.woff2', '.woff', '.ttf'].includes(ext)) {
       res.setHeader('Cache-Control', 'public, max-age=86400, stale-while-revalidate=604800');
     }
 

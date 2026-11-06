@@ -1,5 +1,5 @@
 // PEDAIA Universal Service Worker for Multi-Device & Offline Accessibility
-const CACHE_NAME = 'pedaia-cache-v5';
+const CACHE_NAME = 'pedaia-cache-v8';
 const APP_SHELL = [
   './',
   './index.html',
@@ -57,18 +57,10 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // JavaScript files & HTML: Network-First so code updates take effect immediately
+  // JavaScript files & HTML: Network fresh with no-store so all changes take effect instantly
   if (url.pathname.endsWith('.js') || url.pathname.endsWith('.html') || url.pathname === '/') {
     event.respondWith(
-      fetch(event.request).then((networkResponse) => {
-        if (networkResponse && networkResponse.status === 200) {
-          const responseToCache = networkResponse.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseToCache);
-          });
-        }
-        return networkResponse;
-      }).catch(() => {
+      fetch(event.request, { cache: 'no-store' }).catch(() => {
         return caches.match(event.request);
       })
     );

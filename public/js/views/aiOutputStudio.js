@@ -386,7 +386,7 @@ function renderCreatorWorkspaceView(activeCat, savedOutputs = []) {
       <!-- ================================================================= -->
       <!-- STEP 1: OUTPUT CATEGORY SELECTION CARDS                           -->
       <!-- ================================================================= -->
-      <section class="bg-white dark:bg-slate-850 rounded-2xl border border-slate-200/90 dark:border-slate-750 p-6 shadow-sm">
+      <section id="step-1-category-section" class="bg-white dark:bg-slate-850 rounded-2xl border border-slate-200/90 dark:border-slate-750 p-6 shadow-sm">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
           <div>
             <div class="flex items-center gap-2">
@@ -454,7 +454,7 @@ function renderCreatorWorkspaceView(activeCat, savedOutputs = []) {
       <section class="grid grid-cols-1 lg:grid-cols-12 gap-6">
         
         <!-- Column 1: Pedagogical Content (7 Cols) -->
-        <div class="lg:col-span-7 bg-white dark:bg-slate-850 rounded-2xl border border-slate-200/90 dark:border-slate-750 p-6 shadow-sm space-y-4">
+        <div id="step-2-content-section" class="lg:col-span-7 bg-white dark:bg-slate-850 rounded-2xl border border-slate-200/90 dark:border-slate-750 p-6 shadow-sm space-y-4">
           <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
             <div class="flex items-center gap-2">
               <span class="w-6 h-6 rounded-full bg-indigo-600 text-white font-mono text-xs font-bold flex items-center justify-center">2</span>

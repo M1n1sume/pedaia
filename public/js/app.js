@@ -75,46 +75,52 @@ export function showToast(message, type = 'info') {
 }
 
 export function navigateTo(route, param = null) {
-  currentRoute = route;
+  const normalizedRoute = (route === 'output-studio' || route === 'ai-output-studio') ? 'ai-output-studio' : route;
+  currentRoute = normalizedRoute;
 
-  if (route === 'workspace' && param) {
+  if (normalizedRoute === 'workspace' && param) {
     setActiveWorkspaceDesignId(param);
-  } else if (route === 'settings' && param) {
+  } else if (normalizedRoute === 'settings' && param) {
     setSettingsActiveTab(param);
   }
 
-  // Update URL hash
-  window.location.hash = param ? `${route}/${param}` : route;
+  // Update URL hash without re-triggering unnecessary events
+  const targetHash = param ? `${normalizedRoute}/${param}` : normalizedRoute;
+  if (window.location.hash.replace(/^#\/?/, '') !== targetHash) {
+    window.location.hash = targetHash;
+  }
 
-  // Update active sidebar nav
-  document.querySelectorAll('.nav-item').forEach(item => {
+  // Update active navigation item styling across all bars (Header, Sidebar, Bottom Bar)
+  document.querySelectorAll('.nav-item, [data-nav]').forEach(item => {
     const navVal = item.getAttribute('data-nav');
     const tabVal = item.getAttribute('data-tab');
     let isActive = false;
 
-    if (route === 'settings' && navVal === 'settings') {
+    if (normalizedRoute === 'settings' && navVal === 'settings') {
       if (tabVal) {
         isActive = (param === tabVal) || (!param && tabVal === 'ai-providers');
       } else {
         isActive = true;
       }
-    } else if (navVal === route || (route === 'workspace' && navVal === 'designs') || ((route === 'ai-output-studio' || route === 'output-studio') && navVal === 'ai-output-studio')) {
+    } else if (navVal === normalizedRoute || (normalizedRoute === 'workspace' && navVal === 'designs') || (normalizedRoute === 'ai-output-studio' && (navVal === 'ai-output-studio' || navVal === 'output-studio'))) {
       isActive = true;
     }
 
-    if (isActive) {
-      item.classList.add('active', 'bg-indigo-600', 'text-white', 'shadow-xs');
-      item.classList.remove('text-slate-600', 'dark:text-slate-300', 'text-slate-700', 'dark:text-slate-200', 'text-indigo-700', 'dark:text-indigo-300', 'hover:bg-slate-100', 'dark:hover:bg-slate-800', 'bg-indigo-50/90', 'dark:bg-indigo-950/70', 'border-indigo-200/80', 'dark:border-indigo-800');
-    } else {
-      item.classList.remove('active', 'bg-indigo-600', 'text-white', 'shadow-xs', 'bg-indigo-50/90', 'dark:bg-indigo-950/70', 'border-indigo-200/80', 'dark:border-indigo-800', 'text-indigo-700', 'dark:text-indigo-300');
-      item.classList.add('text-slate-600', 'dark:text-slate-300');
+    if (item.classList.contains('nav-item')) {
+      if (isActive) {
+        item.classList.add('active', 'bg-indigo-600', 'text-white', 'shadow-xs');
+        item.classList.remove('text-slate-600', 'dark:text-slate-300', 'text-slate-700', 'dark:text-slate-200', 'text-indigo-700', 'dark:text-indigo-300', 'hover:bg-slate-100', 'dark:hover:bg-slate-800', 'bg-indigo-50/90', 'dark:bg-indigo-950/70', 'border-indigo-200/80', 'dark:border-indigo-800');
+      } else {
+        item.classList.remove('active', 'bg-indigo-600', 'text-white', 'shadow-xs', 'bg-indigo-50/90', 'dark:bg-indigo-950/70', 'border-indigo-200/80', 'dark:border-indigo-800', 'text-indigo-700', 'dark:text-indigo-300');
+        item.classList.add('text-slate-600', 'dark:text-slate-300');
+      }
     }
   });
 
   // Update Header title
   const titleEl = document.getElementById('header-page-title');
   if (titleEl) {
-    titleEl.textContent = PAGE_TITLES[route] || 'Instructional Studio';
+    titleEl.textContent = PAGE_TITLES[normalizedRoute] || 'Instructional Studio';
   }
 
   // Close mobile sidebar if open
@@ -130,55 +136,59 @@ function renderCurrentView() {
 
   window.scrollTo({ top: 0, behavior: 'smooth' });
 
-  switch (currentRoute) {
-    case 'dashboard':
-      container.innerHTML = renderDashboardView();
-      setupDashboardListeners(container, navigateTo, showToast);
-      break;
-    case 'lesson-planning':
-      container.innerHTML = renderLessonPlannerView();
-      setupLessonPlannerListeners(container, (id) => navigateTo('workspace', id), showToast, () => navigateTo('settings'));
-      break;
-    case 'activity-design':
-      container.innerHTML = renderActivityDesignerView();
-      setupActivityDesignerListeners(container, (id) => navigateTo('workspace', id), showToast, () => navigateTo('settings'));
-      break;
-    case 'questioning':
-      container.innerHTML = renderQuestioningStudioView();
-      setupQuestioningStudioListeners(container, (id) => navigateTo('workspace', id), showToast, () => navigateTo('settings'));
-      break;
-    case 'differentiation':
-      container.innerHTML = renderDifferentiationStudioView();
-      setupDifferentiationStudioListeners(container, (id) => navigateTo('workspace', id), showToast, () => navigateTo('settings'));
-      break;
-    case 'ai-output-studio':
-    case 'output-studio':
-      container.innerHTML = renderAiOutputStudioView();
-      setupAiOutputStudioListeners(container, navigateTo, showToast);
-      break;
-    case 'workspace':
-      container.innerHTML = renderOutputWorkspaceView();
-      setupOutputWorkspaceListeners(container, (dest, param) => navigateTo(dest, param), showToast, () => navigateTo('settings'));
-      break;
-    case 'designs':
-      container.innerHTML = renderMyDesignsView();
-      setupMyDesignsListeners(container, (dest, param) => navigateTo(dest, param), showToast);
-      break;
-    case 'prompt-library':
-      container.innerHTML = renderPromptLibraryView();
-      setupPromptLibraryListeners(container, (dest) => navigateTo(dest), showToast);
-      break;
-    case 'settings':
-      container.innerHTML = renderSettingsView();
-      setupSettingsListeners(container, showToast);
-      break;
-    case 'admin':
-      container.innerHTML = renderAdminDashboardView();
-      setupAdminDashboardListeners(container, navigateTo, showToast);
-      break;
-    default:
-      container.innerHTML = renderDashboardView();
-      setupDashboardListeners(container, navigateTo, showToast);
+  try {
+    switch (currentRoute) {
+      case 'dashboard':
+        container.innerHTML = renderDashboardView();
+        setupDashboardListeners(container, navigateTo, showToast);
+        break;
+      case 'lesson-planning':
+        container.innerHTML = renderLessonPlannerView();
+        setupLessonPlannerListeners(container, (id) => navigateTo('workspace', id), showToast, () => navigateTo('settings'));
+        break;
+      case 'activity-design':
+        container.innerHTML = renderActivityDesignerView();
+        setupActivityDesignerListeners(container, (id) => navigateTo('workspace', id), showToast, () => navigateTo('settings'));
+        break;
+      case 'questioning':
+        container.innerHTML = renderQuestioningStudioView();
+        setupQuestioningStudioListeners(container, (id) => navigateTo('workspace', id), showToast, () => navigateTo('settings'));
+        break;
+      case 'differentiation':
+        container.innerHTML = renderDifferentiationStudioView();
+        setupDifferentiationStudioListeners(container, (id) => navigateTo('workspace', id), showToast, () => navigateTo('settings'));
+        break;
+      case 'ai-output-studio':
+      case 'output-studio':
+        container.innerHTML = renderAiOutputStudioView();
+        setupAiOutputStudioListeners(container, navigateTo, showToast);
+        break;
+      case 'workspace':
+        container.innerHTML = renderOutputWorkspaceView();
+        setupOutputWorkspaceListeners(container, (dest, param) => navigateTo(dest, param), showToast, () => navigateTo('settings'));
+        break;
+      case 'designs':
+        container.innerHTML = renderMyDesignsView();
+        setupMyDesignsListeners(container, (dest, param) => navigateTo(dest, param), showToast);
+        break;
+      case 'prompt-library':
+        container.innerHTML = renderPromptLibraryView();
+        setupPromptLibraryListeners(container, (dest) => navigateTo(dest), showToast);
+        break;
+      case 'settings':
+        container.innerHTML = renderSettingsView();
+        setupSettingsListeners(container, showToast);
+        break;
+      case 'admin':
+        container.innerHTML = renderAdminDashboardView();
+        setupAdminDashboardListeners(container, navigateTo, showToast);
+        break;
+      default:
+        container.innerHTML = renderDashboardView();
+        setupDashboardListeners(container, navigateTo, showToast);
+    }
+  } catch (err) {
+    console.error(`[Router] Error rendering view for ${currentRoute}:`, err);
   }
 }
 
@@ -337,19 +347,21 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   });
 
-  // Navigation event delegation
-  document.querySelectorAll('.nav-item').forEach(item => {
-    item.addEventListener('click', () => {
-      const dest = item.getAttribute('data-nav');
-      const tab = item.getAttribute('data-tab');
+  // Universal Navigation Click Delegation (Catches every click on or inside [data-nav] elements)
+  document.addEventListener('click', (e) => {
+    const navBtn = e.target.closest('[data-nav]');
+    if (navBtn) {
+      const dest = navBtn.getAttribute('data-nav');
+      const tab = navBtn.getAttribute('data-tab');
       if (dest) {
+        e.preventDefault();
         if (dest === 'settings' && tab) {
           navigateTo('settings', tab);
         } else {
           navigateTo(dest);
         }
       }
-    });
+    }
   });
 
   // Brand logo click
@@ -539,12 +551,23 @@ document.addEventListener('DOMContentLoaded', async () => {
   };
   updateAuthUI();
 
-  // User dropdown toggle
+  // User dropdown or direct authentication modal trigger
   const userBtn = document.getElementById('header-user-btn');
   const userDropdown = document.getElementById('header-user-dropdown');
   userBtn?.addEventListener('click', (e) => {
     e.stopPropagation();
-    userDropdown?.classList.toggle('hidden');
+    if (!store.isAuthenticated()) {
+      openAuthModal({
+        showToast,
+        onSuccess: () => {
+          updateAuthUI();
+          updateSidebarProfile();
+          renderCurrentView();
+        }
+      });
+    } else {
+      userDropdown?.classList.toggle('hidden');
+    }
   });
   document.addEventListener('click', (e) => {
     if (!userDropdown?.contains(e.target) && !userBtn?.contains(e.target)) {
@@ -632,11 +655,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     updateHeaderPalette();
   });
 
-  // Check initial API status
-  await aiService.checkServerStatus();
-  updateApiStatusIndicator();
-
-  // Route from URL hash if present
+  // Route from URL hash immediately without blocking
   const hash = window.location.hash.replace(/^#\/?/, '');
   if (hash) {
     const parts = hash.split('/');
@@ -653,4 +672,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       navigateTo(parts[0], parts[1]);
     }
   });
+
+  // Check API status in the background
+  aiService.checkServerStatus().then(() => {
+    updateApiStatusIndicator();
+  }).catch(() => {});
 });

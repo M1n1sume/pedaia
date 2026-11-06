@@ -1,6 +1,7 @@
 // PEDAIA Professional Instructional Design Atelier Dashboard View
 import { store } from '../state.js';
 import { openUniversalExportModal } from '../exportUtils.js';
+import { openAuthModal } from './authModal.js';
 
 export function renderDashboardView() {
   const designs = store.getDesigns();
@@ -9,12 +10,67 @@ export function renderDashboardView() {
   const recentDesigns = designs.slice(0, 6);
   const recentOutputs = outputs.slice(0, 4);
   const featuredTemplates = templates.slice(0, 4);
+  const user = store.getCurrentUser();
+  const isAuthenticated = store.isAuthenticated();
+  const isM1n1sumeUninitialized = !store.isM1n1sumeInitialized();
 
   // The most recent design to continue working on
   const mostRecentDesign = designs.length > 0 ? designs[0] : null;
 
   return `
     <div class="space-y-8 animate-fade-in pb-12">
+      
+      <!-- =================================================================== -->
+      <!-- USER AUTHENTICATION & ACCESS BARRIER / BANNER                       -->
+      <!-- =================================================================== -->
+      ${!isAuthenticated ? `
+        <div class="p-4 rounded-2xl bg-indigo-50/80 dark:bg-indigo-950/40 border border-indigo-200/80 dark:border-indigo-800/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-2xs">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold text-sm shrink-0">
+              🔐
+            </div>
+            <div>
+              <div class="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <span>Account Access & Security</span>
+                ${isM1n1sumeUninitialized ? '<span class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 border border-amber-300">👑 Admin Setup Ready</span>' : ''}
+              </div>
+              <p class="text-[11.5px] text-slate-600 dark:text-slate-400 mt-0.5">
+                Create an account or sign in to isolate and save your pedagogical folios, AI outputs, and studio preferences.
+              </p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 shrink-0 w-full sm:w-auto">
+            <button id="dashboard-login-btn" class="flex-1 sm:flex-none px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-2xs transition-all cursor-pointer">
+              Sign In
+            </button>
+            <button id="dashboard-signup-btn" class="flex-1 sm:flex-none px-3.5 py-1.5 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-750 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 text-xs font-semibold shadow-2xs transition-all cursor-pointer">
+              Create Account
+            </button>
+            ${isM1n1sumeUninitialized ? `
+              <button id="dashboard-admin-setup-btn" class="flex-1 sm:flex-none px-3.5 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold shadow-2xs transition-all cursor-pointer">
+                👑 Setup Admin
+              </button>
+            ` : ''}
+          </div>
+        </div>
+      ` : `
+        <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-750 flex items-center justify-between text-xs">
+          <div class="flex items-center gap-2.5">
+            <span class="w-2.5 h-2.5 rounded-full ${user.role === 'admin' ? 'bg-amber-500' : 'bg-emerald-500'}"></span>
+            <span class="text-slate-600 dark:text-slate-300">Logged in as <strong class="font-mono text-slate-900 dark:text-white">${user.username}</strong> (${user.role === 'admin' ? 'System Administrator' : 'Educator Workspace'})</span>
+          </div>
+          <div class="flex items-center gap-2">
+            ${user.role === 'admin' ? `
+              <button data-action="nav" data-dest="admin" class="px-2.5 py-1 text-[11px] font-bold text-amber-700 dark:text-amber-300 bg-amber-100/70 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-800 rounded-lg cursor-pointer">
+                👑 Admin Console
+              </button>
+            ` : ''}
+            <button id="dashboard-switch-account-btn" class="px-2.5 py-1 text-[11px] font-semibold text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 rounded-lg cursor-pointer">
+              Switch Account
+            </button>
+          </div>
+        </div>
+      `}
       
       <!-- =================================================================== -->
       <!-- 1. CREATE INSTRUCTIONAL DESIGN (Primary Hero & Quick-Start Hub)     -->
@@ -522,6 +578,20 @@ function escapeHtml(str) {
 }
 
 export function setupDashboardListeners(container, navigateTo, showToast = null) {
+  // Authentication Actions
+  container.querySelector('#dashboard-login-btn')?.addEventListener('click', () => {
+    openAuthModal({ defaultTab: 'login', showToast, onSuccess: () => navigateTo('dashboard') });
+  });
+  container.querySelector('#dashboard-signup-btn')?.addEventListener('click', () => {
+    openAuthModal({ defaultTab: 'signup', showToast, onSuccess: () => navigateTo('dashboard') });
+  });
+  container.querySelector('#dashboard-admin-setup-btn')?.addEventListener('click', () => {
+    openAuthModal({ defaultTab: 'admin-setup', showToast, onSuccess: () => navigateTo('admin') });
+  });
+  container.querySelector('#dashboard-switch-account-btn')?.addEventListener('click', () => {
+    openAuthModal({ showToast, onSuccess: () => navigateTo('dashboard') });
+  });
+
   // Quick Launch Studio Buttons in Hero
   container.querySelector('#quick-launch-lp-btn')?.addEventListener('click', () => navigateTo('lesson-planning'));
   container.querySelector('#quick-launch-act-btn')?.addEventListener('click', () => navigateTo('activity-design'));

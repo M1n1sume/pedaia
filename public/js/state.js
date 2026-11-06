@@ -375,7 +375,9 @@ class StateStore {
     return { success: true, user: admin, session };
   }
 
-  async registerUser({ username, password, initialName = '' }) {
+  async registerUser(arg1, arg2, arg3) {
+    const options = (typeof arg1 === 'object' && arg1 !== null) ? arg1 : { username: arg1, password: arg2, initialName: arg3 };
+    const { username, password, initialName = '' } = options;
     if (!username || typeof username !== 'string') {
       throw new Error('Username is required.');
     }
@@ -439,7 +441,9 @@ class StateStore {
     return { success: true, user: newUser, session };
   }
 
-  async loginUser({ username, password }) {
+  async loginUser(arg1, arg2) {
+    const options = (typeof arg1 === 'object' && arg1 !== null) ? arg1 : { username: arg1, password: arg2 };
+    const { username, password } = options;
     if (!username || typeof username !== 'string') {
       throw new Error('Username is required.');
     }
