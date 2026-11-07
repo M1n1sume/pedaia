@@ -117,5 +117,33 @@
     "email": "viewer_1794078970701@example.com",
     "role": "educator",
     "createdAt": "2026-11-07T19:16:10.760Z"
+  },
+  "sess_0966a316fb5950175014681871cd40f6bb91c27e3993312929e9632131b3efbe": {
+    "userId": "usr_admin_m1n1sume",
+    "username": "M1n1sume",
+    "email": "admin@pedaia.internal",
+    "role": "admin",
+    "createdAt": "2026-11-07T19:36:30.275Z"
+  },
+  "sess_a319097c5bcbe05c3ae3d22efb50e4fd7a761bffd96ee31bc25665832033f339": {
+    "userId": "usr_admin_m1n1sume",
+    "username": "M1n1sume",
+    "email": "admin@pedaia.internal",
+    "role": "admin",
+    "createdAt": "2026-11-07T19:36:30.342Z"
+  },
+  "sess_b397d0e3dd60ba02853f77b15b210726c3333d91ac524a7ba9fd3ec5c57a9621": {
+    "userId": "usr_1794080190438_364baa",
+    "username": "temp_author_1794080190379",
+    "email": "author_1794080190379@example.com",
+    "role": "educator",
+    "createdAt": "2026-11-07T19:36:30.438Z"
+  },
+  "sess_64943884c5fe4d0d15ae9052af41b2878a9e46c7f6891b4595b83210571c292a": {
+    "userId": "usr_1794080190511_f83b8d",
+    "username": "temp_viewer_1794080190448",
+    "email": "viewer_1794080190448@example.com",
+    "role": "educator",
+    "createdAt": "2026-11-07T19:36:30.511Z"
   }
 }
