@@ -1,5 +1,148 @@
 [
   {
+    "id": "act_1794081358086_a729ee",
+    "type": "EMAIL_SENT",
+    "userId": "usr_1794081357942_80e98d",
+    "username": "temp_author_1794081357891",
+    "details": {
+      "recipient": "author_1794081357891@example.com",
+      "designId": "des-1794081358057-58467f",
+      "designTitle": "Open Curriculum",
+      "eventType": "OUTPUT_GENERATED",
+      "subject": "[PEDAIA] ✨ New AI Educational Output Ready for \"Open Curriculum\""
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "timestamp": "2026-11-07T19:55:58.086Z"
+  },
+  {
+    "id": "act_1794081358071_084e0c",
+    "type": "EMAIL_SENT",
+    "userId": "usr_1794081357942_80e98d",
+    "username": "temp_author_1794081357891",
+    "details": {
+      "recipient": "author_1794081357891@example.com",
+      "designId": "des-1794081358057-58467f",
+      "designTitle": "Open Curriculum",
+      "eventType": "STAGE_COMPLETED",
+      "subject": "[PEDAIA] 🎉 Milestone Reached: \"Open Curriculum\" is Completed!"
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "timestamp": "2026-11-07T19:55:58.071Z"
+  },
+  {
+    "id": "act_1794081358060_9d55a8",
+    "type": "OUTPUT_CREATED",
+    "userId": "usr_1794081357942_80e98d",
+    "username": "temp_author_1794081357891",
+    "details": {
+      "designId": "des-1794081358057-58467f",
+      "title": "Open Curriculum",
+      "stage": "Completed",
+      "visibility": "public"
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "timestamp": "2026-11-07T19:55:58.060Z"
+  },
+  {
+    "id": "act_1794081358050_c747b2",
+    "type": "EMAIL_SENT",
+    "userId": "usr_1794081357942_80e98d",
+    "username": "temp_author_1794081357891",
+    "details": {
+      "recipient": "author_1794081357891@example.com",
+      "designId": "des-1794081358021-9a809f",
+      "designTitle": "Confidential Exam",
+      "eventType": "STAGE_COMPLETED",
+      "subject": "[PEDAIA] 🎉 Milestone Reached: \"Confidential Exam\" is Completed!"
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "timestamp": "2026-11-07T19:55:58.050Z"
+  },
+  {
+    "id": "act_1794081358026_85b61f",
+    "type": "OUTPUT_CREATED",
+    "userId": "usr_1794081357942_80e98d",
+    "username": "temp_author_1794081357891",
+    "details": {
+      "designId": "des-1794081358021-9a809f",
+      "title": "Confidential Exam",
+      "stage": "Completed",
+      "visibility": "private"
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "timestamp": "2026-11-07T19:55:58.026Z"
+  },
+  {
+    "id": "act_1794081358015_9d41fa",
+    "type": "OUTPUT_CREATED",
+    "userId": "usr_1794081357942_80e98d",
+    "username": "temp_author_1794081357891",
+    "details": {
+      "designId": "des-1794081358011-8d66d8",
+      "title": "WIP Physics Lab",
+      "stage": "Draft",
+      "visibility": "public"
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "timestamp": "2026-11-07T19:55:58.015Z"
+  },
+  {
+    "id": "act_1794081357882_c2f6b9",
+    "type": "USER_LOGIN",
+    "userId": null,
+    "username": "M1n1sume",
+    "details": {
+      "status": "SUCCESS"
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "timestamp": "2026-11-07T19:55:57.882Z"
+  },
+  {
+    "id": "act_1794081357871_7905c6",
+    "type": "WEBSITE_ACCESS",
+    "userId": null,
+    "username": "Guest Visitor",
+    "details": {
+      "path": "/"
+    },
+    "ip": "10.0.0.1",
+    "userAgent": "",
+    "timestamp": "2026-11-07T19:55:57.872Z"
+  },
+  {
+    "id": "act_1794081357860_787258",
+    "type": "USER_LOGIN",
+    "userId": "usr_admin_m1n1sume",
+    "username": "M1n1sume",
+    "details": {
+      "status": "SUCCESS",
+      "role": "admin"
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "timestamp": "2026-11-07T19:55:57.860Z"
+  },
+  {
+    "id": "act_1794081357799_05449a",
+    "type": "USER_LOGIN",
+    "userId": "usr_admin_m1n1sume",
+    "username": "M1n1sume",
+    "details": {
+      "status": "SUCCESS",
+      "role": "admin"
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "timestamp": "2026-11-07T19:55:57.799Z"
+  },
+  {
     "id": "act_1794080190617_227e4a",
     "type": "EMAIL_SENT",
     "userId": "usr_1794080190438_364baa",

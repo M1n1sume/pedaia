@@ -1,0 +1,6 @@
+# PEDAIA Search Engine Crawling & Discovery Policy
+User-agent: *
+Allow: /
+
+# Sitemap Index for Google, Bing, Apple, DuckDuckGo
+Sitemap: https://pedaia.onrender.com/sitemap.xml
