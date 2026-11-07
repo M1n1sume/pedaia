@@ -23,6 +23,8 @@ import { initLayoutManager } from './layoutManager.js';
 
 let currentRoute = 'dashboard';
 let isSidebarCollapsed = false;
+let isInitialRouteLoad = true;
+let mobileHeaderTimer = null;
 
 const PAGE_TITLES = {
   'dashboard': 'Dashboard',
@@ -38,6 +40,134 @@ const PAGE_TITLES = {
   'settings': 'Settings & AI Setup',
   'admin': 'Admin Console & User Directory'
 };
+
+const ROUTE_METADATA = {
+  'dashboard': {
+    title: 'Dashboard',
+    icon: '🏛️',
+    context: 'Design Atelier'
+  },
+  'ai-output-studio': {
+    title: 'AI Output Studio',
+    icon: '🎨',
+    context: 'PowerPoint & Decks'
+  },
+  'output-studio': {
+    title: 'AI Output Studio',
+    icon: '🎨',
+    context: 'PowerPoint & Decks'
+  },
+  'lesson-planning': {
+    title: 'Lesson Planner',
+    icon: '📖',
+    context: '5E & UbD Standards'
+  },
+  'activity-design': {
+    title: 'Activity Designer',
+    icon: '🔬',
+    context: 'Active Learning & Labs'
+  },
+  'questioning': {
+    title: 'Questioning Studio',
+    icon: '💡',
+    context: "Bloom's Cognitive Banks"
+  },
+  'differentiation': {
+    title: 'Differentiation Studio',
+    icon: '⚖️',
+    context: 'Tomlinson Scaffolds'
+  },
+  'workspace': {
+    title: 'Refinement Workspace',
+    icon: '🛠️',
+    context: 'Pedagogical Folios'
+  },
+  'designs': {
+    title: 'My Saved Designs',
+    icon: '🗃️',
+    context: 'Curricular Library'
+  },
+  'prompt-library': {
+    title: 'Prompt Library',
+    icon: '📚',
+    context: 'Exemplar Prompts'
+  },
+  'settings': {
+    title: 'Studio Settings',
+    icon: '⚙️',
+    context: 'AI Engines & Setup'
+  },
+  'admin': {
+    title: 'Admin Console',
+    icon: '👑',
+    context: 'Activity Telemetry'
+  }
+};
+
+/**
+ * Smooth 3D Rotating Transition for the Mobile Header
+ * Applies subtle rotateX, fade, and cubic-bezier easing on view changes
+ */
+export function updateMobileRotatingHeader(route, immediate = false) {
+  const meta = ROUTE_METADATA[route] || {
+    title: PAGE_TITLES[route] || 'Instructional Studio',
+    icon: '🏛️',
+    context: 'Design Atelier'
+  };
+
+  const stage = document.getElementById('mobile-header-stage');
+  const titleEl = document.getElementById('mobile-header-title');
+  const iconEl = document.getElementById('mobile-header-icon');
+  const contextEl = document.getElementById('mobile-header-context');
+
+  if (!stage || !titleEl) return;
+
+  const applyData = () => {
+    titleEl.textContent = meta.title;
+    if (iconEl) iconEl.textContent = meta.icon;
+    if (contextEl) contextEl.textContent = meta.context;
+  };
+
+  // Immediate update on initial load or on desktop viewport
+  if (immediate || window.innerWidth >= 768) {
+    applyData();
+    return;
+  }
+
+  // Clear existing animation timer if user taps rapidly
+  if (mobileHeaderTimer) {
+    clearTimeout(mobileHeaderTimer);
+    mobileHeaderTimer = null;
+  }
+
+  // Accessibility: Support prefers-reduced-motion fallback
+  const prefersReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (prefersReducedMotion) {
+    stage.classList.remove('mobile-rotate-in', 'mobile-rotate-out');
+    stage.style.opacity = '0';
+    mobileHeaderTimer = setTimeout(() => {
+      applyData();
+      stage.style.opacity = '1';
+      mobileHeaderTimer = null;
+    }, 150);
+    return;
+  }
+
+  // Fluid 3D Rotation Animation Cycle (400-500ms total, cubic-bezier easing)
+  stage.classList.remove('mobile-rotate-in');
+  stage.classList.add('mobile-rotate-out');
+
+  mobileHeaderTimer = setTimeout(() => {
+    applyData();
+    stage.classList.remove('mobile-rotate-out');
+    stage.classList.add('mobile-rotate-in');
+
+    mobileHeaderTimer = setTimeout(() => {
+      stage.classList.remove('mobile-rotate-in');
+      mobileHeaderTimer = null;
+    }, 260);
+  }, 220);
+}
 
 export function showToast(message, type = 'info') {
   const container = document.getElementById('toast-container');
@@ -123,6 +253,10 @@ export function navigateTo(route, param = null) {
   if (titleEl) {
     titleEl.textContent = PAGE_TITLES[normalizedRoute] || 'Instructional Studio';
   }
+
+  // Update Smooth Rotating Mobile Header with 3D rotation transition
+  updateMobileRotatingHeader(normalizedRoute, isInitialRouteLoad);
+  isInitialRouteLoad = false;
 
   // Close mobile sidebar if open
   closeMobileSidebar();
@@ -370,6 +504,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Brand logo click
   document.getElementById('brand-logo-btn')?.addEventListener('click', () => navigateTo('dashboard'));
+
+  // Mobile Rotating Header click: opens the mobile drawer for instant studio navigation
+  document.getElementById('mobile-rotating-header')?.addEventListener('click', () => {
+    const sidebar = document.getElementById('app-sidebar');
+    const backdrop = document.getElementById('mobile-sidebar-backdrop');
+    sidebar?.classList.remove('translate-x-full');
+    backdrop?.classList.remove('hidden');
+  });
 
   // Header buttons
   document.getElementById('header-settings-btn')?.addEventListener('click', () => navigateTo('settings', 'ai-providers'));

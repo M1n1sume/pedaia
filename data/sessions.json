@@ -33,5 +33,61 @@
     "email": "educator_1794072145364@school.edu",
     "role": "educator",
     "createdAt": "2026-11-07T17:22:25.415Z"
+  },
+  "sess_05719eac584ebab1d483d576121b09825cf2ab557d27f808078fd6cf71903a00": {
+    "userId": "usr_admin_m1n1sume",
+    "username": "M1n1sume",
+    "email": "admin@pedaia.internal",
+    "role": "admin",
+    "createdAt": "2026-11-07T17:28:45.048Z"
+  },
+  "sess_55fd52d2e1ffa906c7a75dd79266dae38ad76c72fdc1613af4c03b6e1d30066c": {
+    "userId": "usr_admin_m1n1sume",
+    "username": "M1n1sume",
+    "email": "admin@pedaia.internal",
+    "role": "admin",
+    "createdAt": "2026-11-07T17:28:45.114Z"
+  },
+  "sess_52e003f8a3bb1afd33487b4be1abc52391aff96c0a6ddc3c7cbfc31a6f80006f": {
+    "userId": "usr_1794072525237_3fe268",
+    "username": "temp_author_1794072525149",
+    "email": "author_1794072525149@example.com",
+    "role": "educator",
+    "createdAt": "2026-11-07T17:28:45.237Z"
+  },
+  "sess_2857849353a4581ed7cbaf57834066411cce79e836cf52c8e0bb076a30ffb8df": {
+    "userId": "usr_1794072525307_c5197d",
+    "username": "temp_viewer_1794072525248",
+    "email": "viewer_1794072525248@example.com",
+    "role": "educator",
+    "createdAt": "2026-11-07T17:28:45.307Z"
+  },
+  "sess_fff3c1145c8053e97cf44354f75f2fae9837810d35db41740f84abc10099c5bc": {
+    "userId": "usr_admin_m1n1sume",
+    "username": "M1n1sume",
+    "email": "admin@pedaia.internal",
+    "role": "admin",
+    "createdAt": "2026-11-07T17:38:41.132Z"
+  },
+  "sess_26f65afa9fc425dd3d6890e74b33a18aa790c66b183e7a674faae68873a373d5": {
+    "userId": "usr_admin_m1n1sume",
+    "username": "M1n1sume",
+    "email": "admin@pedaia.internal",
+    "role": "admin",
+    "createdAt": "2026-11-07T17:38:41.195Z"
+  },
+  "sess_f0021dc8aabd2d574e793113f50c30087ff7172c920ffc90aeeef984974b81fb": {
+    "userId": "usr_1794073121281_74b30b",
+    "username": "temp_author_1794073121231",
+    "email": "author_1794073121231@example.com",
+    "role": "educator",
+    "createdAt": "2026-11-07T17:38:41.281Z"
+  },
+  "sess_119446a43c18af508b149c295a6c619079d47426b17dcb0317a1d8045562c31f": {
+    "userId": "usr_1794073121341_9e82e5",
+    "username": "temp_viewer_1794073121290",
+    "email": "viewer_1794073121290@example.com",
+    "role": "educator",
+    "createdAt": "2026-11-07T17:38:41.341Z"
   }
 }
