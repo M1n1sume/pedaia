@@ -19,6 +19,7 @@ import { renderAdminDashboardView, setupAdminDashboardListeners } from './views/
 import { openAuthModal } from './views/authModal.js';
 import { openExtensionModal } from './views/extensionModal.js';
 import { openScreenFitModal } from './views/screenFitModal.js';
+import { openUserAccountModal } from './views/userAccountModal.js';
 import { initCommandPalette, openCommandPalette } from './views/commandPalette.js';
 import { initLayoutManager } from './layoutManager.js';
 
@@ -746,7 +747,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   });
 
-  // User Dropdown Trigger (Only active when authenticated)
+  // User Profile Trigger (Opens non-clipped pop-up modal, matching Dark Mode, Extensions, and AI Switcher)
   const userBtn = document.getElementById('header-user-btn');
   const userDropdown = document.getElementById('header-user-dropdown');
   userBtn?.addEventListener('click', (e) => {
@@ -762,7 +763,39 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
       });
     } else {
-      userDropdown?.classList.toggle('hidden');
+      openUserAccountModal({
+        navigateTo,
+        showToast,
+        updateAuthUI,
+        updateSidebarProfile,
+        renderCurrentView,
+        setAiOutputStudioViewMode
+      });
+    }
+  });
+
+  // Mobile User Strip Click (Also opens User Account Modal if authenticated)
+  document.getElementById('mobile-user-strip')?.addEventListener('click', () => {
+    closeMobileSidebar();
+    if (!store.isAuthenticated()) {
+      openAuthModal({
+        defaultTab: 'login',
+        showToast,
+        onSuccess: () => {
+          updateAuthUI();
+          updateSidebarProfile();
+          renderCurrentView();
+        }
+      });
+    } else {
+      openUserAccountModal({
+        navigateTo,
+        showToast,
+        updateAuthUI,
+        updateSidebarProfile,
+        renderCurrentView,
+        setAiOutputStudioViewMode
+      });
     }
   });
 
