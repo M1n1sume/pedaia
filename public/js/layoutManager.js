@@ -195,6 +195,29 @@ export function setupScreenFitListeners() {
   });
 }
 
+export function setupMobileHeaderScroll() {
+  if (typeof document === 'undefined') return;
+  const masthead = document.getElementById('top-masthead');
+  if (!masthead) return;
+
+  // Enable mouse wheel horizontal scrolling when content overflows on mobile widths
+  masthead.addEventListener('wheel', (e) => {
+    if (e.deltaY !== 0 && masthead.scrollWidth > masthead.clientWidth) {
+      masthead.scrollLeft += e.deltaY;
+      e.preventDefault();
+    }
+  }, { passive: false });
+
+  // When auth buttons are tapped or focused, ensure they smoothly scroll into full view
+  const signupBtn = document.getElementById('header-signup-btn');
+  const loginBtn = document.getElementById('header-login-btn');
+  [signupBtn, loginBtn].forEach(btn => {
+    btn?.addEventListener('focus', () => {
+      btn.scrollIntoView({ behavior: 'smooth', inline: 'nearest', block: 'nearest' });
+    });
+  });
+}
+
 export function initLayoutManager() {
   if (typeof window === 'undefined') return;
 
@@ -205,6 +228,7 @@ export function initLayoutManager() {
 
   applyLayoutMode(initialMode, initialScale);
   setupScreenFitListeners();
+  setupMobileHeaderScroll();
 
   // Listen for store layoutChanged
   if (store.subscribe) {

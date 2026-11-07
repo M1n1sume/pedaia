@@ -1,5 +1,124 @@
 [
   {
+    "id": "act_1794071323169_f2b70b",
+    "type": "EMAIL_SENT",
+    "userId": "usr_1794071323034_d9bb41",
+    "username": "educator_notif_1794071322979",
+    "details": {
+      "recipient": "educator_1794071322979@school.edu",
+      "designId": "des-1794071323072-c8d1a2",
+      "designTitle": "Quantum Computing Fundamentals for High School",
+      "eventType": "STAGE_COMPLETED",
+      "subject": "[PEDAIA] 🎉 Milestone Reached: \"Quantum Computing Fundamentals for High School\" is Completed!"
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "timestamp": "2026-11-07T17:08:43.169Z"
+  },
+  {
+    "id": "act_1794071323157_971f57",
+    "type": "OUTPUT_CREATED",
+    "userId": "usr_1794071323034_d9bb41",
+    "username": "educator_notif_1794071322979",
+    "details": {
+      "designId": "des-1794071323072-c8d1a2",
+      "title": "Quantum Computing Fundamentals for High School",
+      "stage": "Completed",
+      "visibility": "private"
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "timestamp": "2026-11-07T17:08:43.157Z"
+  },
+  {
+    "id": "act_1794071323143_db882e",
+    "type": "EMAIL_SENT",
+    "userId": "usr_1794071323034_d9bb41",
+    "username": "educator_notif_1794071322979",
+    "details": {
+      "recipient": "educator_1794071322979@school.edu",
+      "designId": "des-1794071323072-c8d1a2",
+      "designTitle": "Quantum Computing Fundamentals for High School",
+      "eventType": "PROJECT_UPDATE",
+      "subject": "[PEDAIA] Project Update: \"Quantum Computing Fundamentals for High School\""
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "timestamp": "2026-11-07T17:08:43.143Z"
+  },
+  {
+    "id": "act_1794071323120_d17544",
+    "type": "EMAIL_SENT",
+    "userId": "usr_1794071323034_d9bb41",
+    "username": "educator_notif_1794071322979",
+    "details": {
+      "recipient": "educator_1794071322979@school.edu",
+      "designId": "des-1794071323072-c8d1a2",
+      "designTitle": "Quantum Computing Fundamentals for High School",
+      "eventType": "OUTPUT_GENERATED",
+      "subject": "[PEDAIA] ✨ New AI Educational Output Ready for \"Quantum Computing Fundamentals for High School\""
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "timestamp": "2026-11-07T17:08:43.120Z"
+  },
+  {
+    "id": "act_1794071323087_e9fcb0",
+    "type": "OUTPUT_CREATED",
+    "userId": "usr_1794071323034_d9bb41",
+    "username": "educator_notif_1794071322979",
+    "details": {
+      "outputId": "out-1794071323082-85af3c",
+      "title": "Interactive Qubit Simulation Worksheet",
+      "outputType": "AI Worksheet & Activity",
+      "designId": "des-1794071323072-c8d1a2"
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "timestamp": "2026-11-07T17:08:43.087Z"
+  },
+  {
+    "id": "act_1794071323077_cd7d63",
+    "type": "OUTPUT_CREATED",
+    "userId": "usr_1794071323034_d9bb41",
+    "username": "educator_notif_1794071322979",
+    "details": {
+      "designId": "des-1794071323072-c8d1a2",
+      "title": "Quantum Computing Fundamentals for High School",
+      "stage": "Draft",
+      "visibility": "private"
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "timestamp": "2026-11-07T17:08:43.077Z"
+  },
+  {
+    "id": "act_1794071323068_9f7edb",
+    "type": "USER_LOGIN",
+    "userId": "usr_1794071323034_d9bb41",
+    "username": "educator_notif_1794071322979",
+    "details": {
+      "status": "SUCCESS",
+      "role": "educator"
+    },
+    "ip": "192.168.1.42",
+    "userAgent": "",
+    "timestamp": "2026-11-07T17:08:43.068Z"
+  },
+  {
+    "id": "act_1794071323060_869f80",
+    "type": "WEBSITE_ACCESS",
+    "userId": "usr_1794071323034_d9bb41",
+    "username": "educator_notif_1794071322979",
+    "details": {
+      "path": "/dashboard",
+      "device": "Desktop Browser"
+    },
+    "ip": "192.168.1.42",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+    "timestamp": "2026-11-07T17:08:43.060Z"
+  },
+  {
     "id": "act_1794007349211_760133",
     "type": "USER_LOGIN",
     "userId": "usr_admin_m1n1sume",

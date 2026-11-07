@@ -146,9 +146,59 @@ html.dark body, body.dark {
 /* Anchors layout to the left, expands usable workspace, prevents cutoffs    */
 /* ========================================================================= */
 
+#top-masthead {
+  overflow-x: auto;
+  overflow-y: visible;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE 10+ */
+  touch-action: pan-x pan-y;
+  scroll-behavior: smooth;
+}
+
+#top-masthead::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
 #top-masthead .masthead-inner {
   width: 100% !important;
   max-width: 100% !important;
+}
+
+/* Mobile Sideways Scroll for Header — Allows user to smoothly scroll right to view/click Create Account */
+@media (max-width: 640px) {
+  #top-masthead {
+    overscroll-behavior-x: contain;
+  }
+
+  #top-masthead .masthead-inner {
+    width: max-content !important;
+    min-width: 100% !important;
+    padding-left: 0.75rem !important;
+    padding-right: 1.5rem !important;
+    display: flex !important;
+    flex-wrap: nowrap !important;
+  }
+
+  /* Prevent auth buttons and utility buttons from shrinking awkwardly */
+  #header-auth-buttons,
+  #header-user-menu-wrapper,
+  #header-login-btn,
+  #header-signup-btn {
+    flex-shrink: 0 !important;
+    white-space: nowrap !important;
+  }
+
+  /* Floating positioning for header dropdown popovers on mobile so they don't get clipped */
+  #header-screen-fit-dropdown,
+  #header-user-dropdown {
+    position: fixed !important;
+    top: 62px !important;
+    right: 12px !important;
+    left: auto !important;
+    max-width: calc(100vw - 24px) !important;
+    z-index: 9999 !important;
+  }
 }
 
 #main-content {
