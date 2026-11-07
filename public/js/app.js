@@ -18,6 +18,7 @@ import { renderAiOutputStudioView, setupAiOutputStudioListeners, setAiOutputStud
 import { renderAdminDashboardView, setupAdminDashboardListeners } from './views/adminDashboard.js';
 import { openAuthModal } from './views/authModal.js';
 import { openExtensionModal } from './views/extensionModal.js';
+import { openScreenFitModal } from './views/screenFitModal.js';
 import { initCommandPalette, openCommandPalette } from './views/commandPalette.js';
 import { initLayoutManager } from './layoutManager.js';
 
@@ -537,6 +538,16 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('mobile-sidebar-palette-btn')?.addEventListener('click', () => {
     closeMobileSidebar();
     openPaletteModal({ showToast });
+  });
+
+  // Device & Screen Fit Modal Triggers (Pop-up Dialog)
+  document.getElementById('header-screen-fit-btn')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    openScreenFitModal({ showToast });
+  });
+  document.getElementById('mobile-sidebar-screen-fit-btn')?.addEventListener('click', () => {
+    closeMobileSidebar();
+    openScreenFitModal({ showToast });
   });
 
   // Browser Extension Modal Triggers

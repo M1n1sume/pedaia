@@ -192,8 +192,7 @@ html.dark body, body.dark {
     white-space: nowrap !important;
   }
 
-  /* Floating positioning for header dropdown popovers on mobile so they don't get clipped */
-  #header-screen-fit-dropdown,
+  /* Floating positioning for header user dropdown popover on mobile so it doesn't get clipped */
   #header-user-dropdown {
     position: fixed !important;
     top: 62px !important;

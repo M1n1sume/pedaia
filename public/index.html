@@ -334,92 +334,14 @@
           <span class="hidden md:inline text-[11px]">Extension</span>
         </button>
 
-        <!-- Screen Fit & Device Layout Dropdown Trigger -->
+        <!-- Screen Fit & Device Layout Button (Opens Pop-up Modal) -->
         <div class="relative shrink-0 hidden md:block" id="header-screen-fit-wrapper">
           <button id="header-screen-fit-btn" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-750 border border-slate-200 dark:border-slate-700 transition-all shadow-2xs cursor-pointer" title="Adjust website layout for your device (Left-aligned, Auto-fit, or Compact)">
             <svg class="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
             </svg>
-            <span class="hidden sm:inline text-[11px]" id="header-screen-fit-label">Screen Fit</span>
+            <span class="hidden sm:inline text-[11px]" id="header-screen-fit-label">Auto-Fit</span>
           </button>
-
-          <!-- Screen Fit Dropdown Popover -->
-          <div id="header-screen-fit-dropdown" class="hidden absolute right-0 mt-2 w-80 rounded-2xl bg-white dark:bg-slate-850 border border-slate-200 dark:border-slate-750 shadow-xl p-4 z-50 text-slate-800 dark:text-slate-100 animate-fade-in space-y-3.5">
-            <div class="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-750">
-              <div class="flex items-center gap-2">
-                <span class="text-base">🖥️</span>
-                <div>
-                  <h4 class="text-xs font-bold text-slate-900 dark:text-white">Device & Screen Fit</h4>
-                  <p class="text-[10px] text-slate-500 dark:text-slate-400" id="screen-fit-detected-device">Detecting screen...</p>
-                </div>
-              </div>
-              <span class="px-2 py-0.5 rounded-md text-[10px] font-mono font-bold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800/60" id="screen-fit-res-badge">1920×1080</span>
-            </div>
-
-            <!-- Layout Alignment Selection -->
-            <div>
-              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-1.5">Layout Alignment</label>
-              <div class="space-y-1.5 text-xs">
-                <button type="button" class="screen-layout-opt-btn w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-start gap-2.5 text-left transition-all cursor-pointer" data-mode="auto">
-                  <span class="text-base shrink-0 mt-0.5">⚡</span>
-                  <div class="flex-1 min-w-0">
-                    <div class="flex items-center justify-between">
-                      <span class="font-bold text-slate-900 dark:text-white">Smart Device Adaptive</span>
-                      <span class="layout-check hidden text-indigo-600 dark:text-indigo-400 font-bold">✓</span>
-                    </div>
-                    <p class="text-[11px] text-slate-500 dark:text-slate-400">Auto-adjusts layout to your device so all buttons stay visible</p>
-                  </div>
-                </button>
-
-                <button type="button" class="screen-layout-opt-btn w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-start gap-2.5 text-left transition-all cursor-pointer" data-mode="left">
-                  <span class="text-base shrink-0 mt-0.5">⬅️</span>
-                  <div class="flex-1 min-w-0">
-                    <div class="flex items-center justify-between">
-                      <span class="font-bold text-slate-900 dark:text-white">Left-Aligned (Wide)</span>
-                      <span class="layout-check hidden text-indigo-600 dark:text-indigo-400 font-bold">✓</span>
-                    </div>
-                    <p class="text-[11px] text-slate-500 dark:text-slate-400">Moves layout to the left, maximizing viewable area</p>
-                  </div>
-                </button>
-
-                <button type="button" class="screen-layout-opt-btn w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-start gap-2.5 text-left transition-all cursor-pointer" data-mode="compact">
-                  <span class="text-base shrink-0 mt-0.5">💻</span>
-                  <div class="flex-1 min-w-0">
-                    <div class="flex items-center justify-between">
-                      <span class="font-bold text-slate-900 dark:text-white">Laptop & Scaled Fit</span>
-                      <span class="layout-check hidden text-indigo-600 dark:text-indigo-400 font-bold">✓</span>
-                    </div>
-                    <p class="text-[11px] text-slate-500 dark:text-slate-400">Fits 100% of controls on 1366x768 and 125%/150% scaled displays</p>
-                  </div>
-                </button>
-
-                <button type="button" class="screen-layout-opt-btn w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-start gap-2.5 text-left transition-all cursor-pointer" data-mode="centered">
-                  <span class="text-base shrink-0 mt-0.5">🎯</span>
-                  <div class="flex-1 min-w-0">
-                    <div class="flex items-center justify-between">
-                      <span class="font-bold text-slate-900 dark:text-white">Centered Atelier</span>
-                      <span class="layout-check hidden text-indigo-600 dark:text-indigo-400 font-bold">✓</span>
-                    </div>
-                    <p class="text-[11px] text-slate-500 dark:text-slate-400">Classic centered document column</p>
-                  </div>
-                </button>
-              </div>
-            </div>
-
-            <!-- UI Scale Adjuster -->
-            <div class="pt-2 border-t border-slate-100 dark:border-slate-750">
-              <div class="flex items-center justify-between mb-1.5">
-                <label class="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">UI Scale / Zoom</label>
-                <span class="text-xs font-mono font-bold text-indigo-600 dark:text-indigo-400" id="screen-fit-scale-val">100%</span>
-              </div>
-              <div class="grid grid-cols-4 gap-1.5">
-                <button type="button" class="scale-opt-btn py-1 text-xs font-bold rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer" data-scale="90">90%</button>
-                <button type="button" class="scale-opt-btn py-1 text-xs font-bold rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer" data-scale="95">95%</button>
-                <button type="button" class="scale-opt-btn py-1 text-xs font-bold rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer" data-scale="100">100%</button>
-                <button type="button" class="scale-opt-btn py-1 text-xs font-bold rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer" data-scale="105">105%</button>
-              </div>
-            </div>
-          </div>
         </div>
 
         <!-- Studio Settings Button (Official Settings Gear Logo) -->
@@ -650,6 +572,9 @@
       </button>
       <button id="mobile-sidebar-palette-btn" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800">
         <span>🌓 Appearance (Light / Dark / System)</span>
+      </button>
+      <button id="mobile-sidebar-screen-fit-btn" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer">
+        <span>🖥️ Device & Screen Fit</span>
       </button>
       <button id="mobile-sidebar-extension-btn" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800">
         <span>🧩 Browser Companion Extension</span>

@@ -3,6 +3,7 @@
 // anchors layout to the left, prevents button cutoffs, and provides manual fit controls.
 
 import { store } from './state.js';
+import { openScreenFitModal } from './views/screenFitModal.js';
 
 export const LAYOUT_MODES = {
   AUTO: 'auto',
@@ -137,62 +138,16 @@ export function setupScreenFitListeners() {
   if (typeof document === 'undefined') return;
 
   const btn = document.getElementById('header-screen-fit-btn');
-  const dropdown = document.getElementById('header-screen-fit-dropdown');
-  const wrapper = document.getElementById('header-screen-fit-wrapper');
+  const mobileBtn = document.getElementById('mobile-sidebar-screen-fit-btn');
 
-  if (btn && dropdown) {
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      dropdown.classList.toggle('hidden');
-      if (!dropdown.classList.contains('hidden')) {
-        const curMode = store.getLayoutMode ? store.getLayoutMode() : 'auto';
-        const curScale = store.getUiScale ? store.getUiScale() : 100;
-        updateScreenFitDropdownUI(curMode, curScale);
-      }
-    });
+  const handleOpen = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    openScreenFitModal({ showToast: window.showToast });
+  };
 
-    document.addEventListener('click', (e) => {
-      if (wrapper && !wrapper.contains(e.target)) {
-        dropdown.classList.add('hidden');
-      }
-    });
-  }
-
-  // Layout mode buttons click
-  document.querySelectorAll('.screen-layout-opt-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const mode = btn.getAttribute('data-mode');
-      if (mode && store.setLayoutMode) {
-        store.setLayoutMode(mode);
-        const curScale = store.getUiScale ? store.getUiScale() : 100;
-        applyLayoutMode(mode, curScale);
-        if (window.showToast) {
-          const names = {
-            auto: '⚡ Smart Device Adaptive',
-            left: '⬅️ Left-Aligned (Wide Canvas)',
-            compact: '💻 Laptop & Scaled Screen Fit',
-            centered: '🎯 Centered Atelier'
-          };
-          window.showToast(`Layout adjusted to ${names[mode] || mode}`, 'info');
-        }
-      }
-    });
-  });
-
-  // Scale buttons click
-  document.querySelectorAll('.scale-opt-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const scale = Number(btn.getAttribute('data-scale'));
-      if (scale && store.setUiScale) {
-        store.setUiScale(scale);
-        const curMode = store.getLayoutMode ? store.getLayoutMode() : 'auto';
-        applyLayoutMode(curMode, scale);
-        if (window.showToast) {
-          window.showToast(`Display scale set to ${scale}%`, 'info');
-        }
-      }
-    });
-  });
+  btn?.addEventListener('click', handleOpen);
+  mobileBtn?.addEventListener('click', handleOpen);
 }
 
 export function setupMobileHeaderScroll() {
@@ -251,11 +206,14 @@ export function initLayoutManager() {
   });
 }
 
+export { openScreenFitModal };
+
 export default {
   LAYOUT_MODES,
   UI_SCALES,
   getDeviceProfile,
   applyLayoutMode,
   setupScreenFitListeners,
+  openScreenFitModal,
   initLayoutManager
 };

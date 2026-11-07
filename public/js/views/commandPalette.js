@@ -6,6 +6,7 @@ import { openUniversalImportModal } from '../importUtils.js';
 import { openAiSwitcherModal } from './aiSwitcherModal.js';
 import { openPaletteModal } from './paletteModal.js';
 import { openExtensionModal } from './extensionModal.js';
+import { openScreenFitModal } from './screenFitModal.js';
 
 let isOpen = false;
 let selectedIndex = 0;
@@ -95,6 +96,7 @@ function getAvailableCommands() {
     // Quick Actions
     { id: 'act-import', category: 'Studio Tools', icon: '📥', title: 'Import Any Document or Syllabus', subtitle: 'Parse PDF, DOCX, TXT, JSON, CSV into pedagogical prompts', action: () => openUniversalImportModal({ showToast: toastCallback, onAction: (a, d) => a === 'open-workspace' ? safeNavigate('workspace', d.designId) : safeNavigate('designs') }) },
     { id: 'act-switch-ai', category: 'Studio Tools', icon: '⚡', title: 'Switch Active AI Engine', subtitle: 'Switch between Gemini 2.5, Claude 3.5, GPT-4o, DeepSeek, Llama', action: () => openAiSwitcherModal({ showToast: toastCallback }) },
+    { id: 'act-screen-fit', category: 'Studio Tools', icon: '🖥️', title: 'Device & Screen Fit Layout', subtitle: 'Auto-Fit, Left-Aligned Canvas, Laptop Fit, and UI Scale Zoom', action: () => openScreenFitModal({ showToast: toastCallback }) },
     { id: 'act-extension', category: 'Studio Tools', icon: '🧩', title: 'Browser Companion Extension', subtitle: 'Download cross-browser side panel for Canvas & Classroom', action: () => openExtensionModal() },
     { id: 'act-palette', category: 'Appearance', icon: '🌓', title: 'Appearance & Theme Mode', subtitle: 'Daylight Light Mode, Evening Dark Mode, or OS System Sync', action: () => openPaletteModal({ showToast: toastCallback }) },
     { id: 'act-theme-light', category: 'Appearance', icon: '☀️', title: 'Switch to Daylight Light Mode', subtitle: 'Crisp white surfaces with official Indigo & Violet accents', action: () => { store.setThemeMode('light'); if (toastCallback) toastCallback('Switched to Daylight Light Mode', 'success'); } },
