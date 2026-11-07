@@ -195,27 +195,184 @@ export function setupScreenFitListeners() {
   });
 }
 
-export function setupMobileHeaderScroll() {
+// =========================================================================
+// MOBILE ANIMATED HEADER ROTATOR
+// Alternates smoothly between Account Actions and Studio Tools on Mobile
+// =========================================================================
+
+export function initHeaderRotator() {
   if (typeof document === 'undefined') return;
-  const masthead = document.getElementById('top-masthead');
-  if (!masthead) return;
 
-  // Enable mouse wheel horizontal scrolling when content overflows on mobile widths
-  masthead.addEventListener('wheel', (e) => {
-    if (e.deltaY !== 0 && masthead.scrollWidth > masthead.clientWidth) {
-      masthead.scrollLeft += e.deltaY;
-      e.preventDefault();
+  const rotator = document.getElementById('header-mobile-rotator');
+  if (!rotator) return;
+
+  const slideAuth = document.getElementById('mobile-slide-auth');
+  const slideTools = document.getElementById('mobile-slide-tools');
+  const toggle = document.getElementById('header-rotator-toggle');
+  const pills = toggle ? toggle.querySelectorAll('.rotator-pill') : [];
+
+  if (!slideAuth || !slideTools) return;
+
+  let currentSlide = 0; // 0: Auth Actions, 1: Studio Tools
+  let autoTimer = null;
+  let isInteracting = false;
+  let interactionResumeTimer = null;
+  const ROTATION_INTERVAL = 5500; // 5.5 seconds per slide rotation
+
+  const isMobile = () => window.innerWidth <= 640;
+
+  function setSlide(index) {
+    const prevSlide = currentSlide;
+    currentSlide = index % 2;
+
+    const slides = [slideAuth, slideTools];
+    slides.forEach((slide, idx) => {
+      if (idx === currentSlide) {
+        slide.classList.remove('exiting');
+        slide.classList.add('active');
+      } else if (idx === prevSlide && idx !== currentSlide) {
+        slide.classList.remove('active');
+        slide.classList.add('exiting');
+        setTimeout(() => slide.classList.remove('exiting'), 450);
+      } else {
+        slide.classList.remove('active', 'exiting');
+      }
+    });
+
+    // Update indicator micro-pills
+    pills.forEach((pill, idx) => {
+      const isActive = idx === currentSlide;
+      pill.classList.toggle('active', isActive);
+      pill.setAttribute('aria-selected', isActive ? 'true' : 'false');
+    });
+  }
+
+  function nextSlide() {
+    // Halt auto-rotation if dropdown popovers are open or user is currently interacting
+    const screenFitDropdown = document.getElementById('header-screen-fit-dropdown');
+    const userDropdown = document.getElementById('header-user-dropdown');
+    const isDropdownOpen = (screenFitDropdown && !screenFitDropdown.classList.contains('hidden')) ||
+                          (userDropdown && !userDropdown.classList.contains('hidden'));
+
+    if (isDropdownOpen || isInteracting || !isMobile()) {
+      return;
     }
-  }, { passive: false });
 
-  // When auth buttons are tapped or focused, ensure they smoothly scroll into full view
+    setSlide(currentSlide === 0 ? 1 : 0);
+  }
+
+  function startTimer() {
+    stopTimer();
+    if (isMobile()) {
+      autoTimer = setInterval(nextSlide, ROTATION_INTERVAL);
+    }
+  }
+
+  function stopTimer() {
+    if (autoTimer) {
+      clearInterval(autoTimer);
+      autoTimer = null;
+    }
+  }
+
+  function pauseInteraction(resumeDelay = 6500) {
+    isInteracting = true;
+    stopTimer();
+    clearTimeout(interactionResumeTimer);
+    interactionResumeTimer = setTimeout(() => {
+      isInteracting = false;
+      startTimer();
+    }, resumeDelay);
+  }
+
+  // Toggle button click (manual jump between slides)
+  if (toggle) {
+    toggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      pauseInteraction(8000);
+      const targetPill = e.target.closest('.rotator-pill');
+      if (targetPill) {
+        const slideName = targetPill.getAttribute('data-slide');
+        setSlide(slideName === 'tools' ? 1 : 0);
+      } else {
+        setSlide(currentSlide === 0 ? 1 : 0);
+      }
+    });
+  }
+
+  // Touch and pointer listeners: pause on hover / touch so user is never interrupted
+  rotator.addEventListener('mouseenter', () => pauseInteraction(5000));
+  rotator.addEventListener('touchstart', () => pauseInteraction(7500), { passive: true });
+  rotator.addEventListener('focusin', () => pauseInteraction(8000));
+
+  // Touch swipe support: swipe left/right across rotator flips slides
+  let touchStartX = 0;
+  let touchStartY = 0;
+  rotator.addEventListener('touchstart', (e) => {
+    if (e.touches && e.touches.length === 1) {
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+    }
+  }, { passive: true });
+
+  rotator.addEventListener('touchend', (e) => {
+    if (e.changedTouches && e.changedTouches.length === 1) {
+      const deltaX = e.changedTouches[0].clientX - touchStartX;
+      const deltaY = e.changedTouches[0].clientY - touchStartY;
+      if (Math.abs(deltaX) > 28 && Math.abs(deltaX) > Math.abs(deltaY)) {
+        pauseInteraction(8000);
+        if (deltaX < 0) {
+          // Swiped left -> Studio Tools
+          setSlide(1);
+        } else {
+          // Swiped right -> Account
+          setSlide(0);
+        }
+      }
+    }
+  }, { passive: true });
+
+  // Keyboard accessibility / focus listeners
   const signupBtn = document.getElementById('header-signup-btn');
   const loginBtn = document.getElementById('header-login-btn');
+  const screenFitBtn = document.getElementById('header-screen-fit-btn');
+  const settingsBtn = document.getElementById('header-settings-btn');
+
   [signupBtn, loginBtn].forEach(btn => {
     btn?.addEventListener('focus', () => {
-      btn.scrollIntoView({ behavior: 'smooth', inline: 'nearest', block: 'nearest' });
+      setSlide(0);
+      pauseInteraction(8000);
     });
   });
+
+  [screenFitBtn, settingsBtn].forEach(btn => {
+    btn?.addEventListener('focus', () => {
+      setSlide(1);
+      pauseInteraction(8000);
+    });
+  });
+
+  // Handle window resizing
+  window.addEventListener('resize', () => {
+    if (isMobile()) {
+      if (!autoTimer && !isInteracting) startTimer();
+    } else {
+      stopTimer();
+    }
+  });
+
+  // Initialize on Slide 0 (Auth: Log In & Create Account immediately visible)
+  setSlide(0);
+  startTimer();
+
+  // Expose global rotator API for testing or external controls
+  window.headerRotator = {
+    setSlide,
+    next: () => setSlide(currentSlide === 0 ? 1 : 0),
+    getCurrentSlide: () => currentSlide,
+    pause: () => pauseInteraction(20000),
+    resume: () => { isInteracting = false; startTimer(); }
+  };
 }
 
 export function initLayoutManager() {
@@ -228,7 +385,7 @@ export function initLayoutManager() {
 
   applyLayoutMode(initialMode, initialScale);
   setupScreenFitListeners();
-  setupMobileHeaderScroll();
+  initHeaderRotator();
 
   // Listen for store layoutChanged
   if (store.subscribe) {
@@ -257,5 +414,7 @@ export default {
   getDeviceProfile,
   applyLayoutMode,
   setupScreenFitListeners,
+  initHeaderRotator,
   initLayoutManager
+};
 };

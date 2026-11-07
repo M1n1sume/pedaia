@@ -1,5 +1,267 @@
 [
   {
+    "id": "act_1794072145552_8b924b",
+    "type": "EMAIL_SENT",
+    "userId": "usr_1794072145415_25ad8d",
+    "username": "educator_notif_1794072145364",
+    "details": {
+      "recipient": "educator_1794072145364@school.edu",
+      "designId": "des-1794072145442-2810b1",
+      "designTitle": "Quantum Computing Fundamentals for High School",
+      "eventType": "STAGE_COMPLETED",
+      "subject": "[PEDAIA] 🎉 Milestone Reached: \"Quantum Computing Fundamentals for High School\" is Completed!"
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "timestamp": "2026-11-07T17:22:25.552Z"
+  },
+  {
+    "id": "act_1794072145537_43f5e3",
+    "type": "OUTPUT_CREATED",
+    "userId": "usr_1794072145415_25ad8d",
+    "username": "educator_notif_1794072145364",
+    "details": {
+      "designId": "des-1794072145442-2810b1",
+      "title": "Quantum Computing Fundamentals for High School",
+      "stage": "Completed",
+      "visibility": "private"
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "timestamp": "2026-11-07T17:22:25.537Z"
+  },
+  {
+    "id": "act_1794072145521_82d0f3",
+    "type": "EMAIL_SENT",
+    "userId": "usr_1794072145415_25ad8d",
+    "username": "educator_notif_1794072145364",
+    "details": {
+      "recipient": "educator_1794072145364@school.edu",
+      "designId": "des-1794072145442-2810b1",
+      "designTitle": "Quantum Computing Fundamentals for High School",
+      "eventType": "PROJECT_UPDATE",
+      "subject": "[PEDAIA] Project Update: \"Quantum Computing Fundamentals for High School\""
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "timestamp": "2026-11-07T17:22:25.521Z"
+  },
+  {
+    "id": "act_1794072145500_330e90",
+    "type": "EMAIL_SENT",
+    "userId": "usr_1794072145415_25ad8d",
+    "username": "educator_notif_1794072145364",
+    "details": {
+      "recipient": "educator_1794072145364@school.edu",
+      "designId": "des-1794072145442-2810b1",
+      "designTitle": "Quantum Computing Fundamentals for High School",
+      "eventType": "OUTPUT_GENERATED",
+      "subject": "[PEDAIA] ✨ New AI Educational Output Ready for \"Quantum Computing Fundamentals for High School\""
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "timestamp": "2026-11-07T17:22:25.500Z"
+  },
+  {
+    "id": "act_1794072145473_c7d819",
+    "type": "OUTPUT_CREATED",
+    "userId": "usr_1794072145415_25ad8d",
+    "username": "educator_notif_1794072145364",
+    "details": {
+      "outputId": "out-1794072145467-7db574",
+      "title": "Interactive Qubit Simulation Worksheet",
+      "outputType": "AI Worksheet & Activity",
+      "designId": "des-1794072145442-2810b1"
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "timestamp": "2026-11-07T17:22:25.473Z"
+  },
+  {
+    "id": "act_1794072145463_78ae6a",
+    "type": "OUTPUT_CREATED",
+    "userId": "usr_1794072145415_25ad8d",
+    "username": "educator_notif_1794072145364",
+    "details": {
+      "designId": "des-1794072145442-2810b1",
+      "title": "Quantum Computing Fundamentals for High School",
+      "stage": "Draft",
+      "visibility": "private"
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "timestamp": "2026-11-07T17:22:25.463Z"
+  },
+  {
+    "id": "act_1794072145438_5560b6",
+    "type": "USER_LOGIN",
+    "userId": "usr_1794072145415_25ad8d",
+    "username": "educator_notif_1794072145364",
+    "details": {
+      "status": "SUCCESS",
+      "role": "educator"
+    },
+    "ip": "192.168.1.42",
+    "userAgent": "",
+    "timestamp": "2026-11-07T17:22:25.438Z"
+  },
+  {
+    "id": "act_1794072145428_c6d8cc",
+    "type": "WEBSITE_ACCESS",
+    "userId": "usr_1794072145415_25ad8d",
+    "username": "educator_notif_1794072145364",
+    "details": {
+      "path": "/dashboard",
+      "device": "Desktop Browser"
+    },
+    "ip": "192.168.1.42",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+    "timestamp": "2026-11-07T17:22:25.428Z"
+  },
+  {
+    "id": "act_1794072139813_df2a55",
+    "type": "EMAIL_SENT",
+    "userId": "usr_1794072139668_bcf34f",
+    "username": "temp_author_1794072139618",
+    "details": {
+      "recipient": "author_1794072139618@example.com",
+      "designId": "des-1794072139785-337ce0",
+      "designTitle": "Open Curriculum",
+      "eventType": "OUTPUT_GENERATED",
+      "subject": "[PEDAIA] ✨ New AI Educational Output Ready for \"Open Curriculum\""
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "timestamp": "2026-11-07T17:22:19.813Z"
+  },
+  {
+    "id": "act_1794072139799_5cd715",
+    "type": "EMAIL_SENT",
+    "userId": "usr_1794072139668_bcf34f",
+    "username": "temp_author_1794072139618",
+    "details": {
+      "recipient": "author_1794072139618@example.com",
+      "designId": "des-1794072139785-337ce0",
+      "designTitle": "Open Curriculum",
+      "eventType": "STAGE_COMPLETED",
+      "subject": "[PEDAIA] 🎉 Milestone Reached: \"Open Curriculum\" is Completed!"
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "timestamp": "2026-11-07T17:22:19.799Z"
+  },
+  {
+    "id": "act_1794072139789_25c363",
+    "type": "OUTPUT_CREATED",
+    "userId": "usr_1794072139668_bcf34f",
+    "username": "temp_author_1794072139618",
+    "details": {
+      "designId": "des-1794072139785-337ce0",
+      "title": "Open Curriculum",
+      "stage": "Completed",
+      "visibility": "public"
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "timestamp": "2026-11-07T17:22:19.789Z"
+  },
+  {
+    "id": "act_1794072139776_5c09f0",
+    "type": "EMAIL_SENT",
+    "userId": "usr_1794072139668_bcf34f",
+    "username": "temp_author_1794072139618",
+    "details": {
+      "recipient": "author_1794072139618@example.com",
+      "designId": "des-1794072139748-3ad4e7",
+      "designTitle": "Confidential Exam",
+      "eventType": "STAGE_COMPLETED",
+      "subject": "[PEDAIA] 🎉 Milestone Reached: \"Confidential Exam\" is Completed!"
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "timestamp": "2026-11-07T17:22:19.776Z"
+  },
+  {
+    "id": "act_1794072139751_0559c8",
+    "type": "OUTPUT_CREATED",
+    "userId": "usr_1794072139668_bcf34f",
+    "username": "temp_author_1794072139618",
+    "details": {
+      "designId": "des-1794072139748-3ad4e7",
+      "title": "Confidential Exam",
+      "stage": "Completed",
+      "visibility": "private"
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "timestamp": "2026-11-07T17:22:19.751Z"
+  },
+  {
+    "id": "act_1794072139742_807c89",
+    "type": "OUTPUT_CREATED",
+    "userId": "usr_1794072139668_bcf34f",
+    "username": "temp_author_1794072139618",
+    "details": {
+      "designId": "des-1794072139739-db2623",
+      "title": "WIP Physics Lab",
+      "stage": "Draft",
+      "visibility": "public"
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "timestamp": "2026-11-07T17:22:19.742Z"
+  },
+  {
+    "id": "act_1794072139610_1d076d",
+    "type": "USER_LOGIN",
+    "userId": null,
+    "username": "M1n1sume",
+    "details": {
+      "status": "SUCCESS"
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "timestamp": "2026-11-07T17:22:19.610Z"
+  },
+  {
+    "id": "act_1794072139596_88318e",
+    "type": "WEBSITE_ACCESS",
+    "userId": null,
+    "username": "Guest Visitor",
+    "details": {
+      "path": "/"
+    },
+    "ip": "10.0.0.1",
+    "userAgent": "",
+    "timestamp": "2026-11-07T17:22:19.596Z"
+  },
+  {
+    "id": "act_1794072139588_f69e22",
+    "type": "USER_LOGIN",
+    "userId": "usr_admin_m1n1sume",
+    "username": "M1n1sume",
+    "details": {
+      "status": "SUCCESS",
+      "role": "admin"
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "timestamp": "2026-11-07T17:22:19.588Z"
+  },
+  {
+    "id": "act_1794072139528_7cd51e",
+    "type": "USER_LOGIN",
+    "userId": "usr_admin_m1n1sume",
+    "username": "M1n1sume",
+    "details": {
+      "status": "SUCCESS",
+      "role": "admin"
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "timestamp": "2026-11-07T17:22:19.529Z"
+  },
+  {
     "id": "act_1794071520920_527847",
     "type": "EMAIL_SENT",
     "userId": "usr_1794071520778_857884",

@@ -1,1 +1,13 @@
-[]
+[
+  {
+    "designId": "des-1794072145442-2810b1",
+    "title": "Interactive Qubit Simulation Worksheet",
+    "type": "AI Worksheet & Activity",
+    "format": "interactive-markdown",
+    "content": "Exercise 1: Superposition state representation.",
+    "id": "out-1794072145467-7db574",
+    "userId": "usr_1794072145415_25ad8d",
+    "createdAt": "2026-11-07T17:22:25.467Z",
+    "updatedAt": "2026-11-07T17:22:25.467Z"
+  }
+]

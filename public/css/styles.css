@@ -147,17 +147,12 @@ html.dark body, body.dark {
 /* ========================================================================= */
 
 #top-masthead {
-  overflow-x: auto;
-  overflow-y: visible;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE 10+ */
-  touch-action: pan-x pan-y;
+  overflow: visible;
   scroll-behavior: smooth;
 }
 
 #top-masthead::-webkit-scrollbar {
-  display: none; /* Chrome, Safari, Opera */
+  display: none;
 }
 
 #top-masthead .masthead-inner {
@@ -165,39 +160,185 @@ html.dark body, body.dark {
   max-width: 100% !important;
 }
 
-/* Mobile Sideways Scroll for Header — Allows user to smoothly scroll right to view/click Create Account */
+/* ========================================================================= */
+/* ANIMATED MOBILE HEADER ROTATOR (Smooth Alternating Header for Mobile UI)  */
+/* ========================================================================= */
+
 @media (max-width: 640px) {
   #top-masthead {
-    overscroll-behavior-x: contain;
+    overflow-x: hidden !important;
+    overflow-y: visible !important;
   }
 
   #top-masthead .masthead-inner {
-    width: max-content !important;
-    min-width: 100% !important;
-    padding-left: 0.75rem !important;
-    padding-right: 1.5rem !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
     display: flex !important;
-    flex-wrap: nowrap !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    overflow: visible !important;
   }
 
-  /* Prevent auth buttons and utility buttons from shrinking awkwardly */
-  #header-auth-buttons,
-  #header-user-menu-wrapper,
-  #header-login-btn,
-  #header-signup-btn {
+  /* Rotator Container on Mobile */
+  .header-rotator {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    height: 38px;
+    min-width: 0;
+    flex-shrink: 0;
+  }
+
+  /* Micro-Pill Indicator & Direct Switcher */
+  .header-rotator-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 3.5px;
+    padding: 3px 5px;
+    border-radius: 9999px;
+    background: rgba(148, 163, 184, 0.15);
+    border: 1px solid rgba(148, 163, 184, 0.25);
+    cursor: pointer;
+    touch-action: manipulation;
+    z-index: 20;
+    transition: all 0.2s ease;
+    user-select: none;
+  }
+
+  html.dark .header-rotator-toggle,
+  .dark .header-rotator-toggle {
+    background: rgba(30, 41, 59, 0.7);
+    border-color: rgba(71, 85, 105, 0.5);
+  }
+
+  .rotator-pill {
+    width: 6px;
+    height: 6px;
+    border-radius: 9999px;
+    background-color: rgba(148, 163, 184, 0.45);
+    border: none;
+    padding: 0;
+    transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    cursor: pointer;
+  }
+
+  .rotator-pill.active {
+    width: 14px;
+    border-radius: 9999px;
+    background-color: #6366f1;
+    box-shadow: 0 0 8px rgba(99, 102, 241, 0.45);
+  }
+
+  /* Alternating Rotating Slides */
+  .header-slide {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    transition: opacity 0.42s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 0.42s cubic-bezier(0.16, 1, 0.3, 1),
+                filter 0.35s ease;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateY(calc(-50% + 14px)) scale(0.96);
+    filter: blur(1.5px);
+    will-change: transform, opacity, filter;
+  }
+
+  .header-slide.active {
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    transform: translateY(-50%) scale(1) !important;
+    filter: blur(0px) !important;
+    z-index: 10;
+  }
+
+  .header-slide.exiting {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    transform: translateY(calc(-50% - 14px)) scale(0.96) !important;
+    filter: blur(1.5px) !important;
+  }
+
+  /* Compact button styling on mobile viewports so both buttons fit completely with 0 cutoffs */
+  #header-login-btn {
+    padding: 0.35rem 0.6rem !important;
+    font-size: 0.72rem !important;
+    border-radius: 0.65rem !important;
     flex-shrink: 0 !important;
     white-space: nowrap !important;
   }
 
-  /* Floating positioning for header dropdown popovers on mobile so they don't get clipped */
+  #header-signup-btn {
+    padding: 0.35rem 0.75rem !important;
+    font-size: 0.72rem !important;
+    font-weight: 700 !important;
+    border-radius: 0.65rem !important;
+    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.28) !important;
+    flex-shrink: 0 !important;
+    white-space: nowrap !important;
+  }
+
+  #header-auth-buttons,
+  #header-user-menu-wrapper {
+    flex-shrink: 0 !important;
+    white-space: nowrap !important;
+  }
+
+  /* Fixed positioning for header dropdown popovers on mobile so they don't clip */
   #header-screen-fit-dropdown,
   #header-user-dropdown {
     position: fixed !important;
-    top: 62px !important;
-    right: 12px !important;
+    top: 58px !important;
+    right: 10px !important;
     left: auto !important;
-    max-width: calc(100vw - 24px) !important;
+    max-width: calc(100vw - 20px) !important;
     z-index: 9999 !important;
+  }
+}
+
+/* Desktop Styles (min-width: 641px) — Restore standard static inline side-by-side layout */
+@media (min-width: 641px) {
+  .header-rotator {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+    position: static !important;
+    height: auto !important;
+    max-width: none !important;
+  }
+
+  .header-rotator-toggle {
+    display: none !important;
+  }
+
+  .header-slide {
+    position: static !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    transform: none !important;
+    filter: none !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+  }
+
+  /* Desktop ordering: Tools slide (Screen Fit & Settings) first, then Auth slide */
+  .header-slide-tools {
+    order: 1;
+  }
+
+  .header-slide-auth {
+    order: 2;
   }
 }
 
