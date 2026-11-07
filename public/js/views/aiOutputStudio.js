@@ -3,6 +3,17 @@
 import { store } from '../state.js';
 import { aiService } from '../aiService.js';
 import { exportToDocx, exportToMarkdown, openPrintableWindow } from '../exportUtils.js';
+import { buildAiOutputStudioPrompt } from '../promptEngine.js';
+
+// --- Compiled Pedagogical Prompt Engine Adapter ---
+export function buildAiOutputPrompt(state = activeStudioState) {
+  const cat = OUTPUT_CATEGORIES.find(c => c.id === state.activeCategoryId) || OUTPUT_CATEGORIES[0];
+  const typeObj = cat?.types?.find(t => t.id === state.activeTypeId) || cat?.types?.[0] || { id: 'output', label: 'Educational Deliverable' };
+  return buildAiOutputStudioPrompt({
+    ...state,
+    typeLabel: typeObj.label
+  });
+}
 
 // --- Output Categories Definition ---
 export const OUTPUT_CATEGORIES = [
@@ -315,7 +326,10 @@ let activeStudioState = {
   activeOutput: null,
   activeSlideIndex: 0,
   activeTab: 'preview', // 'preview' or 'editor'
-  searchQuery: ''
+  searchQuery: '',
+  isPromptEditable: false,
+  userCustomPrompt: null,
+  workspaceTab: 'deliverable' // 'deliverable' or 'prompt'
 };
 
 export function setAiOutputStudioViewMode(mode) {
@@ -385,6 +399,9 @@ export function renderAiOutputStudioView() {
 function renderCreatorWorkspaceView(activeCat, savedOutputs = []) {
   const hasOutput = Boolean(activeStudioState.activeOutput);
   const designs = store.getDesigns ? store.getDesigns() : [];
+  const currentPrompt = activeStudioState.userCustomPrompt !== null
+    ? activeStudioState.userCustomPrompt
+    : buildAiOutputPrompt(activeStudioState);
 
   return `
     <div class="space-y-8">
@@ -694,8 +711,63 @@ function renderCreatorWorkspaceView(activeCat, savedOutputs = []) {
             </div>
           </div>
 
-          <!-- STEP 4: GENERATE BUTTON -->
-          <div class="pt-4 border-t border-slate-100 dark:border-slate-800">
+          <!-- STEP 4: PEDAGOGICAL PROMPT PREVIEW -->
+          <div class="space-y-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="w-5 h-5 rounded-full bg-indigo-600 text-white font-mono text-[10px] font-bold flex items-center justify-center">4</span>
+                <h3 class="text-xs font-bold font-scholarly text-slate-900 dark:text-white">Prompt Preview</h3>
+                ${activeStudioState.userCustomPrompt !== null ? `
+                  <span class="ws-state-pill editing">
+                    <span class="w-2 h-2 rounded-full bg-purple-500"></span>
+                    <span>Customized Prompt</span>
+                  </span>
+                ` : `
+                  <span class="ws-state-pill prompt-preview">
+                    <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
+                    <span>Live Prompt Preview</span>
+                  </span>
+                `}
+              </div>
+
+              <!-- Action Controls -->
+              <div class="flex items-center gap-1.5 self-end sm:self-auto">
+                ${activeStudioState.userCustomPrompt !== null ? `
+                  <button id="output-reset-prompt-btn" type="button" class="px-2 py-1 text-[11px] font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/50 rounded-lg transition-colors flex items-center gap-1" title="Reset to auto-compiled prompt">
+                    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                    <span>Reset</span>
+                  </button>
+                ` : ''}
+
+                <button id="output-toggle-edit-prompt-btn" type="button" class="px-2.5 py-1 text-[11px] font-semibold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-750 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors flex items-center gap-1">
+                  <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                  <span>${activeStudioState.isPromptEditable ? 'Done Editing' : 'Edit Prompt'}</span>
+                </button>
+
+                <button id="output-copy-prompt-btn" type="button" class="px-2.5 py-1 text-[11px] font-semibold text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900 rounded-lg transition-colors flex items-center gap-1">
+                  <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                  <span>Copy</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Monospace Prompt Display Box -->
+            <div class="relative rounded-xl border border-slate-200 dark:border-slate-750 bg-slate-50 dark:bg-[#0B1120] overflow-hidden transition-colors">
+              ${activeStudioState.isPromptEditable ? `
+                <textarea id="output-editable-prompt-text" class="w-full h-56 p-3 bg-transparent font-mono text-[11.5px] text-slate-800 dark:text-slate-100 border-0 outline-none resize-y leading-relaxed focus:ring-1 focus:ring-indigo-500/50" placeholder="Customize pedagogical prompt...">${escapeHtml(currentPrompt)}</textarea>
+              ` : `
+                <pre id="output-prompt-pre" class="whitespace-pre-wrap font-mono text-[11.5px] text-slate-700 dark:text-slate-300 select-all p-3 max-h-56 overflow-y-auto leading-relaxed selection:bg-indigo-100 dark:selection:bg-indigo-900/60">${escapeHtml(currentPrompt)}</pre>
+              `}
+            </div>
+
+            <div class="flex items-center justify-between text-[10.5px] text-slate-500 dark:text-slate-400 px-0.5">
+              <span>💡 Live prompt for pedagogical engine.</span>
+              <span id="output-prompt-stats" class="font-mono">${currentPrompt.length} chars • ~${Math.round(currentPrompt.split(/\s+/).filter(Boolean).length)} words</span>
+            </div>
+          </div>
+
+          <!-- STEP 5: GENERATE BUTTON -->
+          <div class="pt-3 border-t border-slate-100 dark:border-slate-800">
             <button id="generate-output-btn" class="w-full py-3.5 px-4 rounded-xl font-bold text-sm text-white bg-indigo-600 hover:bg-indigo-700 active:scale-[0.99] shadow-md shadow-indigo-600/20 transition-all flex items-center justify-center gap-2 group">
               <span class="text-base group-hover:rotate-12 transition-transform">✨</span>
               <span>Generate Educational Output</span>
@@ -736,6 +808,7 @@ function renderActiveOutputWorkspace(output) {
   const isDiagram = output.category === 'diagram';
   const isFlashcards = output.category === 'flashcards';
   const isAssessment = output.category === 'assessment';
+  const isPromptTab = activeStudioState.workspaceTab === 'prompt';
 
   return `
     <div class="bg-white dark:bg-slate-850 rounded-2xl border border-slate-200/90 dark:border-slate-750 shadow-md overflow-hidden transition-all">
@@ -805,17 +878,91 @@ function renderActiveOutputWorkspace(output) {
         </div>
       </div>
 
-      <!-- Specialized Workspace Layout -->
-      <div class="p-6">
-        ${isPresentation ? renderSlideWorkspace(output) : ''}
-        ${isPoster ? renderPosterWorkspace(output) : ''}
-        ${isWorksheet ? renderWorksheetWorkspace(output) : ''}
-        ${isDiagram ? renderDiagramWorkspace(output) : ''}
-        ${isFlashcards ? renderFlashcardsWorkspace(output) : ''}
-        ${isAssessment ? renderAssessmentWorkspace(output) : ''}
-        ${!isPresentation && !isPoster && !isWorksheet && !isDiagram && !isFlashcards && !isAssessment ? renderGenericWorkspace(output) : ''}
+      <!-- Workspace View Switcher (Deliverable vs Prompt Preview) -->
+      <div class="px-6 py-2.5 bg-slate-100/80 dark:bg-slate-800/60 border-b border-slate-200/80 dark:border-slate-700/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+        <div class="flex items-center gap-1.5">
+          <button id="ws-tab-deliverable-btn" class="px-3 py-1.5 rounded-lg font-bold text-xs transition-all flex items-center gap-1.5 ${!isPromptTab ? 'bg-indigo-600 text-white shadow-2xs' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-200/70 dark:hover:bg-slate-700'}">
+            <span>${output.icon || '📦'}</span>
+            <span>Deliverable View</span>
+          </button>
+          <button id="ws-tab-prompt-btn" class="px-3 py-1.5 rounded-lg font-bold text-xs transition-all flex items-center gap-1.5 ${isPromptTab ? 'bg-indigo-600 text-white shadow-2xs' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-200/70 dark:hover:bg-slate-700'}">
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+            <span>Prompt Preview</span>
+            <span class="text-[10px] px-1.5 py-0.2 rounded-full font-semibold ${isPromptTab ? 'bg-indigo-500 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300'}">AI Source</span>
+          </button>
+        </div>
+
+        ${isPromptTab ? `
+          <div class="flex items-center gap-1.5 self-end sm:self-auto">
+            <button id="ws-copy-prompt-btn" class="px-2.5 py-1 text-xs font-semibold text-indigo-700 dark:text-indigo-300 bg-white dark:bg-slate-700 hover:bg-indigo-50 dark:hover:bg-indigo-950/60 border border-slate-200 dark:border-slate-600 rounded-lg transition-colors flex items-center gap-1">
+              <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+              <span>Copy Prompt</span>
+            </button>
+            <button id="ws-edit-prompt-btn" class="px-2.5 py-1 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors flex items-center gap-1 shadow-2xs" title="Edit this prompt in the creator above">
+              <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+              <span>Edit in Creator</span>
+            </button>
+          </div>
+        ` : ''}
       </div>
 
+      <!-- Specialized Workspace Layout -->
+      <div class="p-6">
+        ${isPromptTab ? renderOutputPromptWorkspace(output) : `
+          ${isPresentation ? renderSlideWorkspace(output) : ''}
+          ${isPoster ? renderPosterWorkspace(output) : ''}
+          ${isWorksheet ? renderWorksheetWorkspace(output) : ''}
+          ${isDiagram ? renderDiagramWorkspace(output) : ''}
+          ${isFlashcards ? renderFlashcardsWorkspace(output) : ''}
+          ${isAssessment ? renderAssessmentWorkspace(output) : ''}
+          ${!isPresentation && !isPoster && !isWorksheet && !isDiagram && !isFlashcards && !isAssessment ? renderGenericWorkspace(output) : ''}
+        `}
+      </div>
+
+    </div>
+  `;
+}
+
+function renderOutputPromptWorkspace(output) {
+  const promptText = output.prompt || buildAiOutputPrompt({
+    activeCategoryId: output.category,
+    activeTypeId: output.typeId,
+    typeLabel: output.typeLabel,
+    formData: {
+      subject: output.subject,
+      educationalLevel: output.educationalLevel,
+      gradeLevel: output.gradeLevel,
+      topic: output.topic,
+      objectives: output.objectives || '',
+      competency: output.competency || '',
+      targetAudience: output.targetAudience || '',
+      contentRequirements: output.contentRequirements || ''
+    },
+    designOptions: activeStudioState.designOptions
+  });
+
+  const charCount = promptText.length;
+  const wordCount = promptText.split(/\s+/).filter(Boolean).length;
+
+  return `
+    <div class="space-y-4 animate-fade-in">
+      <div class="p-4 bg-slate-50 dark:bg-[#0B1120] rounded-xl border border-slate-200/80 dark:border-slate-800 text-slate-800 dark:text-slate-100 font-mono text-xs leading-relaxed max-h-[560px] overflow-y-auto selection:bg-indigo-100 dark:selection:bg-indigo-900/60">
+        <pre class="whitespace-pre-wrap select-all font-mono">${escapeHtml(promptText)}</pre>
+      </div>
+
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between text-xs text-slate-500 dark:text-slate-400 gap-2 px-1">
+        <div class="flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+          <span>Source Pedagogical Prompt Used for Generation</span>
+        </div>
+        <div class="flex items-center gap-3 font-mono text-[11px]">
+          <span>${charCount} characters</span>
+          <span>•</span>
+          <span>~${wordCount} words</span>
+          <span>•</span>
+          <span>${escapeHtml(output.typeLabel || output.category)}</span>
+        </div>
+      </div>
     </div>
   `;
 }
@@ -1501,6 +1648,8 @@ export function setupAiOutputStudioListeners(container, navigateTo, showToast) {
           activeStudioState.formData.purpose = tpl.purpose;
           activeStudioState.formData.contentRequirements = tpl.contentRequirements;
           activeStudioState.viewMode = 'creator';
+          activeStudioState.userCustomPrompt = null;
+          activeStudioState.isPromptEditable = false;
           refreshView(container, navigateTo, showToast);
           if (showToast) showToast(`Loaded template: "${tpl.title}"`, 'success');
           setTimeout(() => {
@@ -1519,6 +1668,8 @@ export function setupAiOutputStudioListeners(container, navigateTo, showToast) {
         if (cat) {
           activeStudioState.activeCategoryId = catId;
           activeStudioState.activeTypeId = cat.types[0]?.id || '';
+          activeStudioState.userCustomPrompt = null;
+          activeStudioState.isPromptEditable = false;
           refreshView(container, navigateTo, showToast);
         }
       });
@@ -1529,6 +1680,8 @@ export function setupAiOutputStudioListeners(container, navigateTo, showToast) {
       pill.addEventListener('click', () => {
         const typeId = pill.getAttribute('data-type-id');
         activeStudioState.activeTypeId = typeId;
+        activeStudioState.userCustomPrompt = null;
+        activeStudioState.isPromptEditable = false;
         refreshView(container, navigateTo, showToast);
       });
     });
@@ -1554,6 +1707,8 @@ export function setupAiOutputStudioListeners(container, navigateTo, showToast) {
           if (design.output) {
             activeStudioState.formData.contentRequirements = `Inherited from ${design.title}:\n` + design.output.slice(0, 300) + '...';
           }
+          activeStudioState.userCustomPrompt = null;
+          activeStudioState.isPromptEditable = false;
           showToast(`Imported context from "${design.title}".`, 'success');
           refreshView(container, navigateTo, showToast);
         }
@@ -1567,9 +1722,58 @@ export function setupAiOutputStudioListeners(container, navigateTo, showToast) {
         const type = btn.getAttribute('data-type');
         activeStudioState.activeCategoryId = cat;
         activeStudioState.activeTypeId = type;
+        activeStudioState.userCustomPrompt = null;
+        activeStudioState.isPromptEditable = false;
         showToast(`Switched deliverable to ${btn.textContent.trim()}`, 'info');
         refreshView(container, navigateTo, showToast);
       });
+    });
+
+    // Prompt Preview Controls & Direct Editing
+    container.querySelector('#output-toggle-edit-prompt-btn')?.addEventListener('click', () => {
+      if (activeStudioState.isPromptEditable) {
+        const textarea = container.querySelector('#output-editable-prompt-text');
+        if (textarea) {
+          activeStudioState.userCustomPrompt = textarea.value;
+        }
+        activeStudioState.isPromptEditable = false;
+        showToast('Saved customized pedagogical prompt.', 'info');
+      } else {
+        if (activeStudioState.userCustomPrompt === null) {
+          activeStudioState.userCustomPrompt = buildAiOutputPrompt(activeStudioState);
+        }
+        activeStudioState.isPromptEditable = true;
+      }
+      refreshView(container, navigateTo, showToast);
+    });
+
+    container.querySelector('#output-editable-prompt-text')?.addEventListener('input', (e) => {
+      activeStudioState.userCustomPrompt = e.target.value;
+      const stats = container.querySelector('#output-prompt-stats');
+      if (stats) {
+        const chars = e.target.value.length;
+        const words = e.target.value.split(/\s+/).filter(Boolean).length;
+        stats.textContent = `${chars} chars • ~${words} words`;
+      }
+    });
+
+    container.querySelector('#output-copy-prompt-btn')?.addEventListener('click', async () => {
+      const promptToCopy = activeStudioState.userCustomPrompt !== null
+        ? activeStudioState.userCustomPrompt
+        : buildAiOutputPrompt(activeStudioState);
+      try {
+        await navigator.clipboard.writeText(promptToCopy);
+        showToast('✓ Copied pedagogical prompt to clipboard!', 'success');
+      } catch (err) {
+        showToast('Could not access clipboard: ' + err.message, 'error');
+      }
+    });
+
+    container.querySelector('#output-reset-prompt-btn')?.addEventListener('click', () => {
+      activeStudioState.userCustomPrompt = null;
+      activeStudioState.isPromptEditable = false;
+      showToast('Reset prompt to live auto-compiled specification.', 'info');
+      refreshView(container, navigateTo, showToast);
     });
 
     // Sync Form Input Data
@@ -1587,20 +1791,70 @@ export function setupAiOutputStudioListeners(container, navigateTo, showToast) {
   }
 }
 
+function updatePromptPreviewDisplay(container) {
+  if (activeStudioState.userCustomPrompt !== null || activeStudioState.isPromptEditable) {
+    return;
+  }
+  const prompt = buildAiOutputPrompt(activeStudioState);
+  const pre = container.querySelector('#output-prompt-pre');
+  if (pre) {
+    pre.textContent = prompt;
+  }
+  const stats = container.querySelector('#output-prompt-stats');
+  if (stats) {
+    const chars = prompt.length;
+    const words = prompt.split(/\s+/).filter(Boolean).length;
+    stats.textContent = `${chars} chars • ~${words} words`;
+  }
+}
+
 function bindFormSync(container) {
-  const sync = (id, key) => {
-    container.querySelector(`#${id}`)?.addEventListener('input', (e) => {
-      activeStudioState.formData[key] = e.target.value;
-    });
+  const syncInput = (id, key) => {
+    const el = container.querySelector(`#${id}`);
+    if (el) {
+      el.addEventListener('input', (e) => {
+        activeStudioState.formData[key] = e.target.value;
+        updatePromptPreviewDisplay(container);
+      });
+      el.addEventListener('change', (e) => {
+        activeStudioState.formData[key] = e.target.value;
+        updatePromptPreviewDisplay(container);
+      });
+    }
   };
-  sync('form-subject', 'subject');
-  sync('form-ed-level', 'educationalLevel');
-  sync('form-grade-level', 'gradeLevel');
-  sync('form-topic', 'topic');
-  sync('form-objectives', 'objectives');
-  sync('form-competency', 'competency');
-  sync('form-content-req', 'contentRequirements');
-  sync('form-add-notes', 'additionalInstructions');
+
+  syncInput('form-subject', 'subject');
+  syncInput('form-ed-level', 'educationalLevel');
+  syncInput('form-grade-level', 'gradeLevel');
+  syncInput('form-topic', 'topic');
+  syncInput('form-objectives', 'objectives');
+  syncInput('form-competency', 'competency');
+  syncInput('form-content-req', 'contentRequirements');
+  syncInput('form-add-notes', 'additionalInstructions');
+
+  // Sync design options
+  const syncOpt = (id, key, isBool = false) => {
+    const el = container.querySelector(`#${id}`);
+    if (el) {
+      el.addEventListener('change', (e) => {
+        activeStudioState.designOptions[key] = isBool ? e.target.checked : e.target.value;
+        updatePromptPreviewDisplay(container);
+      });
+    }
+  };
+
+  syncOpt('opt-theme', 'theme');
+  syncOpt('opt-slide-count', 'slideCount');
+  syncOpt('opt-aspect', 'aspectRatio');
+  syncOpt('opt-speaker-notes', 'speakerNotes', true);
+  syncOpt('opt-orientation', 'orientation');
+  syncOpt('opt-layout', 'layout');
+  syncOpt('opt-page-size', 'pageSize');
+  syncOpt('opt-answer-key', 'includeAnswerKey', true);
+  syncOpt('opt-spacing', 'spacing');
+  syncOpt('opt-rubric', 'rubric');
+  syncOpt('opt-card-count', 'cardCount');
+  syncOpt('opt-diagram-type', 'diagramType');
 }
 
 // -------------------------------------------------------------------------
@@ -1621,22 +1875,20 @@ async function executeOutputGeneration(container, navigateTo, showToast) {
     const f = activeStudioState.formData;
 
     // Structured Prompt for Generation
-    const prompt = `Act as PEDAIA, a master educational technology specialist. Generate a complete, publication-ready ${typeObj.label} for ${f.gradeLevel} ${f.subject} on "${f.topic}".
-Learning Objectives:
-${f.objectives}
-Curriculum Competency: ${f.competency}
-Target Audience: ${f.targetAudience}
-Content Requirements: ${f.contentRequirements}
-Instructions: Produce authentic, ready-to-teach materials with zero placeholders.`;
+    const prompt = activeStudioState.userCustomPrompt || buildAiOutputPrompt(activeStudioState);
 
     const systemInstruction = `You are PEDAIA, an educational materials and slide generation specialist. Create structured, rigorous learning materials.`;
 
     // Real AI Service Call (seamlessly engages pedagogical synthesis if no key)
-    const result = await aiService.generateContent({
+    const result = await (aiService.generate ? aiService.generate({
       prompt,
       systemInstruction,
       temperature: 0.7
-    });
+    }) : aiService.generateContent({
+      prompt,
+      systemInstruction,
+      temperature: 0.7
+    }));
 
     const outputText = result.output || '';
 
@@ -1653,6 +1905,7 @@ Instructions: Produce authentic, ready-to-teach materials with zero placeholders
       gradeLevel: f.gradeLevel,
       topic: f.topic,
       output: outputText,
+      prompt: prompt,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
@@ -1695,6 +1948,78 @@ Instructions: Produce authentic, ready-to-teach materials with zero placeholders
 // Workspace Specialized Interactive Listeners
 // -------------------------------------------------------------------------
 function setupWorkspaceListeners(container, navigateTo, showToast) {
+  // Workspace Tab Switcher (Deliverable vs Prompt Preview)
+  container.querySelector('#ws-tab-deliverable-btn')?.addEventListener('click', () => {
+    activeStudioState.workspaceTab = 'deliverable';
+    refreshView(container, navigateTo, showToast);
+  });
+
+  container.querySelector('#ws-tab-prompt-btn')?.addEventListener('click', () => {
+    activeStudioState.workspaceTab = 'prompt';
+    refreshView(container, navigateTo, showToast);
+  });
+
+  // Prompt Copy in Workspace
+  container.querySelector('#ws-copy-prompt-btn')?.addEventListener('click', async () => {
+    const output = activeStudioState.activeOutput;
+    if (!output) return;
+    const promptText = output.prompt || buildAiOutputPrompt({
+      activeCategoryId: output.category,
+      activeTypeId: output.typeId,
+      typeLabel: output.typeLabel,
+      formData: {
+        subject: output.subject,
+        educationalLevel: output.educationalLevel,
+        gradeLevel: output.gradeLevel,
+        topic: output.topic,
+        objectives: output.objectives || '',
+        competency: output.competency || '',
+        targetAudience: output.targetAudience || '',
+        contentRequirements: output.contentRequirements || ''
+      },
+      designOptions: activeStudioState.designOptions
+    });
+    try {
+      await navigator.clipboard.writeText(promptText);
+      showToast('✓ Copied source prompt to clipboard!', 'success');
+    } catch (err) {
+      showToast('Could not access clipboard: ' + err.message, 'error');
+    }
+  });
+
+  // Prompt Edit in Creator
+  container.querySelector('#ws-edit-prompt-btn')?.addEventListener('click', () => {
+    const output = activeStudioState.activeOutput;
+    if (!output) return;
+    const promptText = output.prompt || buildAiOutputPrompt({
+      activeCategoryId: output.category,
+      activeTypeId: output.typeId,
+      typeLabel: output.typeLabel,
+      formData: {
+        subject: output.subject,
+        educationalLevel: output.educationalLevel,
+        gradeLevel: output.gradeLevel,
+        topic: output.topic,
+        objectives: output.objectives || '',
+        competency: output.competency || '',
+        targetAudience: output.targetAudience || '',
+        contentRequirements: output.contentRequirements || ''
+      },
+      designOptions: activeStudioState.designOptions
+    });
+
+    activeStudioState.userCustomPrompt = promptText;
+    activeStudioState.isPromptEditable = true;
+    showToast('Loaded prompt into Creator for editing.', 'info');
+    refreshView(container, navigateTo, showToast);
+
+    setTimeout(() => {
+      const textarea = document.querySelector('#output-editable-prompt-text');
+      textarea?.focus();
+      textarea?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 100);
+  });
+
   // Slide Carousel Thumbnails
   container.querySelectorAll('.slide-thumb').forEach(thumb => {
     thumb.addEventListener('click', () => {

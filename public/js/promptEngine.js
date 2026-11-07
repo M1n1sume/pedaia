@@ -812,3 +812,157 @@ Format each item with clear checkbox markdown:
 - [ ] [Task Title]: Detailed directive and required materials.
 ${additionalRequirements ? `\n[ADDITIONAL CONSTRAINTS]\n${additionalRequirements}` : ''}`.trim();
 }
+
+/**
+ * 16. Dedicated AI Output Studio Prompt Builder
+ * Compiles a rich pedagogical prompt for presentations, posters, worksheets,
+ * diagrams, assessments, and classroom flashcards.
+ */
+export function buildAiOutputStudioPrompt(config = {}) {
+  const f = config.formData || config;
+  const opts = config.designOptions || config.options || config;
+  const categoryId = config.activeCategoryId || config.category || 'presentation';
+  const typeId = config.activeTypeId || config.type || 'powerpoint';
+  const typeLabel = config.typeLabel || config.deliverableType || typeId;
+
+  const subject = f.subject || 'General Education';
+  const level = f.educationalLevel || 'Junior High School';
+  const grade = f.gradeLevel ? `(${f.gradeLevel})` : '';
+  const topic = f.topic || 'Curriculum Concepts';
+  const objectives = f.objectives || 'Demonstrate deep conceptual mastery, analytical inquiry, and authentic real-world application.';
+  const competency = f.competency || 'Curriculum-aligned performance standard and learning competency.';
+  const targetAudience = f.targetAudience || `${level} Learners`;
+  const contentRequirements = f.contentRequirements || 'Include authentic educational examples, key vocabulary, and formative checks.';
+  const notes = f.additionalInstructions ? `\n[ADDITIONAL CONSTRAINTS & PREFERENCES]\n${f.additionalInstructions}` : '';
+
+  let specificDirectives = '';
+
+  switch (categoryId) {
+    case 'presentation': {
+      const slideCount = opts.slideCount || 8;
+      const theme = opts.theme || 'academic-indigo';
+      const aspect = opts.aspectRatio || '16:9';
+      const speakerNotes = opts.speakerNotes !== false;
+
+      specificDirectives = `[SLIDE DECK SPECIFICATIONS]
+- Deliverable Format: ${typeLabel} (${slideCount} slides, ${aspect} widescreen)
+- Visual Theme: ${theme}
+- Structure:
+  1. Title Slide with subject, grade level, and motivating inquiry hook.
+  2. Clear Bloom-aligned Learning Objectives.
+  3. Concept Explanation Slides with structured bullet points, diagrams, and formulas.
+  4. Formative Check-for-Understanding & Active Learning Tasks.
+  5. Real-World Application & Synthetic Evaluation.
+  6. Key Takeaways & Summary Slide.
+${speakerNotes ? '- Speaker Notes: For EVERY slide, provide comprehensive word-for-word teacher narration, discussion questions, and pedagogical cues in a dedicated "Notes:" section.' : ''}
+- Formatting: Format each slide distinctly with '### Slide [N]: [Slide Title]', slide type, visual directive, bulleted content, and speaker notes.`;
+      break;
+    }
+
+    case 'poster': {
+      const orientation = opts.orientation || 'portrait';
+      const layout = opts.layout || '3-column-grid';
+      const pageSize = opts.pageSize || 'letter';
+
+      specificDirectives = `[POSTER & INFOGRAPHIC SPECIFICATIONS]
+- Deliverable Format: ${typeLabel} (${orientation}, ${layout}, ${pageSize} size)
+- Visual Architecture:
+  1. Main Headline & Anchor Competency Banner.
+  2. Core Definition & Foundational Conceptual Model.
+  3. Structured 3-Part Visual Breakdown with key principles, formulas, and diagrams.
+  4. Step-by-Step Mechanism / Flowchart / Comparative Table.
+  5. Real-World Application / "Did You Know?" Inquiry Box.
+  6. Classroom Summary & Review Checklist.
+- Layout Directives: Include explicit visual framing suggestions, icon symbols, and callout box formatting.`;
+      break;
+    }
+
+    case 'worksheet': {
+      const includeKey = opts.includeAnswerKey !== false;
+      const spacing = opts.spacing || 'spacious';
+      const rubric = opts.rubric || 'included';
+
+      specificDirectives = `[WORKSHEET & LEARNING ACTIVITY SHEET (LAS) SPECIFICATIONS]
+- Deliverable Format: ${typeLabel} (${spacing} student layout)
+- Structure:
+  Part I: Learning Target & Conceptual Overview (Essential knowledge summary).
+  Part II: Guided Practice (Fill-in-the-blank, identification, and concept matching).
+  Part III: Analytical Application (Case studies, data interpretation, or problem-solving).
+  Part IV: Socratic Inquiry & Metacognitive Reflection (Open-ended synthesis questions).
+${rubric === 'included' ? 'Part V: 4-Level Performance Rubric (Criteria, Exemplary, Proficient, Developing, Beginning).' : ''}
+${includeKey ? `[TEACHER ANSWER KEY & PEDAGOGICAL RATIONALE]
+- Provide a complete Teacher Answer Key with step-by-step solutions, grading criteria, and common student misconception warnings.` : ''}`;
+      break;
+    }
+
+    case 'diagram': {
+      const diagramType = opts.diagramType || 'concept-map';
+
+      specificDirectives = `[VISUAL LEARNING RESOURCE & DIAGRAM SPECIFICATIONS]
+- Deliverable Format: ${typeLabel} (${diagramType})
+- Structural Directives:
+  1. Central Anchor Node (Core Topic/Phenomenon).
+  2. First-Tier Branches (Major Sub-Concepts / Principles).
+  3. Second-Tier Detailed Nodes (Mechanisms, Examples, and Supporting Evidence).
+  4. Cross-Linking Connections: Explicitly show relationships between disparate concepts with linking verbs (e.g., "catalyzes", "leads to", "transforms into").
+  5. Provide an ASCII or structured node-edge hierarchy map ready for rendering or classroom board drawing.`;
+      break;
+    }
+
+    case 'assessment': {
+      const itemCount = opts.itemCount || 15;
+      const includeTOS = opts.includeTOS !== false;
+      const includeKey = opts.includeAnswerKey !== false;
+
+      specificDirectives = `[ASSESSMENT INSTRUMENT & RUBRIC SPECIFICATIONS]
+- Deliverable Format: ${typeLabel} (${itemCount} items)
+${includeTOS ? `- Table of Specifications (TOS): Include a curriculum blueprint mapping items to Bloom's taxonomy (Remembering, Understanding, Applying, Analyzing, Evaluating, Creating) with percentage weighting.` : ''}
+- Test Item Distribution:
+  - Section A: Multiple-Choice Items with diagnostic distractors and plausible misconceptions.
+  - Section B: Short-Answer & Computational / Scenario Analysis.
+  - Section C: Extended Response / Authentic Performance Task.
+${includeKey ? `- Teacher Answer Key: Provide correct answers, point distribution, and explicit scoring rationales for every item.` : ''}
+- Scoring Rubric: 4-level analytic scoring matrix for open-ended and performance items.`;
+      break;
+    }
+
+    case 'flashcards': {
+      const cardCount = opts.cardCount || 12;
+
+      specificDirectives = `[FLASHCARD & TASK CARD DECK SPECIFICATIONS]
+- Deliverable Format: ${typeLabel} (${cardCount} two-sided cards)
+- Card Architecture (Format each card with Front and Back):
+  - Card [N] - FRONT: Key Term, Visual Prompt / Scenario, and Challenge Question.
+  - Card [N] - BACK: Concise Definition, Academic Explanation, Memory Cue (Mnemonic or Analogy), and Follow-Up Application Question.`;
+      break;
+    }
+
+    default: {
+      specificDirectives = `[DELIVERABLE SPECIFICATIONS]
+- Deliverable Format: ${typeLabel}
+- Produce an exhaustive, publication-grade academic deliverable with structured sections, explicit instructions, and zero placeholder text.`;
+      break;
+    }
+  }
+
+  return `[ROLE & PEDAGOGICAL PERSONA]
+You are PEDAIA's Master Educational Deliverable Architect. Synthesize a complete, publication-ready ${typeLabel} designed for immediate instructional use.
+
+[CURRICULUM & INSTRUCTIONAL CONTEXT]
+- Subject / Discipline: ${subject}
+- Educational Level: ${level} ${grade}
+- Topic / Central Concept: ${topic}
+- Curriculum Standard / Competency: ${competency}
+- Bloom-Aligned Learning Objectives:
+${objectives}
+- Target Learner Audience: ${targetAudience}
+- Content Requirements: ${contentRequirements}
+
+${specificDirectives}
+
+[OUTPUT QUALITY DIRECTIVES]
+- Provide authentic, academically rigorous, and ready-to-teach materials.
+- Avoid vague placeholders, ellipses, or truncated sections.
+- Use clean academic Markdown formatting with appropriate headings, tables, bold terminology, and bullet points.
+${notes}`.trim();
+}

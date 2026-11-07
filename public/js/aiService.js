@@ -272,6 +272,10 @@ ${instruction}
 
     return this.generate({ prompt });
   }
+
+  async generateContent(args) {
+    return this.generate(args);
+  }
 }
 
 export const aiService = new AIService();
