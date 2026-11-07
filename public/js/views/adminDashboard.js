@@ -379,8 +379,8 @@ export function renderAdminDashboardView() {
                     </td>
                     <td class="py-3 px-4 font-mono font-medium whitespace-nowrap">
                       <div class="flex items-center gap-2">
-                        <span class="w-5 h-5 rounded-md ${isAdminActor ? 'bg-amber-600 text-white' : (isGuest ? 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300' : 'bg-indigo-600 text-white')} flex items-center justify-center text-[9px] font-bold">
-                          ${isAdminActor ? '👑' : (isGuest ? '👤' : log.username.charAt(0).toUpperCase())}
+                        <span class="w-5 h-5 rounded-md ${isAdminActor ? 'overflow-hidden border border-indigo-400/40 bg-indigo-950' : (isGuest ? 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300' : 'bg-indigo-600 text-white')} flex items-center justify-center text-[9px] font-bold shrink-0">
+                          ${isAdminActor ? '<img src="./favicon.svg" alt="PEDAIA Administrator" class="w-full h-full object-cover">' : (isGuest ? '👤' : log.username.charAt(0).toUpperCase())}
                         </span>
                         <span class="text-slate-900 dark:text-white font-bold">${escapeHtml(log.username)}</span>
                       </div>

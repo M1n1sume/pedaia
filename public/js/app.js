@@ -660,12 +660,12 @@ document.addEventListener('DOMContentLoaded', async () => {
           roleBadge.classList.remove('hidden');
         }
         if (avatar) {
-          avatar.className = 'w-6 h-6 rounded-lg bg-amber-600 text-white flex items-center justify-center font-bold text-[10px] shadow-2xs shrink-0';
-          avatar.textContent = '👑';
+          avatar.className = 'w-6 h-6 rounded-lg overflow-hidden shadow-2xs shrink-0 border border-indigo-400/40 dark:border-indigo-500/50 flex items-center justify-center bg-indigo-950';
+          avatar.innerHTML = '<img src="./favicon.svg" alt="PEDAIA Administrator" class="w-full h-full object-cover block">';
         }
         if (mobileAvatar) {
-          mobileAvatar.className = 'w-7 h-7 rounded-lg bg-amber-600 text-white flex items-center justify-center font-bold text-xs';
-          mobileAvatar.textContent = '👑';
+          mobileAvatar.className = 'w-7 h-7 rounded-lg overflow-hidden shadow-2xs shrink-0 border border-indigo-400/40 dark:border-indigo-500/50 flex items-center justify-center bg-indigo-950';
+          mobileAvatar.innerHTML = '<img src="./favicon.svg" alt="PEDAIA Administrator" class="w-full h-full object-cover block">';
         }
         if (dropdownRole) dropdownRole.textContent = 'System Administrator';
         if (mobileRole) mobileRole.textContent = 'System Administrator';
@@ -675,13 +675,24 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (drawerAdminSection) drawerAdminSection.classList.remove('hidden');
       } else {
         if (roleBadge) roleBadge.classList.add('hidden');
+        const initial = user.username ? user.username.charAt(0).toUpperCase() : 'U';
         if (avatar) {
-          avatar.className = 'w-6 h-6 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-bold text-[10px] shadow-2xs shrink-0';
-          avatar.textContent = user.username.charAt(0).toUpperCase();
+          if (user.avatarUrl) {
+            avatar.className = 'w-6 h-6 rounded-lg overflow-hidden shadow-2xs shrink-0 border border-indigo-400/40 flex items-center justify-center bg-indigo-950';
+            avatar.innerHTML = `<img src="${user.avatarUrl}" alt="${user.username}" class="w-full h-full object-cover block">`;
+          } else {
+            avatar.className = 'w-6 h-6 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-bold text-[10px] shadow-2xs shrink-0';
+            avatar.textContent = initial;
+          }
         }
         if (mobileAvatar) {
-          mobileAvatar.className = 'w-7 h-7 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-bold text-xs';
-          mobileAvatar.textContent = user.username.charAt(0).toUpperCase();
+          if (user.avatarUrl) {
+            mobileAvatar.className = 'w-7 h-7 rounded-lg overflow-hidden shadow-2xs shrink-0 border border-indigo-400/40 flex items-center justify-center bg-indigo-950';
+            mobileAvatar.innerHTML = `<img src="${user.avatarUrl}" alt="${user.username}" class="w-full h-full object-cover block">`;
+          } else {
+            mobileAvatar.className = 'w-7 h-7 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-bold text-xs shrink-0';
+            mobileAvatar.textContent = initial;
+          }
         }
         if (dropdownRole) dropdownRole.textContent = 'Educator Workspace';
         if (mobileRole) mobileRole.textContent = 'Educator Workspace';
@@ -749,7 +760,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // User Profile Trigger (Opens non-clipped pop-up modal, matching Dark Mode, Extensions, and AI Switcher)
   const userBtn = document.getElementById('header-user-btn');
-  const userDropdown = document.getElementById('header-user-dropdown');
   userBtn?.addEventListener('click', (e) => {
     e.stopPropagation();
     if (!store.isAuthenticated()) {
@@ -797,43 +807,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         setAiOutputStudioViewMode
       });
     }
-  });
-
-  document.addEventListener('click', (e) => {
-    if (!userDropdown?.contains(e.target) && !userBtn?.contains(e.target)) {
-      userDropdown?.classList.add('hidden');
-    }
-  });
-
-  // Account Menu Items
-  document.getElementById('menu-item-profile')?.addEventListener('click', () => {
-    userDropdown?.classList.add('hidden');
-    navigateTo('settings', 'general');
-  });
-
-  document.getElementById('menu-item-saved-designs')?.addEventListener('click', () => {
-    userDropdown?.classList.add('hidden');
-    navigateTo('designs');
-  });
-
-  document.getElementById('menu-item-generated-outputs')?.addEventListener('click', () => {
-    userDropdown?.classList.add('hidden');
-    setAiOutputStudioViewMode('library');
-    navigateTo('ai-output-studio');
-  });
-
-  document.getElementById('menu-item-admin')?.addEventListener('click', () => {
-    userDropdown?.classList.add('hidden');
-    navigateTo('admin');
-  });
-
-  document.getElementById('menu-item-logout')?.addEventListener('click', () => {
-    userDropdown?.classList.add('hidden');
-    store.logoutUser();
-    showToast('✓ Successfully signed out of PEDAIA.', 'info');
-    updateAuthUI();
-    updateSidebarProfile();
-    renderCurrentView();
   });
 
   // Mobile drawer auth actions

@@ -342,6 +342,7 @@ function renderViewModeHeader(profile, completion) {
   const hasSpec = Boolean(profile.specialization && profile.specialization.trim().length > 0);
   const hasLevel = Boolean(profile.educationalLevel && profile.educationalLevel.trim().length > 0);
 
+  const isAdmin = store.isAdmin ? store.isAdmin() : false;
   const initials = hasName
     ? profile.name.split(' ').filter(Boolean).map(w => w[0]).slice(0, 2).join('').toUpperCase()
     : '';
@@ -349,7 +350,11 @@ function renderViewModeHeader(profile, completion) {
   return `
     <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-750 gap-4">
       <div class="flex items-center gap-4">
-        ${hasName && initials ? `
+        ${isAdmin ? `
+          <div class="w-14 h-14 rounded-2xl bg-indigo-950 border border-indigo-400/50 dark:border-indigo-500/60 overflow-hidden shadow-md shrink-0 flex items-center justify-center">
+            <img src="./favicon.svg" alt="PEDAIA Administrator" class="w-full h-full object-cover">
+          </div>
+        ` : (hasName && initials ? `
           <div class="w-14 h-14 rounded-2xl bg-indigo-600 text-white flex items-center justify-center font-bold text-lg font-scholarly shadow-md border-2 border-indigo-400/30 shrink-0">
             ${initials}
           </div>
@@ -359,7 +364,7 @@ function renderViewModeHeader(profile, completion) {
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
             </svg>
           </div>
-        `}
+        `)}
         <div>
           <div class="flex items-center gap-2 flex-wrap">
             <h2 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white">

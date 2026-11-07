@@ -34,8 +34,8 @@ export function openUserAccountModal({
         <!-- Modal Header -->
         <div class="flex items-start justify-between pb-3.5 border-b border-slate-100 dark:border-slate-800">
           <div class="flex items-center gap-3">
-            <div class="w-12 h-12 rounded-2xl ${isAdmin ? 'bg-amber-100 dark:bg-amber-950/70 border-amber-300 dark:border-amber-700/80 text-amber-600 dark:text-amber-300' : 'bg-indigo-100 dark:bg-indigo-950/70 border-indigo-200 dark:border-indigo-800 text-indigo-600 dark:text-indigo-400'} border flex items-center justify-center text-xl shadow-2xs shrink-0 font-bold">
-              ${isAdmin ? '👑' : initial}
+            <div class="w-12 h-12 rounded-2xl ${isAdmin ? 'bg-indigo-950 border-indigo-400/50 dark:border-indigo-500/60 shadow-indigo-500/10' : 'bg-indigo-100 dark:bg-indigo-950/70 border-indigo-200 dark:border-indigo-800 text-indigo-600 dark:text-indigo-400'} border flex items-center justify-center text-xl shadow-2xs shrink-0 font-bold overflow-hidden">
+              ${isAdmin ? '<img src="./favicon.svg" alt="PEDAIA Administrator" class="w-full h-full object-cover">' : (user.avatarUrl ? `<img src="${user.avatarUrl}" alt="${escapeHtml(user.username)}" class="w-full h-full object-cover">` : initial)}
             </div>
             <div>
               <div class="flex items-center gap-2 flex-wrap">

@@ -272,7 +272,20 @@ const views = [
   'educatorReview.js',
   'myDesigns.js',
   'outputWorkspace.js',
-  'settings.js'
+  'settings.js',
+  'lessonPlanner.js',
+  'activityDesigner.js',
+  'questioningStudio.js',
+  'differentiationStudio.js',
+  'aiOutputStudio.js',
+  'promptLibrary.js',
+  'authModal.js',
+  'paletteModal.js',
+  'extensionModal.js',
+  'screenFitModal.js',
+  'aiSwitcherModal.js',
+  'userAccountModal.js',
+  'commandPalette.js'
 ];
 
 for (const v of views) {
@@ -281,7 +294,7 @@ for (const v of views) {
     issuesFound.push(`View component missing: ${v}`);
   }
 }
-console.log('✓ All 7 view components exist.');
+console.log(`✓ All ${views.length} view components exist.`);
 
 // Check for broken unclosed tags or undefined window calls in critical modules
 const criticalClientFiles = [

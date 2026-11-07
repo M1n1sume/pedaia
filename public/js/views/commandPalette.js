@@ -7,6 +7,7 @@ import { openAiSwitcherModal } from './aiSwitcherModal.js';
 import { openPaletteModal } from './paletteModal.js';
 import { openExtensionModal } from './extensionModal.js';
 import { openScreenFitModal } from './screenFitModal.js';
+import { openUserAccountModal } from './userAccountModal.js';
 
 let isOpen = false;
 let selectedIndex = 0;
@@ -94,6 +95,7 @@ function getAvailableCommands() {
     { id: 'nav-profile', category: 'Curriculum Library', icon: '👤', title: 'Educator Profile & Context', subtitle: 'Update institution, faculty credentials, and default subject', action: () => safeNavigate('settings', 'general') },
 
     // Quick Actions
+    { id: 'act-user-account', category: 'Studio Tools', icon: '👤', title: 'User Account & Security', subtitle: 'Manage active session, saved designs, AI outputs & profile', action: () => openUserAccountModal({ navigateTo: safeNavigate, showToast: toastCallback }) },
     { id: 'act-import', category: 'Studio Tools', icon: '📥', title: 'Import Any Document or Syllabus', subtitle: 'Parse PDF, DOCX, TXT, JSON, CSV into pedagogical prompts', action: () => openUniversalImportModal({ showToast: toastCallback, onAction: (a, d) => a === 'open-workspace' ? safeNavigate('workspace', d.designId) : safeNavigate('designs') }) },
     { id: 'act-switch-ai', category: 'Studio Tools', icon: '⚡', title: 'Switch Active AI Engine', subtitle: 'Switch between Gemini 2.5, Claude 3.5, GPT-4o, DeepSeek, Llama', action: () => openAiSwitcherModal({ showToast: toastCallback }) },
     { id: 'act-screen-fit', category: 'Studio Tools', icon: '🖥️', title: 'Device & Screen Fit Layout', subtitle: 'Auto-Fit, Left-Aligned Canvas, Laptop Fit, and UI Scale Zoom', action: () => openScreenFitModal({ showToast: toastCallback }) },
