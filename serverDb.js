@@ -1182,3 +1182,113 @@ export function exportVaultData(userId) {
     outputs
   };
 }
+
+/**
+ * Public Shared Links System
+ * Enables educators to generate and share direct links to designs and outputs.
+ */
+export function saveSharedItem(sharedData) {
+  if (!sharedData || !sharedData.item || !sharedData.item.id) {
+    throw new Error('Valid item with an id is required for sharing.');
+  }
+  const sharedList = readJson('shared_links.json', []);
+  const cleanId = String(sharedData.item.id).trim();
+  const now = new Date().toISOString();
+
+  const entry = {
+    id: cleanId,
+    type: sharedData.type || (cleanId.startsWith('out-') ? 'output' : 'design'),
+    title: sharedData.item.title || sharedData.item.topic || 'Instructional Learning Resource',
+    subject: sharedData.item.subject || '',
+    gradeLevel: sharedData.item.gradeLevel || sharedData.item.educationalLevel || '',
+    category: sharedData.item.category || sharedData.item.outputType || 'Instructional Design',
+    authorName: sharedData.authorName || 'PEDAIA Educator',
+    item: sharedData.item,
+    sharedAt: now,
+    views: 0
+  };
+
+  const existingIdx = sharedList.findIndex(s => s && s.id === cleanId);
+  if (existingIdx >= 0) {
+    entry.views = sharedList[existingIdx].views || 0;
+    sharedList[existingIdx] = entry;
+  } else {
+    sharedList.unshift(entry);
+  }
+  writeJson('shared_links.json', sharedList);
+
+  // Also mark the original in designs.json or outputs.json as isShared if found
+  try {
+    const designs = readJson('designs.json', []);
+    const dIdx = designs.findIndex(d => d && d.id === cleanId);
+    if (dIdx >= 0) {
+      designs[dIdx].isShared = true;
+      writeJson('designs.json', designs);
+    }
+  } catch {}
+
+  try {
+    const outputs = readJson('outputs.json', []);
+    const oIdx = outputs.findIndex(o => o && o.id === cleanId);
+    if (oIdx >= 0) {
+      outputs[oIdx].isShared = true;
+      writeJson('outputs.json', outputs);
+    }
+  } catch {}
+
+  return entry;
+}
+
+export function getSharedItemById(id) {
+  if (!id) return null;
+  const cleanId = String(id).trim();
+
+  // 1. Check shared_links.json first
+  const sharedList = readJson('shared_links.json', []);
+  const found = sharedList.find(s => s && s.id === cleanId);
+  if (found) {
+    try {
+      found.views = (found.views || 0) + 1;
+      writeJson('shared_links.json', sharedList);
+    } catch {}
+    return found;
+  }
+
+  // 2. Check designs.json (if isShared or isPublic or Completed)
+  const designs = readJson('designs.json', []);
+  const design = designs.find(d => d && d.id === cleanId);
+  if (design && (design.isShared || design.isPublic || design.visibility === 'public')) {
+    return {
+      id: design.id,
+      type: 'design',
+      title: design.title,
+      subject: design.subject,
+      gradeLevel: design.gradeLevel || design.educationalLevel,
+      category: design.category || 'Lesson Plan',
+      authorName: design.authorName || 'PEDAIA Educator',
+      item: design,
+      sharedAt: design.updatedAt || design.createdAt,
+      views: 1
+    };
+  }
+
+  // 3. Check outputs.json (if isShared or match)
+  const outputs = readJson('outputs.json', []);
+  const output = outputs.find(o => o && o.id === cleanId);
+  if (output) {
+    return {
+      id: output.id,
+      type: 'output',
+      title: output.title || output.topic || 'AI Learning Resource',
+      subject: output.subject,
+      gradeLevel: output.gradeLevel || output.educationalLevel,
+      category: output.category || output.outputType || 'Learning Resource',
+      authorName: output.authorName || 'PEDAIA Educator',
+      item: output,
+      sharedAt: output.updatedAt || output.createdAt,
+      views: 1
+    };
+  }
+
+  return null;
+}

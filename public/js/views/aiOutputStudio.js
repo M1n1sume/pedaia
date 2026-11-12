@@ -4,6 +4,7 @@ import { store } from '../state.js';
 import { aiService } from '../aiService.js';
 import { exportToDocx, exportToMarkdown, openPrintableWindow } from '../exportUtils.js';
 import { buildAiOutputStudioPrompt } from '../promptEngine.js';
+import { openShareLinkModal } from './shareLinkModal.js';
 
 // --- Compiled Pedagogical Prompt Engine Adapter ---
 export function buildAiOutputPrompt(state = activeStudioState) {
@@ -834,8 +835,15 @@ function renderActiveOutputWorkspace(output) {
 
         <!-- Action Controls & Real Exports -->
         <div class="flex items-center gap-2 shrink-0 flex-wrap">
-          <button id="save-to-library-btn" class="px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-white dark:bg-slate-700 hover:bg-slate-100 dark:hover:bg-slate-650 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-600 transition-colors shadow-2xs flex items-center gap-1.5">
+          <button id="save-to-library-btn" class="px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-white dark:bg-slate-700 hover:bg-slate-100 dark:hover:bg-slate-650 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-600 transition-colors shadow-2xs flex items-center gap-1.5 cursor-pointer">
             <span>💾 Save to Library</span>
+          </button>
+
+          <button id="output-share-link-btn" class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-violet-600 hover:bg-violet-700 text-white transition-colors shadow-2xs flex items-center gap-1.5 cursor-pointer" title="Share direct link to this output">
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+            </svg>
+            <span>Share Link</span>
           </button>
 
           <!-- Real Export Dropdown / Buttons -->
@@ -2133,6 +2141,16 @@ function setupWorkspaceListeners(container, navigateTo, showToast) {
     if (activeStudioState.activeOutput) {
       store.saveOutput(activeStudioState.activeOutput);
       showToast('✓ Saved artifact into AI Output Library!', 'success');
+    }
+  });
+
+  // Share Link
+  container.querySelector('#output-share-link-btn')?.addEventListener('click', () => {
+    const out = activeStudioState.activeOutput;
+    if (out) {
+      openShareLinkModal({ item: out, type: 'output', showToast });
+    } else {
+      showToast('Generate or select an output first to share.', 'info');
     }
   });
 

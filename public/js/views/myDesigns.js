@@ -3,6 +3,7 @@ import { store } from '../state.js';
 import { exportToDocx, exportToMarkdown, openPrintableWindow, openUniversalExportModal } from '../exportUtils.js';
 import { openUniversalImportModal } from '../importUtils.js';
 import { openPublishLmsModal } from './publishLmsModal.js';
+import { openShareLinkModal } from './shareLinkModal.js';
 
 let currentSearchTerm = '';
 let selectedCategoryFilter = 'all';
@@ -403,6 +404,13 @@ export function renderMyDesignsView() {
                       </svg>
                     </button>
 
+                    <!-- Share Direct Link Button -->
+                    <button data-share-id="${d.id}" title="Share Direct Link" class="share-btn p-1.5 text-slate-500 hover:text-violet-600 dark:hover:text-violet-400 hover:bg-violet-50 dark:hover:bg-violet-950/50 rounded-lg transition-colors border border-slate-200 dark:border-slate-700 cursor-pointer">
+                      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                      </svg>
+                    </button>
+
                     <!-- Send Project Update to Email Button -->
                     <button data-email-id="${d.id}" title="Send Project Update to Email" class="email-btn p-1.5 text-slate-500 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/50 rounded-lg transition-colors border border-slate-200 dark:border-slate-700 cursor-pointer">
                       <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -684,6 +692,18 @@ export function setupMyDesignsListeners(container, navigateToWorkspace, showToas
         showToast(`Duplicated as "${copy.title}"`, 'success');
         container.innerHTML = renderMyDesignsView();
         setupMyDesignsListeners(container, navigateToWorkspace, showToast);
+      }
+    });
+  });
+
+  // Share Direct Link Button
+  container.querySelectorAll('.share-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const id = btn.getAttribute('data-share-id');
+      const design = store.getDesignById(id);
+      if (design) {
+        openShareLinkModal({ item: design, type: 'design', showToast });
       }
     });
   });

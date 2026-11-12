@@ -1336,6 +1336,140 @@ class StateStore {
     });
   }
 
+  // --- Public Shared Links Integration ---
+  async shareItem(item, type = 'design') {
+    if (!item || !item.id) return null;
+    const cleanId = String(item.id).trim();
+
+    // Mark locally as shared
+    if (type === 'design') {
+      this.updateDesign(cleanId, { isShared: true, sharedAt: new Date().toISOString() });
+    } else if (type === 'output') {
+      const out = this.getOutputById(cleanId);
+      if (out) {
+        this.saveOutput({ ...out, isShared: true, sharedAt: new Date().toISOString() });
+      }
+    }
+
+    const currentAuthor = this.getCurrentUser()?.username || 'PEDAIA Educator';
+
+    // Broadcast to server if online
+    try {
+      await fetch('/api/share', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          item,
+          type,
+          authorName: currentAuthor
+        })
+      });
+    } catch (err) {
+      console.warn('[PEDAIA] Offline link share registration:', err);
+    }
+
+    const origin = window.location.origin;
+    const pathname = window.location.pathname.endsWith('/') ? window.location.pathname : window.location.pathname + '/';
+    return {
+      shareId: cleanId,
+      url: `${origin}${pathname}#share/${cleanId}`,
+      presentationUrl: `${origin}${pathname}#share/${cleanId}?mode=presentation`,
+      embedUrl: `${origin}${pathname}#share/${cleanId}?mode=embed`
+    };
+  }
+
+  async fetchSharedItem(id) {
+    if (!id) return null;
+    const cleanId = String(id).trim();
+
+    // 1. Check local designs
+    const localDesign = this.getDesignById(cleanId);
+    if (localDesign) {
+      return {
+        id: localDesign.id,
+        type: 'design',
+        title: localDesign.title,
+        subject: localDesign.subject,
+        gradeLevel: localDesign.gradeLevel || localDesign.educationalLevel,
+        category: localDesign.categoryLabel || localDesign.category || 'Instructional Design',
+        authorName: localDesign.authorName || 'PEDAIA Educator',
+        item: localDesign
+      };
+    }
+
+    // 2. Check local outputs
+    const localOutput = this.getOutputById(cleanId);
+    if (localOutput) {
+      return {
+        id: localOutput.id,
+        type: 'output',
+        title: localOutput.title || localOutput.topic,
+        subject: localOutput.subject,
+        gradeLevel: localOutput.gradeLevel || localOutput.educationalLevel,
+        category: localOutput.category || localOutput.outputType || 'Learning Resource',
+        authorName: localOutput.authorName || 'PEDAIA Educator',
+        item: localOutput
+      };
+    }
+
+    // 3. Fetch from Server
+    try {
+      const res = await fetch(`/api/share/${encodeURIComponent(cleanId)}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.success && data.share) {
+          return data.share;
+        }
+      }
+    } catch (err) {
+      console.warn('[PEDAIA] Failed to fetch shared item from server:', err);
+    }
+
+    return null;
+  }
+
+  importSharedItemToStudio(sharedItem, type = 'design') {
+    if (!sharedItem) return null;
+    const currentUid = this.getCurrentUserId();
+    const now = new Date().toISOString();
+
+    if (type === 'design' || (!type && !String(sharedItem.id).startsWith('out-'))) {
+      const newId = 'des_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6);
+      const clonedDesign = {
+        ...sharedItem,
+        id: newId,
+        userId: currentUid,
+        title: sharedItem.title ? (sharedItem.title.includes('(Copy)') ? sharedItem.title : `${sharedItem.title} (Imported)`) : 'Imported Instructional Design',
+        status: 'Output Generated',
+        visibility: 'private',
+        isPublic: false,
+        createdAt: now,
+        updatedAt: now,
+        importedFrom: sharedItem.id,
+        versionHistory: [
+          {
+            timestamp: now,
+            output: sharedItem.output || '',
+            note: `Imported from shared link (${sharedItem.authorName || 'Educator'})`
+          }
+        ]
+      };
+      return this.saveDesign(clonedDesign);
+    } else {
+      const newId = 'out-' + Date.now() + '-' + Math.random().toString(36).substring(2, 6);
+      const clonedOutput = {
+        ...sharedItem,
+        id: newId,
+        userId: currentUid,
+        title: sharedItem.title ? `${sharedItem.title} (Imported)` : 'Imported Learning Resource',
+        createdAt: now,
+        updatedAt: now,
+        importedFrom: sharedItem.id
+      };
+      return this.saveOutput(clonedOutput);
+    }
+  }
+
   // --- Templates ---
   getTemplates() {
     try {

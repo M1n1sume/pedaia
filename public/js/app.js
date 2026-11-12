@@ -16,6 +16,7 @@ import { renderPromptLibraryView, setupPromptLibraryListeners } from './views/pr
 import { renderSettingsView, setupSettingsListeners, setSettingsActiveTab } from './views/settings.js';
 import { renderAiOutputStudioView, setupAiOutputStudioListeners, setAiOutputStudioViewMode } from './views/aiOutputStudio.js';
 import { renderAdminDashboardView, setupAdminDashboardListeners } from './views/adminDashboard.js';
+import { renderSharedView, setupSharedViewListeners } from './views/sharedViewer.js';
 import { openAuthModal } from './views/authModal.js';
 import { openExtensionModal } from './views/extensionModal.js';
 import { openScreenFitModal } from './views/screenFitModal.js';
@@ -24,6 +25,7 @@ import { initCommandPalette, openCommandPalette } from './views/commandPalette.j
 import { initLayoutManager } from './layoutManager.js';
 
 let currentRoute = 'dashboard';
+let activeSharedId = null;
 let isSidebarCollapsed = false;
 let isInitialRouteLoad = true;
 let mobileHeaderTimer = null;
@@ -40,7 +42,9 @@ const PAGE_TITLES = {
   'designs': 'My Instructional Designs',
   'prompt-library': 'Prompt Library',
   'settings': 'Settings & AI Setup',
-  'admin': 'Admin Console & User Directory'
+  'admin': 'Admin Console & User Directory',
+  'share': 'Shared Instructional Resource',
+  'shared-view': 'Shared Instructional Resource'
 };
 
 const ROUTE_METADATA = {
@@ -215,6 +219,8 @@ export function navigateTo(route, param = null) {
     setActiveWorkspaceDesignId(param);
   } else if (normalizedRoute === 'settings' && param) {
     setSettingsActiveTab(param);
+  } else if ((normalizedRoute === 'share' || normalizedRoute === 'shared-view') && param) {
+    activeSharedId = param;
   }
 
   // Update URL hash without re-triggering unnecessary events
@@ -319,6 +325,11 @@ function renderCurrentView() {
       case 'admin':
         container.innerHTML = renderAdminDashboardView();
         setupAdminDashboardListeners(container, navigateTo, showToast);
+        break;
+      case 'share':
+      case 'shared-view':
+        container.innerHTML = renderSharedView(activeSharedId);
+        setupSharedViewListeners(container, (dest, param) => navigateTo(dest, param), showToast);
         break;
       default:
         container.innerHTML = renderDashboardView();
@@ -889,18 +900,31 @@ document.addEventListener('DOMContentLoaded', async () => {
     updateHeaderPalette();
   });
 
-  // Route from URL hash immediately without blocking
+  // Route from URL query param ?share=... or URL hash immediately without blocking
+  const urlParams = new URLSearchParams(window.location.search);
+  const shareQuery = urlParams.get('share') || urlParams.get('share_id');
   const hash = window.location.hash.replace(/^#\/?/, '');
-  if (hash) {
+
+  if (shareQuery) {
+    navigateTo('share', shareQuery);
+  } else if (hash.startsWith('share/')) {
+    const shareId = hash.replace(/^share\//, '').split('?')[0];
+    navigateTo('share', shareId);
+  } else if (hash) {
     const parts = hash.split('/');
     navigateTo(parts[0], parts[1]);
   } else {
     navigateTo('dashboard');
   }
 
-  // Handle browser back/forward
+  // Handle browser back/forward and dynamic hash updates
   window.addEventListener('hashchange', () => {
     const h = window.location.hash.replace(/^#\/?/, '');
+    if (h.startsWith('share/')) {
+      const shareId = h.replace(/^share\//, '').split('?')[0];
+      navigateTo('share', shareId);
+      return;
+    }
     const parts = h.split('/');
     if (parts[0] && parts[0] !== currentRoute) {
       navigateTo(parts[0], parts[1]);

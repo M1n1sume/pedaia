@@ -218,6 +218,58 @@ const server = http.createServer(async (req, res) => {
       return;
     }
 
+    // Public Shared Links: POST /api/share (Register or update a shared design or output)
+    if (pathname === '/api/share' && req.method === 'POST') {
+      try {
+        const body = await parseJsonBody(req);
+        if (!body || !body.item) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: 'INVALID_PAYLOAD', message: 'Item payload is required.' }));
+          return;
+        }
+        const authorName = authUser ? authUser.username : (body.authorName || 'PEDAIA Educator');
+        const sharedEntry = db.saveSharedItem({
+          item: body.item,
+          type: body.type,
+          authorName
+        });
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({
+          success: true,
+          shareId: sharedEntry.id,
+          share: sharedEntry
+        }));
+      } catch (err) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'SHARE_FAILED', message: err.message }));
+      }
+      return;
+    }
+
+    // Public Shared Links: GET /api/share/:id (Retrieve shared design or output)
+    if (pathname.startsWith('/api/share/') && req.method === 'GET') {
+      const shareId = pathname.replace('/api/share/', '').trim();
+      if (!shareId) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'INVALID_ID', message: 'Share ID is required.' }));
+        return;
+      }
+      try {
+        const shared = db.getSharedItemById(shareId);
+        if (!shared) {
+          res.writeHead(404, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: 'NOT_FOUND', message: 'Shared design or output not found or link has expired.' }));
+          return;
+        }
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: true, share: shared }));
+      } catch (err) {
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'SERVER_ERROR', message: err.message }));
+      }
+      return;
+    }
+
     // Personal Saved Designs: GET
     if (pathname === '/api/designs' && req.method === 'GET') {
       if (!authUser) {
