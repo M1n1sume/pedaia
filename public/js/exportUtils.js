@@ -69,7 +69,7 @@ export function openPrintableWindow(design) {
   printWindow.document.close();
 }
 
-export function exportToDocx(design) {
+export function exportToDocx(design, download = true) {
   const cleanTitle = getSafeFilename(design.title);
   const renderedHtml = renderMarkdownToHtml(design.output || '');
 
@@ -114,10 +114,13 @@ export function exportToDocx(design) {
 </body>
 </html>`;
 
-  triggerDownload(new Blob(['\ufeff', docContent], { type: 'application/msword;charset=utf-8' }), `${cleanTitle}.doc`);
+  if (download) {
+    triggerDownload(new Blob(['\ufeff', docContent], { type: 'application/msword;charset=utf-8' }), `${cleanTitle}.doc`);
+  }
+  return docContent;
 }
 
-export function exportToMarkdown(design) {
+export function exportToMarkdown(design, download = true) {
   const cleanTitle = getSafeFilename(design.title);
   const content = `---\n` +
     `title: "${design.title}"\n` +
@@ -137,10 +140,13 @@ export function exportToMarkdown(design) {
     `${design.output || ''}\n\n` +
     `---\n*Exported from PEDAIA — AI-Powered Instructional Design Studio on ${new Date().toLocaleDateString()}*`;
 
-  triggerDownload(new Blob([content], { type: 'text/markdown;charset=utf-8' }), `${cleanTitle}.md`);
+  if (download) {
+    triggerDownload(new Blob([content], { type: 'text/markdown;charset=utf-8' }), `${cleanTitle}.md`);
+  }
+  return content;
 }
 
-export function exportToPlainText(design) {
+export function exportToPlainText(design, download = true) {
   const cleanTitle = getSafeFilename(design.title);
   let text = `${design.title.toUpperCase()}\n` +
     `PEDAIA — AI-Powered Instructional Design Studio\n` +
@@ -154,10 +160,13 @@ export function exportToPlainText(design) {
     `================================================================================\n\n` +
     stripMarkdownToPlainText(design.output || '');
 
-  triggerDownload(new Blob([text], { type: 'text/plain;charset=utf-8' }), `${cleanTitle}.txt`);
+  if (download) {
+    triggerDownload(new Blob([text], { type: 'text/plain;charset=utf-8' }), `${cleanTitle}.txt`);
+  }
+  return text;
 }
 
-export function exportToHtml(design) {
+export function exportToHtml(design, download = true) {
   const cleanTitle = getSafeFilename(design.title);
   const htmlContent = `<!DOCTYPE html>
 <html lang="en">
@@ -207,16 +216,22 @@ export function exportToHtml(design) {
 </body>
 </html>`;
 
-  triggerDownload(new Blob([htmlContent], { type: 'text/html;charset=utf-8' }), `${cleanTitle}.html`);
+  if (download) {
+    triggerDownload(new Blob([htmlContent], { type: 'text/html;charset=utf-8' }), `${cleanTitle}.html`);
+  }
+  return htmlContent;
 }
 
-export function exportToJson(design) {
+export function exportToJson(design, download = true) {
   const cleanTitle = getSafeFilename(design.title);
   const jsonPayload = JSON.stringify(design, null, 2);
-  triggerDownload(new Blob([jsonPayload], { type: 'application/json;charset=utf-8' }), `${cleanTitle}.json`);
+  if (download) {
+    triggerDownload(new Blob([jsonPayload], { type: 'application/json;charset=utf-8' }), `${cleanTitle}.json`);
+  }
+  return jsonPayload;
 }
 
-export function exportToCsv(design) {
+export function exportToCsv(design, download = true) {
   const cleanTitle = getSafeFilename(design.title);
   const rows = [
     ['Field', 'Value'],
@@ -235,10 +250,13 @@ export function exportToCsv(design) {
   ];
 
   const csvString = rows.map(r => `"${r[0]}","${r[1]}"`).join('\r\n');
-  triggerDownload(new Blob(['\ufeff', csvString], { type: 'text/csv;charset=utf-8' }), `${cleanTitle}.csv`);
+  if (download) {
+    triggerDownload(new Blob(['\ufeff', csvString], { type: 'text/csv;charset=utf-8' }), `${cleanTitle}.csv`);
+  }
+  return csvString;
 }
 
-export function exportToRtf(design) {
+export function exportToRtf(design, download = true) {
   const cleanTitle = getSafeFilename(design.title);
   const plainText = stripMarkdownToPlainText(design.output || '')
     .replace(/\\/g, '\\\\')
@@ -257,10 +275,13 @@ ${plainText}
 \\par\\par\\cf3\\fs16 Generated with PEDAIA • Verified for Instructional Practice\\par
 }`;
 
-  triggerDownload(new Blob([rtfContent], { type: 'application/rtf;charset=utf-8' }), `${cleanTitle}.rtf`);
+  if (download) {
+    triggerDownload(new Blob([rtfContent], { type: 'application/rtf;charset=utf-8' }), `${cleanTitle}.rtf`);
+  }
+  return rtfContent;
 }
 
-export function exportToLatex(design) {
+export function exportToLatex(design, download = true) {
   const cleanTitle = getSafeFilename(design.title);
   const latexBody = (design.output || '')
     .replace(/\\/g, '\\textbackslash ')
@@ -301,10 +322,13 @@ ${latexBody}
 \\end{document}
 `;
 
-  triggerDownload(new Blob([latexContent], { type: 'application/x-latex;charset=utf-8' }), `${cleanTitle}.tex`);
+  if (download) {
+    triggerDownload(new Blob([latexContent], { type: 'application/x-latex;charset=utf-8' }), `${cleanTitle}.tex`);
+  }
+  return latexContent;
 }
 
-export function exportToXml(design) {
+export function exportToXml(design, download = true) {
   const cleanTitle = getSafeFilename(design.title);
   const xmlContent = `<?xml version="1.0" encoding="UTF-8"?>
 <instructionalDesign xmlns="urn:pedaia:edtech:v1" id="${escapeXml(design.id || 'design-0')}">
@@ -329,36 +353,51 @@ ${design.output || ''}
   </content>
 </instructionalDesign>`;
 
-  triggerDownload(new Blob([xmlContent], { type: 'application/xml;charset=utf-8' }), `${cleanTitle}.xml`);
+  if (download) {
+    triggerDownload(new Blob([xmlContent], { type: 'application/xml;charset=utf-8' }), `${cleanTitle}.xml`);
+  }
+  return xmlContent;
 }
 
-export function exportToCustomFile(design, extension = 'txt', customMime = 'text/plain') {
+export function exportToCustomFile(design, extension = 'txt', customMime = 'text/plain', download = true) {
   let cleanExt = extension.trim().replace(/^\./, '').toLowerCase() || 'txt';
   const cleanTitle = getSafeFilename(design.title);
   const content = design.output || '';
-  triggerDownload(new Blob([content], { type: `${customMime};charset=utf-8` }), `${cleanTitle}.${cleanExt}`);
+  if (download) {
+    triggerDownload(new Blob([content], { type: `${customMime};charset=utf-8` }), `${cleanTitle}.${cleanExt}`);
+  }
+  return content;
 }
 
 // LMS & Classroom Export Functions
-export async function exportToCanvasHtml(design) {
+export async function exportToCanvasHtml(design, download = true) {
   const { lmsService } = await import('./lmsService.js');
   const cleanTitle = getSafeFilename(design.title);
   const html = lmsService.formatForCanvasPage(design);
-  triggerDownload(new Blob([html], { type: 'text/html;charset=utf-8' }), `${cleanTitle}_canvas_module.html`);
+  if (download) {
+    triggerDownload(new Blob([html], { type: 'text/html;charset=utf-8' }), `${cleanTitle}_canvas_module.html`);
+  }
+  return html;
 }
 
-export async function exportToCanvasQti(design) {
+export async function exportToCanvasQti(design, download = true) {
   const { lmsService } = await import('./lmsService.js');
   const cleanTitle = getSafeFilename(design.title);
   const xml = lmsService.formatForCanvasQTI(design);
-  triggerDownload(new Blob([xml], { type: 'application/xml;charset=utf-8' }), `${cleanTitle}_canvas_quiz.qti.xml`);
+  if (download) {
+    triggerDownload(new Blob([xml], { type: 'application/xml;charset=utf-8' }), `${cleanTitle}_canvas_quiz.qti.xml`);
+  }
+  return xml;
 }
 
-export async function exportToGoogleClassroomFormat(design) {
+export async function exportToGoogleClassroomFormat(design, download = true) {
   const { lmsService } = await import('./lmsService.js');
   const cleanTitle = getSafeFilename(design.title);
   const text = lmsService.formatForGoogleClassroom(design);
-  triggerDownload(new Blob([text], { type: 'text/plain;charset=utf-8' }), `${cleanTitle}_google_classroom.txt`);
+  if (download) {
+    triggerDownload(new Blob([text], { type: 'text/plain;charset=utf-8' }), `${cleanTitle}_google_classroom.txt`);
+  }
+  return text;
 }
 
 export async function openGoogleClassroomWebShare(design) {
@@ -593,14 +632,23 @@ export function openUniversalExportModal(design) {
 
 // Helper: Download Trigger
 function triggerDownload(blob, filename) {
-  const url = URL.createObjectURL(blob);
+  if (typeof document === 'undefined') return;
+  const url = (typeof URL !== 'undefined' && URL.createObjectURL) ? URL.createObjectURL(blob) : '';
   const a = document.createElement('a');
   a.href = url;
   a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+  if (document.body) {
+    document.body.appendChild(a);
+    if (typeof a.click === 'function') {
+      a.click();
+    }
+    document.body.removeChild(a);
+  } else if (typeof a.click === 'function') {
+    a.click();
+  }
+  if (url && typeof URL !== 'undefined' && URL.revokeObjectURL) {
+    URL.revokeObjectURL(url);
+  }
 }
 
 function getSafeFilename(title) {

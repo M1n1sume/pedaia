@@ -4,149 +4,177 @@
 
 import { store } from './state.js';
 
+async function readFileAsText(file) {
+  if (typeof file.text === 'function') {
+    return await file.text();
+  }
+  if (typeof FileReader !== 'undefined') {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => resolve(e.target.result);
+      reader.onerror = () => reject(new Error('Failed to read text file.'));
+      reader.readAsText(file);
+    });
+  }
+  throw new Error('FileReader is not supported in this environment.');
+}
+
+async function readFileAsArrayBuffer(file) {
+  if (typeof file.arrayBuffer === 'function') {
+    return await file.arrayBuffer();
+  }
+  if (typeof FileReader !== 'undefined') {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => resolve(e.target.result);
+      reader.onerror = () => reject(new Error('Failed to read file buffer.'));
+      reader.readAsArrayBuffer(file);
+    });
+  }
+  throw new Error('FileReader is not supported in this environment.');
+}
+
+async function readFileAsDataURL(file) {
+  if (typeof FileReader !== 'undefined') {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => resolve(e.target.result);
+      reader.onerror = () => reject(new Error('Failed to read file as DataURL.'));
+      reader.readAsDataURL(file);
+    });
+  }
+  if (typeof file.arrayBuffer === 'function') {
+    const buf = await file.arrayBuffer();
+    const base64 = (typeof Buffer !== 'undefined')
+      ? Buffer.from(buf).toString('base64')
+      : btoa(String.fromCharCode(...new Uint8Array(buf)));
+    return `data:${file.type || 'application/octet-stream'};base64,${base64}`;
+  }
+  return '';
+}
+
 /**
  * Parses any uploaded File object into an instructional payload.
  * @param {File} file 
  * @returns {Promise<{ filename: string, extension: string, size: number, type: string, text: string, rawDataUrl?: string, metadata: object, isBackup?: boolean }>}
  */
 export async function parseAnyFile(file) {
-  const filename = file.name;
+  const filename = file.name || 'unnamed_file';
   const extension = (filename.includes('.') ? filename.split('.').pop() : '').toLowerCase();
-  const size = file.size;
+  const size = file.size || 0;
   const mimeType = file.type || 'application/octet-stream';
 
-  return new Promise((resolve, reject) => {
-    // 1. Text-based files & known textual formats
-    const textExtensions = [
-      'txt', 'md', 'markdown', 'html', 'htm', 'xml', 'csv', 'tsv', 'json',
-      'rtf', 'tex', 'latex', 'rst', 'qmd', 'yaml', 'yml', 'ini', 'env',
-      'sh', 'py', 'js', 'ts', 'jsx', 'tsx', 'css', 'scss', 'sql', 'log',
-      'java', 'c', 'cpp', 'h', 'php', 'rb', 'prompt'
-    ];
+  // 1. Text-based files & known textual formats
+  const textExtensions = [
+    'txt', 'md', 'markdown', 'html', 'htm', 'xml', 'csv', 'tsv', 'json',
+    'rtf', 'tex', 'latex', 'rst', 'qmd', 'yaml', 'yml', 'ini', 'env',
+    'sh', 'py', 'js', 'ts', 'jsx', 'tsx', 'css', 'scss', 'sql', 'log',
+    'java', 'c', 'cpp', 'h', 'php', 'rb', 'prompt'
+  ];
 
-    if (textExtensions.includes(extension) || mimeType.startsWith('text/') || mimeType === 'application/json' || mimeType === 'application/xml') {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        try {
-          const rawText = e.target.result;
-          let parsedText = rawText;
-          let isBackup = false;
-          let metadata = { detectedFormat: extension.toUpperCase() };
+  if (textExtensions.includes(extension) || mimeType.startsWith('text/') || mimeType === 'application/json' || mimeType === 'application/xml') {
+    const rawText = await readFileAsText(file);
+    let parsedText = rawText;
+    let isBackup = false;
+    let metadata = { detectedFormat: extension.toUpperCase() };
 
-          // Specific handling for JSON
-          if (extension === 'json' || mimeType === 'application/json') {
-            try {
-              const parsedJson = JSON.parse(rawText);
-              if (parsedJson.designs && Array.isArray(parsedJson.designs)) {
-                isBackup = true;
-                metadata.backupDesignCount = parsedJson.designs.length;
-                metadata.backupTemplateCount = (parsedJson.templates || []).length;
-                parsedText = `# PEDAIA Backup Archive\n\nContains ${parsedJson.designs.length} instructional designs and ${(parsedJson.templates || []).length} prompt templates.\n\n` +
-                  parsedJson.designs.map(d => `### ${d.title}\n- **Subject:** ${d.subject}\n- **Level:** ${d.educationalLevel}\n- **Category:** ${d.categoryLabel || d.category}\n`).join('\n');
-              } else if (parsedJson.output && parsedJson.title) {
-                parsedText = parsedJson.output;
-                metadata.title = parsedJson.title;
-                metadata.subject = parsedJson.subject;
-                metadata.category = parsedJson.category;
-              } else {
-                parsedText = '```json\n' + JSON.stringify(parsedJson, null, 2) + '\n```';
-              }
-            } catch (err) {
-              // keep as raw text
-            }
-          }
-
-          // Specific handling for CSV / TSV
-          if (extension === 'csv' || extension === 'tsv') {
-            parsedText = convertDelimitedToMarkdownTable(rawText, extension === 'tsv' ? '\t' : ',');
-          }
-
-          // Specific handling for HTML
-          if (extension === 'html' || extension === 'htm') {
-            parsedText = extractTextFromHtml(rawText);
-          }
-
-          resolve({
-            filename,
-            extension,
-            size,
-            type: mimeType,
-            text: parsedText,
-            metadata,
-            isBackup
-          });
-        } catch (err) {
-          reject(err);
-        }
-      };
-      reader.onerror = () => reject(new Error('Failed to read text file.'));
-      reader.readAsText(file);
-      return;
-    }
-
-    // 2. Microsoft Word Document (.docx)
-    if (extension === 'docx') {
-      const reader = new FileReader();
-      reader.onload = async (e) => {
-        try {
-          const arrayBuffer = e.target.result;
-          const extractedText = await extractTextFromDocx(arrayBuffer);
-          resolve({
-            filename,
-            extension,
-            size,
-            type: mimeType,
-            text: extractedText,
-            metadata: { detectedFormat: 'Microsoft Word Document (.docx)' }
-          });
-        } catch (err) {
-          // Fallback to text string extraction
-          resolve({
-            filename,
-            extension,
-            size,
-            type: mimeType,
-            text: `# ${filename}\n\n*Extracted from Word Document:*\n\n` + extractAsciiStrings(e.target.result),
-            metadata: { detectedFormat: 'Word Document (Binary Parsed)' }
-          });
-        }
-      };
-      reader.onerror = () => reject(new Error('Failed to read Word document.'));
-      reader.readAsArrayBuffer(file);
-      return;
-    }
-
-    // 3. PDF Document (.pdf) or Any Binary/Arbitrary File Type
-    const binaryReader = new FileReader();
-    binaryReader.onload = (e) => {
+    // Specific handling for JSON
+    if (extension === 'json' || mimeType === 'application/json') {
       try {
-        const arrayBuffer = e.target.result;
-        const readableStrings = extractAsciiStrings(arrayBuffer);
-        const dataUrlReader = new FileReader();
-        dataUrlReader.onload = (ev) => {
-          resolve({
-            filename,
-            extension: extension || 'bin',
-            size,
-            type: mimeType,
-            text: readableStrings.length > 100 
-              ? `# Imported File: ${filename}\n\n**File Details:** ${size} bytes • MIME: ${mimeType}\n\n---\n\n### Extracted Text Content:\n\n${readableStrings}`
-              : `# Imported File: ${filename}\n\n**File Details:** ${size} bytes • MIME: ${mimeType}\n\n*Binary file imported successfully. Content has been attached as an instructional resource.*`,
-            rawDataUrl: ev.target.result,
-            metadata: {
-              detectedFormat: extension.toUpperCase() || 'Binary File',
-              isBinary: true
-            }
-          });
-        };
-        dataUrlReader.readAsDataURL(file);
+        const parsedJson = JSON.parse(rawText);
+        if (parsedJson.designs && Array.isArray(parsedJson.designs)) {
+          isBackup = true;
+          metadata.backupDesignCount = parsedJson.designs.length;
+          metadata.backupTemplateCount = (parsedJson.templates || []).length;
+          parsedText = `# PEDAIA Backup Archive\n\nContains ${parsedJson.designs.length} instructional designs and ${(parsedJson.templates || []).length} prompt templates.\n\n` +
+            parsedJson.designs.map(d => `### ${d.title}\n- **Subject:** ${d.subject}\n- **Level:** ${d.educationalLevel}\n- **Category:** ${d.categoryLabel || d.category}\n`).join('\n');
+        } else if (parsedJson.output && parsedJson.title) {
+          parsedText = parsedJson.output;
+          metadata.title = parsedJson.title;
+          metadata.subject = parsedJson.subject;
+          metadata.category = parsedJson.category;
+        } else {
+          parsedText = '```json\n' + JSON.stringify(parsedJson, null, 2) + '\n```';
+        }
       } catch (err) {
-        reject(err);
+        // keep as raw text
       }
+    }
+
+    // Specific handling for CSV / TSV
+    if (extension === 'csv' || extension === 'tsv') {
+      parsedText = convertDelimitedToMarkdownTable(rawText, extension === 'tsv' ? '\t' : ',');
+    }
+
+    // Specific handling for HTML
+    if (extension === 'html' || extension === 'htm') {
+      parsedText = extractTextFromHtml(rawText);
+    }
+
+    return {
+      filename,
+      extension,
+      size,
+      type: mimeType,
+      text: parsedText,
+      metadata,
+      isBackup
     };
-    binaryReader.onerror = () => reject(new Error('Failed to read file.'));
-    binaryReader.readAsArrayBuffer(file);
-  });
+  }
+
+  // 2. Microsoft Word Document (.docx)
+  if (extension === 'docx') {
+    try {
+      const arrayBuffer = await readFileAsArrayBuffer(file);
+      const extractedText = await extractTextFromDocx(arrayBuffer);
+      return {
+        filename,
+        extension,
+        size,
+        type: mimeType,
+        text: extractedText,
+        metadata: { detectedFormat: 'Microsoft Word Document (.docx)' }
+      };
+    } catch (err) {
+      // Fallback to text string extraction
+      try {
+        const arrayBuffer = await readFileAsArrayBuffer(file);
+        return {
+          filename,
+          extension,
+          size,
+          type: mimeType,
+          text: `# ${filename}\n\n*Extracted from Word Document:*\n\n` + extractAsciiStrings(arrayBuffer),
+          metadata: { detectedFormat: 'Word Document (Binary Parsed)' }
+        };
+      } catch (e2) {
+        throw new Error('Failed to read Word document.');
+      }
+    }
+  }
+
+  // 3. PDF Document (.pdf) or Any Binary/Arbitrary File Type
+  const arrayBuffer = await readFileAsArrayBuffer(file);
+  const readableStrings = extractAsciiStrings(arrayBuffer);
+  let rawDataUrl = '';
+  try {
+    rawDataUrl = await readFileAsDataURL(file);
+  } catch {}
+
+  return {
+    filename,
+    extension: extension || 'bin',
+    size,
+    type: mimeType,
+    text: readableStrings.length > 100 
+      ? `# Imported File: ${filename}\n\n**File Details:** ${size} bytes • MIME: ${mimeType}\n\n---\n\n### Extracted Text Content:\n\n${readableStrings}`
+      : `# Imported File: ${filename}\n\n**File Details:** ${size} bytes • MIME: ${mimeType}\n\n*Binary file imported successfully. Content has been attached as an instructional resource.*`,
+    rawDataUrl,
+    metadata: {
+      detectedFormat: extension.toUpperCase() || 'Binary File',
+      isBinary: true
+    }
+  };
 }
 
 /**

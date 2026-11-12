@@ -455,8 +455,8 @@ function openAboutModal() {
   const m = document.getElementById('about-modal-overlay');
   const close = () => m.remove();
 
-  document.getElementById('close-about-modal-btn').addEventListener('click', close);
-  document.getElementById('close-about-modal-btn-2').addEventListener('click', close);
+  document.getElementById('close-about-modal-btn')?.addEventListener('click', close);
+  document.getElementById('close-about-modal-btn-2')?.addEventListener('click', close);
   m.addEventListener('click', (e) => { if (e.target === m) close(); });
 }
 
