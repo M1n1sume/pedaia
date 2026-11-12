@@ -664,6 +664,27 @@ export function setupDifferentiationStudioListeners(container, navigateToWorkspa
     }
   });
 
+  // Import Source File (Syllabus, Learner IEP Context, Text, etc.)
+  container.querySelector('#diff-import-source-btn')?.addEventListener('click', () => {
+    openUniversalImportModal({
+      showToast,
+      onAction: (action, data) => {
+        if (action === 'save-to-designs' || action === 'open-workspace') {
+          navigateToWorkspace('workspace', data.designId);
+        } else {
+          if (data.title) currentState.topic = data.title;
+          if (data.subject && data.subject !== 'Interdisciplinary') currentState.subject = data.subject;
+          if (data.text) {
+            currentState.competency = `Differentiation scaffolding from: ${data.filename || data.title}`;
+          }
+          container.innerHTML = renderDifferentiationStudioView();
+          setupDifferentiationStudioListeners(container, navigateToWorkspace, showToast, openSettings);
+          showToast(`Loaded "${data.filename || data.title}" into Differentiation Studio!`, 'success');
+        }
+      }
+    });
+  });
+
   // Add Custom Profile Button
   container.querySelector('#diff-add-profile-btn')?.addEventListener('click', () => {
     const nextIdx = (currentState.customLearnerProfiles || []).length + 1;

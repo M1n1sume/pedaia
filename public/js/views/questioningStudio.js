@@ -675,6 +675,27 @@ export function setupQuestioningStudioListeners(container, navigateToWorkspace, 
     }
   });
 
+  // Import Source File (Syllabus, Quiz Source, Text, etc.)
+  container.querySelector('#q-import-source-btn')?.addEventListener('click', () => {
+    openUniversalImportModal({
+      showToast,
+      onAction: (action, data) => {
+        if (action === 'save-to-designs' || action === 'open-workspace') {
+          navigateToWorkspace('workspace', data.designId);
+        } else {
+          if (data.title) currentState.topic = data.title;
+          if (data.subject && data.subject !== 'Interdisciplinary') currentState.subject = data.subject;
+          if (data.text) {
+            currentState.competency = `Questions derived from: ${data.filename || data.title}`;
+          }
+          container.innerHTML = renderQuestioningStudioView();
+          setupQuestioningStudioListeners(container, navigateToWorkspace, showToast, openSettings);
+          showToast(`Loaded "${data.filename || data.title}" into Questioning Studio!`, 'success');
+        }
+      }
+    });
+  });
+
   // Total Question Count Input
   container.querySelector('#q-total-count-input')?.addEventListener('input', (e) => {
     const val = parseInt(e.target.value, 10);

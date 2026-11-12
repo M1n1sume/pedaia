@@ -734,6 +734,28 @@ export function setupActivityDesignerListeners(container, navigateToWorkspace, s
     }
   });
 
+  // Import Source File
+  container.querySelector('#act-import-source-btn')?.addEventListener('click', () => {
+    openUniversalImportModal({
+      showToast,
+      onAction: (action, data) => {
+        if (action === 'save-to-designs' || action === 'open-workspace') {
+          navigateToWorkspace('workspace', data.designId);
+        } else {
+          if (data.title) currentState.topic = data.title;
+          if (data.subject && data.subject !== 'Interdisciplinary') currentState.subject = data.subject;
+          if (data.text) {
+            currentState.additionalRequirements = data.text.slice(0, 3000);
+            currentState.competency = `Adapted from reference material: ${data.filename || data.title}`;
+          }
+          container.innerHTML = renderActivityDesignerView();
+          setupActivityDesignerListeners(container, navigateToWorkspace, showToast, openSettings);
+          showToast(`Loaded "${data.filename || data.title}" into Activity Designer!`, 'success');
+        }
+      }
+    });
+  });
+
   // Activity Type Selection
   container.querySelectorAll('#act-types-group .act-type-card').forEach(btn => {
     btn.addEventListener('click', () => {

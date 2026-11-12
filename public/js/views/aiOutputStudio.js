@@ -5,6 +5,7 @@ import { aiService } from '../aiService.js';
 import { exportToDocx, exportToMarkdown, openPrintableWindow } from '../exportUtils.js';
 import { buildAiOutputStudioPrompt } from '../promptEngine.js';
 import { openShareLinkModal } from './shareLinkModal.js';
+import { openUniversalImportModal } from '../importUtils.js';
 
 // --- Compiled Pedagogical Prompt Engine Adapter ---
 export function buildAiOutputPrompt(state = activeStudioState) {
@@ -485,16 +486,22 @@ function renderCreatorWorkspaceView(activeCat, savedOutputs = []) {
               <h2 class="text-base font-bold font-scholarly text-slate-900 dark:text-white">Define Educational Content</h2>
             </div>
 
-            <!-- Import from Existing PEDAIA Design Selector -->
-            ${designs.length > 0 ? `
-              <div class="flex items-center gap-1.5">
+            <!-- Import from Existing PEDAIA Design Selector & File Importer -->
+            <div class="flex items-center gap-1.5 flex-wrap">
+              ${designs.length > 0 ? `
                 <span class="text-[11px] text-slate-500 dark:text-slate-400 hidden sm:inline">Import Design:</span>
                 <select id="import-design-select" class="text-xs py-1 px-2 rounded-lg border border-indigo-200 dark:border-indigo-800 bg-indigo-50/70 dark:bg-indigo-950/60 text-indigo-900 dark:text-indigo-200 outline-none">
                   <option value="">⚡ Autofill from Saved Design...</option>
                   ${designs.map(d => `<option value="${d.id}" ${d.id === activeStudioState.selectedSourceDesignId ? 'selected' : ''}>${escapeHtml(d.title.slice(0, 32))} (${escapeHtml(d.subject || '')})</option>`).join('')}
                 </select>
-              </div>
-            ` : ''}
+              ` : ''}
+              <button type="button" id="output-import-file-btn" class="px-2.5 py-1 text-xs font-semibold text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900 border border-indigo-200 dark:border-indigo-800 rounded-lg transition-colors flex items-center gap-1 cursor-pointer" title="Import syllabus, presentation outline, or document from any file">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                </svg>
+                <span>Import File</span>
+              </button>
+            </div>
           </div>
 
           <!-- Contextual Quick Action Suggestions -->
@@ -1721,6 +1728,25 @@ export function setupAiOutputStudioListeners(container, navigateTo, showToast) {
           refreshView(container, navigateTo, showToast);
         }
       }
+    });
+
+    // Import from Any File into AI Output Studio
+    container.querySelector('#output-import-file-btn')?.addEventListener('click', () => {
+      openUniversalImportModal({
+        showToast,
+        onAction: (action, data) => {
+          if (data.title) activeStudioState.formData.topic = data.title;
+          if (data.subject && data.subject !== 'Interdisciplinary') activeStudioState.formData.subject = data.subject;
+          if (data.text) {
+            activeStudioState.formData.contentRequirements = data.text.slice(0, 1500);
+            activeStudioState.formData.competency = `Source document: ${data.filename || data.title}`;
+          }
+          activeStudioState.userCustomPrompt = null;
+          activeStudioState.isPromptEditable = false;
+          showToast(`Loaded "${data.filename || data.title}" into AI Output Studio!`, 'success');
+          refreshView(container, navigateTo, showToast);
+        }
+      });
     });
 
     // Contextual Conversion Shortcuts

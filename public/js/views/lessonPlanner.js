@@ -779,6 +779,28 @@ export function setupLessonPlannerListeners(container, navigateToWorkspace, show
     }
   });
 
+  // Import Source File (Syllabus, Word, PDF, Text, etc.)
+  container.querySelector('#lp-import-source-btn')?.addEventListener('click', () => {
+    openUniversalImportModal({
+      showToast,
+      onAction: (action, data) => {
+        if (action === 'save-to-designs' || action === 'open-workspace') {
+          navigateToWorkspace('workspace', data.designId);
+        } else {
+          if (data.title) currentState.topic = data.title;
+          if (data.subject && data.subject !== 'Interdisciplinary') currentState.subject = data.subject;
+          if (data.text) {
+            currentState.additionalRequirements = data.text.slice(0, 3000);
+            currentState.competency = `Aligned with syllabus: ${data.filename || data.title}`;
+          }
+          container.innerHTML = renderLessonPlannerView();
+          setupLessonPlannerListeners(container, navigateToWorkspace, showToast, openSettings);
+          showToast(`Loaded "${data.filename || data.title}" into Lesson Planner!`, 'success');
+        }
+      }
+    });
+  });
+
   // --- Dynamic Framework Sequence Listeners ---
 
   // Model Cards Selection
