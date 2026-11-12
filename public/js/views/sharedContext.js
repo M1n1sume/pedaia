@@ -102,9 +102,7 @@ export function renderGlobalContextForm(state, prefix = 'ctx') {
           <select id="${prefix}-subject" class="w-full text-xs p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-850 text-slate-800 dark:text-slate-100 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-colors">
             ${SUBJECT_OPTIONS.map(s => `<option value="${s}" ${state.subject === s ? 'selected' : ''}>${s}</option>`).join('')}
           </select>
-          ${isOtherSubject ? `
-            <input type="text" id="${prefix}-customSubject" class="mt-2 w-full text-xs p-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-850 text-slate-800 dark:text-slate-100 focus:border-indigo-500 outline-none" placeholder="Enter custom subject..." value="${escapeHtml(state.customSubject || '')}">
-          ` : ''}
+          <input type="text" id="${prefix}-customSubject" class="mt-2 w-full text-xs p-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-850 text-slate-800 dark:text-slate-100 focus:border-indigo-500 outline-none ${isOtherSubject ? '' : 'hidden'}" placeholder="Enter custom subject..." value="${escapeHtml(state.customSubject || '')}">
         </div>
 
         <div>
@@ -153,9 +151,7 @@ export function renderGlobalContextForm(state, prefix = 'ctx') {
             `;
           }).join('')}
         </div>
-        ${isCustomDuration ? `
-          <input type="text" id="${prefix}-customDuration" class="mt-2 w-48 text-xs p-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-850 text-slate-800 dark:text-slate-100 focus:border-indigo-500 outline-none" placeholder="e.g. 75 minutes, 2 hours" value="${escapeHtml(state.customDuration || state.duration || '')}">
-        ` : ''}
+        <input type="text" id="${prefix}-customDuration" class="mt-2 w-48 text-xs p-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-850 text-slate-800 dark:text-slate-100 focus:border-indigo-500 outline-none ${isCustomDuration ? '' : 'hidden'}" placeholder="e.g. 75 minutes, 2 hours" value="${escapeHtml(state.customDuration || state.duration || '')}">
       </div>
 
       <!-- Teaching Modality (Cards) -->
@@ -197,3 +193,153 @@ function escapeHtml(str) {
   if (!str) return '';
   return String(str).replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
+
+export function setupGlobalContextListeners(container, state, prefix, onStateChange = () => {}) {
+  if (!container || !state) return;
+
+  // Duration buttons
+  const durationBtns = container.querySelectorAll(`#${prefix}-duration-group .duration-btn`);
+  const customDurationInput = container.querySelector(`#${prefix}-customDuration`);
+
+  durationBtns.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      const val = btn.getAttribute('data-val');
+      state.duration = val;
+
+      durationBtns.forEach(b => {
+        const isCurrent = b === btn;
+        b.className = `duration-btn text-xs px-3 py-1.5 rounded-xl border font-medium transition-all ${
+          isCurrent
+            ? 'bg-indigo-600 text-white border-indigo-600 shadow-2xs font-semibold'
+            : 'bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-750'
+        }`;
+      });
+
+      if (customDurationInput) {
+        if (val === 'Custom') {
+          customDurationInput.classList.remove('hidden');
+          customDurationInput.focus();
+        } else {
+          customDurationInput.classList.add('hidden');
+        }
+      }
+
+      onStateChange();
+    });
+  });
+
+  // Custom duration input
+  customDurationInput?.addEventListener('input', (e) => {
+    state.customDuration = e.target.value;
+    state.duration = e.target.value || 'Custom';
+    onStateChange();
+  });
+
+  // Modality cards
+  const modalityCards = container.querySelectorAll(`#${prefix}-modality-group .modality-card`);
+  modalityCards.forEach(card => {
+    card.addEventListener('click', (e) => {
+      e.preventDefault();
+      const val = card.getAttribute('data-val');
+      state.modality = val;
+
+      modalityCards.forEach(c => {
+        const isCurrent = c === card;
+        c.className = `modality-card p-2.5 text-left rounded-xl border transition-all ${
+          isCurrent
+            ? 'border-indigo-600 bg-indigo-50/70 dark:bg-indigo-950/60 text-indigo-900 dark:text-indigo-200 shadow-2xs ring-1 ring-indigo-500'
+            : 'border-slate-200 dark:border-slate-750 bg-white dark:bg-slate-850 text-slate-700 dark:text-slate-200 hover:border-slate-300 dark:hover:border-slate-650'
+        }`;
+      });
+
+      onStateChange();
+    });
+  });
+
+  // Resource chips (Multi-select)
+  const resourceChips = container.querySelectorAll(`#${prefix}-resources-group .resource-chip`);
+  resourceChips.forEach(chip => {
+    chip.addEventListener('click', (e) => {
+      e.preventDefault();
+      const val = chip.getAttribute('data-val');
+      if (!Array.isArray(state.resources)) state.resources = [];
+
+      const exists = state.resources.includes(val);
+      if (exists) {
+        state.resources = state.resources.filter(r => r !== val);
+      } else {
+        state.resources.push(val);
+      }
+
+      const isSelected = state.resources.includes(val);
+      chip.textContent = `${isSelected ? '✓ ' : '+ '}${val}`;
+      chip.className = `resource-chip text-xs px-2.5 py-1 rounded-full border transition-all ${
+        isSelected
+          ? 'bg-indigo-600 text-white border-indigo-600 font-medium'
+          : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-750'
+      }`;
+
+      onStateChange();
+    });
+  });
+
+  // Custom resources input
+  container.querySelector(`#${prefix}-customResources`)?.addEventListener('input', (e) => {
+    state.customResources = e.target.value;
+    onStateChange();
+  });
+
+  // Subject select & custom subject
+  const subjectSelect = container.querySelector(`#${prefix}-subject`);
+  const customSubjectInput = container.querySelector(`#${prefix}-customSubject`);
+  subjectSelect?.addEventListener('change', (e) => {
+    state.subject = e.target.value;
+    if (customSubjectInput) {
+      if (e.target.value === 'Other') {
+        customSubjectInput.classList.remove('hidden');
+        customSubjectInput.focus();
+      } else {
+        customSubjectInput.classList.add('hidden');
+      }
+    }
+    onStateChange();
+  });
+
+  customSubjectInput?.addEventListener('input', (e) => {
+    state.customSubject = e.target.value;
+    onStateChange();
+  });
+
+  // Educational level
+  container.querySelector(`#${prefix}-educationalLevel`)?.addEventListener('change', (e) => {
+    state.educationalLevel = e.target.value;
+    onStateChange();
+  });
+
+  // Grade level
+  container.querySelector(`#${prefix}-gradeLevel`)?.addEventListener('input', (e) => {
+    state.gradeLevel = e.target.value;
+    onStateChange();
+  });
+
+  // Topic, Competency, Learner Profile text inputs
+  const bindText = (id, prop) => {
+    const el = container.querySelector(`#${id}`);
+    if (el) {
+      el.addEventListener('input', (e) => {
+        state[prop] = e.target.value;
+        onStateChange();
+      });
+      el.addEventListener('change', (e) => {
+        state[prop] = e.target.value;
+        onStateChange();
+      });
+    }
+  };
+
+  bindText(`${prefix}-topic`, 'topic');
+  bindText(`${prefix}-competency`, 'competency');
+  bindText(`${prefix}-learnerProfile`, 'learnerProfile');
+}
+

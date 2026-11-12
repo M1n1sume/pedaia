@@ -1,5 +1,5 @@
 // PEDAIA Module 4: AI Differentiation Studio with Custom Profiles, Tiered Outputs & 5-State Workspace
-import { renderGlobalContextForm } from './sharedContext.js';
+import { renderGlobalContextForm, setupGlobalContextListeners } from './sharedContext.js';
 import { buildDifferentiationStudioPrompt } from '../promptEngine.js';
 import { store } from '../state.js';
 import { aiService } from '../aiService.js';
@@ -750,9 +750,10 @@ export function setupDifferentiationStudioListeners(container, navigateToWorkspa
     });
   });
 
-  // Strategies Chips
+  // Strategies Chips (In-place multi-select)
   container.querySelectorAll('#diff-strategies-group .strategy-chip').forEach(btn => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
       const val = btn.getAttribute('data-val');
       const list = currentState.adaptationStrategies || [];
       if (list.includes(val)) {
@@ -760,8 +761,14 @@ export function setupDifferentiationStudioListeners(container, navigateToWorkspa
       } else {
         currentState.adaptationStrategies = [...list, val];
       }
-      container.innerHTML = renderDifferentiationStudioView();
-      setupDifferentiationStudioListeners(container, navigateToWorkspace, showToast, openSettings);
+      const isSelected = (currentState.adaptationStrategies || []).includes(val);
+      btn.textContent = `${isSelected ? '✓ ' : '+ '}${val}`;
+      btn.className = `strategy-chip text-xs px-2.5 py-1 rounded-full border transition-all ${
+        isSelected
+          ? 'bg-purple-600 text-white border-purple-600 font-semibold'
+          : 'bg-white dark:bg-slate-850 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-50'
+      }`;
+      updatePromptDisplay();
     });
   });
 
@@ -783,36 +790,8 @@ export function setupDifferentiationStudioListeners(container, navigateToWorkspa
     updatePromptDisplay();
   });
 
-  // Context field bindings
-  const bindInput = (id, prop) => {
-    const el = container.querySelector(`#${id}`);
-    if (el) {
-      el.addEventListener('input', (e) => {
-        currentState[prop] = e.target.value;
-        updatePromptDisplay();
-      });
-      el.addEventListener('change', (e) => {
-        currentState[prop] = e.target.value;
-        updatePromptDisplay();
-      });
-    }
-  };
-
-  bindInput('diff-subject', 'subject');
-  bindInput('diff-customSubject', 'customSubject');
-  bindInput('diff-educationalLevel', 'educationalLevel');
-  bindInput('diff-gradeLevel', 'gradeLevel');
-  bindInput('diff-topic', 'topic');
-  bindInput('diff-competency', 'competency');
-  bindInput('diff-learnerProfile', 'learnerProfile');
-  bindInput('diff-customDuration', 'customDuration');
-  bindInput('diff-customResources', 'customResources');
-
-  // Re-render if subject changes to/from 'Other'
-  container.querySelector('#diff-subject')?.addEventListener('change', () => {
-    container.innerHTML = renderDifferentiationStudioView();
-    setupDifferentiationStudioListeners(container, navigateToWorkspace, showToast, openSettings);
-  });
+  // Shared Global Context Listeners (Duration buttons, Modality cards, Resource chips, Inputs)
+  setupGlobalContextListeners(container, currentState, 'diff', updatePromptDisplay);
 
   // Toggle Edit Prompt
   container.querySelector('#diff-toggle-edit-prompt-btn')?.addEventListener('click', () => {

@@ -319,11 +319,25 @@ let activeStudioState = {
   },
   designOptions: {
     theme: 'academic-indigo',
+    customPrimaryColor: '#4F46E5',
+    customSecondaryColor: '#06B6D4',
+    customBackgroundColor: 'light',
+    customBgHex: '#F8FAFC',
+    typographyStyle: 'scholarly-serif',
+    layoutDensity: 'balanced',
+    visualStyle: 'modern-flat',
+    customVisualDirectives: '',
     slideCount: 8,
     orientation: 'portrait',
     aspectRatio: '16:9',
     speakerNotes: true,
-    includeAnswerKey: true
+    includeAnswerKey: true,
+    pageSize: 'letter',
+    layout: '3-column-grid',
+    diagramType: 'concept-map',
+    cardCount: 12,
+    spacing: 'spacious',
+    rubric: 'included'
   },
   activeOutput: null,
   activeSlideIndex: 0,
@@ -401,6 +415,7 @@ export function renderAiOutputStudioView() {
 function renderCreatorWorkspaceView(activeCat, savedOutputs = []) {
   const hasOutput = Boolean(activeStudioState.activeOutput);
   const designs = store.getDesigns ? store.getDesigns() : [];
+  const dOpts = activeStudioState.designOptions || {};
   const currentPrompt = activeStudioState.userCustomPrompt !== null
     ? activeStudioState.userCustomPrompt
     : buildAiOutputPrompt(activeStudioState);
@@ -587,120 +602,243 @@ function renderCreatorWorkspaceView(activeCat, savedOutputs = []) {
             <!-- Dynamic Design Controls based on active Category -->
             <div class="space-y-4">
               
-              ${activeCat.id === 'presentation' ? `
-                <div>
-                  <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">Visual Design Theme</label>
-                  <select id="opt-theme" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white outline-none">
-                    <option value="academic-indigo" selected>Academic Indigo (Scholarly & Professional)</option>
-                    <option value="modern-stem">Modern STEM Teal (High-Tech & Empirical)</option>
-                    <option value="humanities-serif">Warm Humanities (Classic Editorial)</option>
-                    <option value="clean-minimal">Clean Minimalist (High Legibility)</option>
-                  </select>
+              <!-- 1. Universal Visual Theme & Color Palette -->
+              <div>
+                <div class="flex items-center justify-between mb-1.5">
+                  <label class="block text-xs font-bold text-slate-700 dark:text-slate-300">Visual Theme & Color Palette</label>
+                  <span class="text-[10px] text-indigo-600 dark:text-indigo-400 font-semibold font-mono">10 Presets + Custom</span>
+                </div>
+                <select id="opt-theme" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white outline-none">
+                  <option value="academic-indigo" ${dOpts.theme === 'academic-indigo' ? 'selected' : ''}>Academic Indigo (Scholarly & Professional)</option>
+                  <option value="modern-stem" ${dOpts.theme === 'modern-stem' ? 'selected' : ''}>Modern STEM Teal (High-Tech & Empirical)</option>
+                  <option value="humanities-serif" ${dOpts.theme === 'humanities-serif' ? 'selected' : ''}>Warm Humanities (Classic Editorial Amber)</option>
+                  <option value="clean-minimal" ${dOpts.theme === 'clean-minimal' ? 'selected' : ''}>Clean Minimalist (High Legibility & Modern Slate)</option>
+                  <option value="vibrant-primary" ${dOpts.theme === 'vibrant-primary' ? 'selected' : ''}>Vibrant Primary (Active Elementary & Youth Engagement)</option>
+                  <option value="botanical-sage" ${dOpts.theme === 'botanical-sage' ? 'selected' : ''}>Botanical Sage (Calm Nature & Life Sciences)</option>
+                  <option value="cyber-dark" ${dOpts.theme === 'cyber-dark' ? 'selected' : ''}>Cyber Midnight (Dark High-Contrast & Computer Science)</option>
+                  <option value="sunset-coral" ${dOpts.theme === 'sunset-coral' ? 'selected' : ''}>Sunset Terracotta (Creative Arts & Social Studies)</option>
+                  <option value="nordic-frost" ${dOpts.theme === 'nordic-frost' ? 'selected' : ''}>Nordic Frost (Crisp Cyan & Arctic Clean)</option>
+                  <option value="corporate-executive" ${dOpts.theme === 'corporate-executive' ? 'selected' : ''}>Corporate Executive (Navy & Gold Formal)</option>
+                  <option value="custom" ${dOpts.theme === 'custom' ? 'selected' : ''}>🎨 Custom Color Palette & Visual Theme...</option>
+                </select>
+              </div>
+
+              <!-- 2. Custom Palette Configuration (Revealed when theme is 'custom' or toggled) -->
+              <div id="custom-palette-controls" class="${dOpts.theme === 'custom' ? '' : 'hidden'} p-3.5 rounded-xl border border-indigo-200 dark:border-indigo-800 bg-indigo-50/40 dark:bg-indigo-950/30 space-y-3 animate-fade-in">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-bold text-indigo-950 dark:text-indigo-200 flex items-center gap-1.5">
+                    <span>🎨</span> Custom Palette & Contrast
+                  </span>
+                  <span class="text-[10px] text-slate-500 font-mono">Hex & Swatch</span>
                 </div>
 
                 <div class="grid grid-cols-2 gap-3">
                   <div>
-                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">Slide Count</label>
-                    <select id="opt-slide-count" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white outline-none">
-                      <option value="5">5 Slides (Quick Spark)</option>
-                      <option value="8" selected>8 Slides (Standard Lesson)</option>
-                      <option value="10">10 Slides (Deep Dive)</option>
-                      <option value="12">12 Slides (Full Lecture)</option>
-                    </select>
+                    <label class="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">Primary Color</label>
+                    <div class="flex items-center gap-2">
+                      <input type="color" id="opt-custom-primary" value="${dOpts.customPrimaryColor || '#4F46E5'}" class="w-8 h-8 rounded-lg cursor-pointer border-0 p-0 bg-transparent shrink-0">
+                      <input type="text" id="opt-custom-primary-text" value="${dOpts.customPrimaryColor || '#4F46E5'}" class="w-full px-2 py-1 text-xs font-mono rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 outline-none">
+                    </div>
                   </div>
+
                   <div>
-                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">Aspect Ratio</label>
-                    <select id="opt-aspect" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white outline-none">
-                      <option value="16:9" selected>16:9 Widescreen (Projectors / Displays)</option>
-                      <option value="4:3">4:3 Standard</option>
-                    </select>
+                    <label class="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">Accent Color</label>
+                    <div class="flex items-center gap-2">
+                      <input type="color" id="opt-custom-secondary" value="${dOpts.customSecondaryColor || '#06B6D4'}" class="w-8 h-8 rounded-lg cursor-pointer border-0 p-0 bg-transparent shrink-0">
+                      <input type="text" id="opt-custom-secondary-text" value="${dOpts.customSecondaryColor || '#06B6D4'}" class="w-full px-2 py-1 text-xs font-mono rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 outline-none">
+                    </div>
                   </div>
                 </div>
 
-                <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 flex items-center justify-between">
-                  <div>
-                    <span class="text-xs font-bold text-slate-800 dark:text-slate-200 block">Include Speaker Notes</span>
-                    <span class="text-[11px] text-slate-500 dark:text-slate-400">Teacher verbal script for each slide</span>
+                <div>
+                  <label class="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">Canvas / Background Tone</label>
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <select id="opt-custom-bg" class="px-2.5 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 outline-none">
+                      <option value="light" ${dOpts.customBackgroundColor === 'light' ? 'selected' : ''}>Light Clean Paper (#FFFFFF)</option>
+                      <option value="warm-parchment" ${dOpts.customBackgroundColor === 'warm-parchment' ? 'selected' : ''}>Warm Parchment / Cream (#FDFBF7)</option>
+                      <option value="dark-slate" ${dOpts.customBackgroundColor === 'dark-slate' ? 'selected' : ''}>Deep Midnight Slate (#0F172A)</option>
+                      <option value="soft-pastel" ${dOpts.customBackgroundColor === 'soft-pastel' ? 'selected' : ''}>Soft Pastel Tint (#F0FDF4)</option>
+                      <option value="custom-hex" ${dOpts.customBackgroundColor === 'custom-hex' ? 'selected' : ''}>Custom Hex Color</option>
+                    </select>
+                    <div class="flex items-center gap-1.5 ${dOpts.customBackgroundColor === 'custom-hex' ? '' : 'hidden'}" id="custom-bg-hex-wrapper">
+                      <input type="color" id="opt-custom-bg-color" value="${dOpts.customBgHex || '#F8FAFC'}" class="w-7 h-7 rounded cursor-pointer border-0 p-0 bg-transparent shrink-0">
+                      <input type="text" id="opt-custom-bg-hex" value="${dOpts.customBgHex || '#F8FAFC'}" class="w-full px-2 py-1 text-xs font-mono rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 outline-none">
+                    </div>
                   </div>
-                  <input type="checkbox" id="opt-speaker-notes" checked class="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500">
+                </div>
+
+                <!-- Live Swatch Preview Pill -->
+                <div class="p-2.5 rounded-xl border border-slate-200 dark:border-slate-750 flex items-center justify-between text-xs transition-colors shadow-2xs" id="live-swatch-preview" style="background-color: ${dOpts.customBackgroundColor === 'dark-slate' ? '#0F172A' : (dOpts.customBackgroundColor === 'warm-parchment' ? '#FDFBF7' : (dOpts.customBackgroundColor === 'custom-hex' ? (dOpts.customBgHex || '#F8FAFC') : '#FFFFFF'))}; color: ${dOpts.customBackgroundColor === 'dark-slate' ? '#FFFFFF' : '#0F172A'};">
+                  <div class="flex items-center gap-2">
+                    <span class="w-4 h-4 rounded-full shadow-2xs shrink-0" style="background-color: ${dOpts.customPrimaryColor || '#4F46E5'};"></span>
+                    <span class="w-4 h-4 rounded-full shadow-2xs shrink-0" style="background-color: ${dOpts.customSecondaryColor || '#06B6D4'};"></span>
+                    <span class="text-[11px] font-bold">Palette Harmony Preview</span>
+                  </div>
+                  <span class="text-[10px] font-mono px-2 py-0.5 rounded shadow-2xs font-bold" style="background-color: ${dOpts.customPrimaryColor || '#4F46E5'}; color: #FFFFFF;">
+                    Primary Pill
+                  </span>
+                </div>
+              </div>
+
+              <!-- 3. Typography & Density Controls -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Typography Pairing</label>
+                  <select id="opt-typography" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white outline-none">
+                    <option value="scholarly-serif" ${dOpts.typographyStyle === 'scholarly-serif' ? 'selected' : ''}>Scholarly Serif (Merriweather / Inter)</option>
+                    <option value="modern-sans" ${dOpts.typographyStyle === 'modern-sans' ? 'selected' : ''}>Modern Clean Sans (Plus Jakarta / Inter)</option>
+                    <option value="technical-mono" ${dOpts.typographyStyle === 'technical-mono' ? 'selected' : ''}>Technical Monospace & Code</option>
+                    <option value="friendly-humanist" ${dOpts.typographyStyle === 'friendly-humanist' ? 'selected' : ''}>Friendly Humanist (Poppins / Quicksand)</option>
+                    <option value="classic-editorial" ${dOpts.typographyStyle === 'classic-editorial' ? 'selected' : ''}>Classic Editorial (Garamond Style)</option>
+                    <option value="bold-minimalist" ${dOpts.typographyStyle === 'bold-minimalist' ? 'selected' : ''}>Bold Swiss Minimalist</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Layout Spacing & Density</label>
+                  <select id="opt-layout-density" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white outline-none">
+                    <option value="balanced" ${dOpts.layoutDensity === 'balanced' ? 'selected' : ''}>Balanced & Harmonious (Standard)</option>
+                    <option value="spacious" ${dOpts.layoutDensity === 'spacious' ? 'selected' : ''}>Spacious & Airy (Low Cognitive Load)</option>
+                    <option value="dense" ${dOpts.layoutDensity === 'dense' ? 'selected' : ''}>Dense & Information-Rich (Summary)</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- 4. Visual Container & Graphic Style -->
+              <div>
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Graphic Element & Container Style</label>
+                <select id="opt-visual-style" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white outline-none">
+                  <option value="modern-flat" ${dOpts.visualStyle === 'modern-flat' ? 'selected' : ''}>Modern Flat Cards & Clean Vector Badges</option>
+                  <option value="illustrated-card" ${dOpts.visualStyle === 'illustrated-card' ? 'selected' : ''}>Illustrated Infographic & Soft Glow Containers</option>
+                  <option value="technical-blueprint" ${dOpts.visualStyle === 'technical-blueprint' ? 'selected' : ''}>Technical Blueprint & Mathematical Grid</option>
+                  <option value="minimalist-swiss" ${dOpts.visualStyle === 'minimalist-swiss' ? 'selected' : ''}>Minimalist Swiss Typography & Geometric Dividers</option>
+                  <option value="editorial-journal" ${dOpts.visualStyle === 'editorial-journal' ? 'selected' : ''}>Editorial Journal & Formal Ruled Lines</option>
+                </select>
+              </div>
+
+              <!-- 5. Freeform Custom Visual Directives Textarea -->
+              <div>
+                <div class="flex items-center justify-between mb-1">
+                  <label class="block text-xs font-bold text-slate-700 dark:text-slate-300">Custom Visual Directives & Art Direction</label>
+                  <span class="text-[10px] text-slate-400">Optional Aesthetic Prompt</span>
+                </div>
+                <textarea id="opt-custom-visual-directives" rows="2" class="w-full p-2.5 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:border-indigo-500 outline-none leading-relaxed resize-y" placeholder="Describe your exact visual vision (e.g. Bauhaus geometric layout, pastel tones, hand-drawn sketch icons, dark high-contrast with neon cyan highlights, or vintage 1970s science manual)...">${escapeHtml(dOpts.customVisualDirectives || '')}</textarea>
+              </div>
+
+              <!-- Category-Specific Delivery Controls -->
+              ${activeCat.id === 'presentation' ? `
+                <div class="pt-2 border-t border-slate-100 dark:border-slate-800 space-y-3">
+                  <span class="text-[11px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400 block">Slide Deck Specifications</span>
+                  <div class="grid grid-cols-2 gap-3">
+                    <div>
+                      <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Slide Count</label>
+                      <select id="opt-slide-count" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white outline-none">
+                        <option value="5" ${dOpts.slideCount == 5 ? 'selected' : ''}>5 Slides (Quick Spark)</option>
+                        <option value="8" ${dOpts.slideCount == 8 ? 'selected' : ''}>8 Slides (Standard Lesson)</option>
+                        <option value="10" ${dOpts.slideCount == 10 ? 'selected' : ''}>10 Slides (Deep Dive)</option>
+                        <option value="12" ${dOpts.slideCount == 12 ? 'selected' : ''}>12 Slides (Full Lecture)</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Aspect Ratio</label>
+                      <select id="opt-aspect" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white outline-none">
+                        <option value="16:9" ${dOpts.aspectRatio === '16:9' ? 'selected' : ''}>16:9 Widescreen</option>
+                        <option value="4:3" ${dOpts.aspectRatio === '4:3' ? 'selected' : ''}>4:3 Standard</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                    <div>
+                      <span class="text-xs font-bold text-slate-800 dark:text-slate-200 block">Include Speaker Notes</span>
+                      <span class="text-[11px] text-slate-500 dark:text-slate-400">Teacher verbal script for each slide</span>
+                    </div>
+                    <input type="checkbox" id="opt-speaker-notes" ${dOpts.speakerNotes !== false ? 'checked' : ''} class="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer">
+                  </div>
                 </div>
               ` : ''}
 
               ${activeCat.id === 'poster' ? `
-                <div class="grid grid-cols-2 gap-3">
-                  <div>
-                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">Orientation</label>
-                    <select id="opt-orientation" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white outline-none">
-                      <option value="portrait" selected>Portrait (Vertical Wall Poster)</option>
-                      <option value="landscape">Landscape (Horizontal Display)</option>
-                    </select>
+                <div class="pt-2 border-t border-slate-100 dark:border-slate-800 space-y-3">
+                  <span class="text-[11px] font-bold uppercase tracking-wider text-teal-600 dark:text-teal-400 block">Poster Layout Specifications</span>
+                  <div class="grid grid-cols-2 gap-3">
+                    <div>
+                      <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Orientation</label>
+                      <select id="opt-orientation" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white outline-none">
+                        <option value="portrait" ${dOpts.orientation === 'portrait' ? 'selected' : ''}>Portrait (Vertical Wall Poster)</option>
+                        <option value="landscape" ${dOpts.orientation === 'landscape' ? 'selected' : ''}>Landscape (Horizontal Display)</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Layout Structure</label>
+                      <select id="opt-layout" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white outline-none">
+                        <option value="3-column-grid" ${dOpts.layout === '3-column-grid' ? 'selected' : ''}>3-Column Infographic Grid</option>
+                        <option value="focal-hero" ${dOpts.layout === 'focal-hero' ? 'selected' : ''}>Focal Hero & Key Takeaways</option>
+                        <option value="process-flow" ${dOpts.layout === 'process-flow' ? 'selected' : ''}>Sequential Process Flow</option>
+                      </select>
+                    </div>
                   </div>
-                  <div>
-                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">Layout Structure</label>
-                    <select id="opt-layout" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white outline-none">
-                      <option value="3-column-grid" selected>3-Column Infographic Grid</option>
-                      <option value="focal-hero">Focal Hero & Key Takeaways</option>
-                      <option value="process-flow">Sequential Process Flow</option>
-                    </select>
-                  </div>
-                </div>
 
-                <div>
-                  <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">Page Dimension</label>
-                  <select id="opt-page-size" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white outline-none">
-                    <option value="letter" selected>Letter (8.5 × 11 in) — Standard School Printer</option>
-                    <option value="a4">A4 (210 × 297 mm)</option>
-                    <option value="poster-large">Large Poster (18 × 24 in) — Wall Print</option>
-                  </select>
+                  <div>
+                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Page Dimension</label>
+                    <select id="opt-page-size" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white outline-none">
+                      <option value="letter" ${dOpts.pageSize === 'letter' ? 'selected' : ''}>Letter (8.5 × 11 in) — Standard Printer</option>
+                      <option value="a4" ${dOpts.pageSize === 'a4' ? 'selected' : ''}>A4 (210 × 297 mm)</option>
+                      <option value="poster-large" ${dOpts.pageSize === 'poster-large' ? 'selected' : ''}>Large Poster (18 × 24 in) — Wall Print</option>
+                    </select>
+                  </div>
                 </div>
               ` : ''}
 
               ${activeCat.id === 'worksheet' || activeCat.id === 'assessment' ? `
-                <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 flex items-center justify-between">
-                  <div>
-                    <span class="text-xs font-bold text-slate-800 dark:text-slate-200 block">Teacher Answer Key</span>
-                    <span class="text-[11px] text-slate-500 dark:text-slate-400">Generate full answers & grading criteria</span>
+                <div class="pt-2 border-t border-slate-100 dark:border-slate-800 space-y-3">
+                  <span class="text-[11px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400 block">Document Specifications</span>
+                  <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                    <div>
+                      <span class="text-xs font-bold text-slate-800 dark:text-slate-200 block">Teacher Answer Key</span>
+                      <span class="text-[11px] text-slate-500 dark:text-slate-400">Generate full answers & grading criteria</span>
+                    </div>
+                    <input type="checkbox" id="opt-answer-key" ${dOpts.includeAnswerKey !== false ? 'checked' : ''} class="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer">
                   </div>
-                  <input type="checkbox" id="opt-answer-key" checked class="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500">
-                </div>
 
-                <div class="grid grid-cols-2 gap-3">
-                  <div>
-                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">Spacing / Layout</label>
-                    <select id="opt-spacing" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white outline-none">
-                      <option value="spacious" selected>Spacious (Ample Student Space)</option>
-                      <option value="compact">Compact (Paper-Saving)</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">Cognitive Rubric</label>
-                    <select id="opt-rubric" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white outline-none">
-                      <option value="included" selected>Include 4-Level Matrix</option>
-                      <option value="none">Points Only</option>
-                    </select>
+                  <div class="grid grid-cols-2 gap-3">
+                    <div>
+                      <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Spacing / Layout</label>
+                      <select id="opt-spacing" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white outline-none">
+                        <option value="spacious" ${dOpts.spacing === 'spacious' ? 'selected' : ''}>Spacious (Ample Student Space)</option>
+                        <option value="compact" ${dOpts.spacing === 'compact' ? 'selected' : ''}>Compact (Paper-Saving)</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Cognitive Rubric</label>
+                      <select id="opt-rubric" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white outline-none">
+                        <option value="included" ${dOpts.rubric === 'included' ? 'selected' : ''}>Include 4-Level Matrix</option>
+                        <option value="none" ${dOpts.rubric === 'none' ? 'selected' : ''}>Points Only</option>
+                      </select>
+                    </div>
                   </div>
                 </div>
               ` : ''}
 
               ${activeCat.id === 'flashcards' ? `
-                <div>
-                  <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">Card Deck Count</label>
+                <div class="pt-2 border-t border-slate-100 dark:border-slate-800 space-y-2">
+                  <span class="text-[11px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 block">Flashcard Deck Count</span>
                   <select id="opt-card-count" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white outline-none">
-                    <option value="8">8 Essential Concept Cards</option>
-                    <option value="12" selected>12 Standard Study Cards</option>
-                    <option value="16">16 Deep Review Cards</option>
+                    <option value="8" ${dOpts.cardCount == 8 ? 'selected' : ''}>8 Essential Concept Cards</option>
+                    <option value="12" ${dOpts.cardCount == 12 ? 'selected' : ''}>12 Standard Study Cards</option>
+                    <option value="16" ${dOpts.cardCount == 16 ? 'selected' : ''}>16 Deep Review Cards</option>
                   </select>
                 </div>
               ` : ''}
 
               ${activeCat.id === 'diagram' ? `
-                <div>
-                  <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">Diagram Architecture</label>
+                <div class="pt-2 border-t border-slate-100 dark:border-slate-800 space-y-2">
+                  <span class="text-[11px] font-bold uppercase tracking-wider text-purple-600 dark:text-purple-400 block">Diagram Architecture</span>
                   <select id="opt-diagram-type" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white outline-none">
-                    <option value="concept-map" selected>Concept Map (Hierarchical Network)</option>
-                    <option value="flowchart">Decision Logic Flowchart</option>
-                    <option value="timeline">Chronological Timeline</option>
-                    <option value="comparison">Comparative Venn / Matrix</option>
+                    <option value="concept-map" ${dOpts.diagramType === 'concept-map' ? 'selected' : ''}>Concept Map (Hierarchical Network)</option>
+                    <option value="flowchart" ${dOpts.diagramType === 'flowchart' ? 'selected' : ''}>Decision Logic Flowchart</option>
+                    <option value="timeline" ${dOpts.diagramType === 'timeline' ? 'selected' : ''}>Chronological Timeline</option>
+                    <option value="comparison" ${dOpts.diagramType === 'comparison' ? 'selected' : ''}>Comparative Venn / Matrix</option>
                   </select>
                 </div>
               ` : ''}
@@ -708,11 +846,11 @@ function renderCreatorWorkspaceView(activeCat, savedOutputs = []) {
               <!-- AI Synthesis Readiness Badge -->
               <div class="p-3 rounded-xl bg-indigo-50/70 dark:bg-indigo-950/50 border border-indigo-100 dark:border-indigo-800/60 text-xs">
                 <div class="flex items-center gap-2 mb-1">
-                  <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                  <span class="font-bold text-indigo-950 dark:text-indigo-200">Universal Pedagogical Engine</span>
+                  <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                  <span class="font-bold text-indigo-950 dark:text-indigo-200">Custom Design Synthesis Ready</span>
                 </div>
                 <p class="text-[11px] text-slate-600 dark:text-slate-400">
-                  Synthesizes fully formatted, exportable artifacts using connected cloud AI or offline built-in academic generators.
+                  Synthesizes custom visual styling, art direction, and pedagogical layouts using connected AI models or built-in offline engine.
                 </p>
               </div>
 
@@ -1878,6 +2016,9 @@ function bindFormSync(container) {
   };
 
   syncOpt('opt-theme', 'theme');
+  syncOpt('opt-typography', 'typographyStyle');
+  syncOpt('opt-layout-density', 'layoutDensity');
+  syncOpt('opt-visual-style', 'visualStyle');
   syncOpt('opt-slide-count', 'slideCount');
   syncOpt('opt-aspect', 'aspectRatio');
   syncOpt('opt-speaker-notes', 'speakerNotes', true);
@@ -1889,6 +2030,125 @@ function bindFormSync(container) {
   syncOpt('opt-rubric', 'rubric');
   syncOpt('opt-card-count', 'cardCount');
   syncOpt('opt-diagram-type', 'diagramType');
+
+  // Custom Palette Controls & Real-Time Swatch Harmony Sync
+  const themeSelect = container.querySelector('#opt-theme');
+  const customPaletteControls = container.querySelector('#custom-palette-controls');
+
+  const updateLiveSwatchPreview = () => {
+    const swatch = container.querySelector('#live-swatch-preview');
+    if (!swatch) return;
+    const p = activeStudioState.designOptions.customPrimaryColor || '#4F46E5';
+    const s = activeStudioState.designOptions.customSecondaryColor || '#06B6D4';
+    const bgMode = activeStudioState.designOptions.customBackgroundColor || 'light';
+    const bgHex = activeStudioState.designOptions.customBgHex || '#F8FAFC';
+
+    let bg = '#FFFFFF';
+    let text = '#0F172A';
+    if (bgMode === 'dark-slate') {
+      bg = '#0F172A';
+      text = '#FFFFFF';
+    } else if (bgMode === 'warm-parchment') {
+      bg = '#FDFBF7';
+      text = '#1E293B';
+    } else if (bgMode === 'soft-pastel') {
+      bg = '#F0FDF4';
+      text = '#064E3B';
+    } else if (bgMode === 'custom-hex') {
+      bg = bgHex;
+      text = '#0F172A';
+    }
+
+    swatch.style.backgroundColor = bg;
+    swatch.style.color = text;
+    const dots = swatch.querySelectorAll('span.rounded-full');
+    if (dots[0]) dots[0].style.backgroundColor = p;
+    if (dots[1]) dots[1].style.backgroundColor = s;
+    const pill = swatch.querySelector('span.font-mono');
+    if (pill) {
+      pill.style.backgroundColor = p;
+      pill.style.color = '#FFFFFF';
+    }
+  };
+
+  themeSelect?.addEventListener('change', (e) => {
+    activeStudioState.designOptions.theme = e.target.value;
+    if (e.target.value === 'custom') {
+      customPaletteControls?.classList.remove('hidden');
+    } else {
+      customPaletteControls?.classList.add('hidden');
+    }
+    updateLiveSwatchPreview();
+    updatePromptPreviewDisplay(container);
+  });
+
+  // Custom Primary Color Sync (Color Picker <-> Hex Textbox)
+  const primaryColor = container.querySelector('#opt-custom-primary');
+  const primaryText = container.querySelector('#opt-custom-primary-text');
+  primaryColor?.addEventListener('input', (e) => {
+    activeStudioState.designOptions.customPrimaryColor = e.target.value;
+    if (primaryText) primaryText.value = e.target.value;
+    updateLiveSwatchPreview();
+    updatePromptPreviewDisplay(container);
+  });
+  primaryText?.addEventListener('input', (e) => {
+    activeStudioState.designOptions.customPrimaryColor = e.target.value;
+    if (primaryColor) primaryColor.value = e.target.value;
+    updateLiveSwatchPreview();
+    updatePromptPreviewDisplay(container);
+  });
+
+  // Custom Secondary Color Sync (Color Picker <-> Hex Textbox)
+  const secondaryColor = container.querySelector('#opt-custom-secondary');
+  const secondaryText = container.querySelector('#opt-custom-secondary-text');
+  secondaryColor?.addEventListener('input', (e) => {
+    activeStudioState.designOptions.customSecondaryColor = e.target.value;
+    if (secondaryText) secondaryText.value = e.target.value;
+    updateLiveSwatchPreview();
+    updatePromptPreviewDisplay(container);
+  });
+  secondaryText?.addEventListener('input', (e) => {
+    activeStudioState.designOptions.customSecondaryColor = e.target.value;
+    if (secondaryColor) secondaryColor.value = e.target.value;
+    updateLiveSwatchPreview();
+    updatePromptPreviewDisplay(container);
+  });
+
+  // Background Tone & Hex Color Sync
+  const bgSelect = container.querySelector('#opt-custom-bg');
+  const bgHexWrapper = container.querySelector('#custom-bg-hex-wrapper');
+  const bgColor = container.querySelector('#opt-custom-bg-color');
+  const bgHexText = container.querySelector('#opt-custom-bg-hex');
+
+  bgSelect?.addEventListener('change', (e) => {
+    activeStudioState.designOptions.customBackgroundColor = e.target.value;
+    if (e.target.value === 'custom-hex') {
+      bgHexWrapper?.classList.remove('hidden');
+    } else {
+      bgHexWrapper?.classList.add('hidden');
+    }
+    updateLiveSwatchPreview();
+    updatePromptPreviewDisplay(container);
+  });
+
+  bgColor?.addEventListener('input', (e) => {
+    activeStudioState.designOptions.customBgHex = e.target.value;
+    if (bgHexText) bgHexText.value = e.target.value;
+    updateLiveSwatchPreview();
+    updatePromptPreviewDisplay(container);
+  });
+  bgHexText?.addEventListener('input', (e) => {
+    activeStudioState.designOptions.customBgHex = e.target.value;
+    if (bgColor) bgColor.value = e.target.value;
+    updateLiveSwatchPreview();
+    updatePromptPreviewDisplay(container);
+  });
+
+  // Custom Visual Directives Freeform Textarea
+  container.querySelector('#opt-custom-visual-directives')?.addEventListener('input', (e) => {
+    activeStudioState.designOptions.customVisualDirectives = e.target.value;
+    updatePromptPreviewDisplay(container);
+  });
 }
 
 // -------------------------------------------------------------------------
@@ -2465,6 +2725,53 @@ function generateTeacherAnswerKey(studentText, formData) {
 function downloadPowerPointPresentation(output) {
   const slides = output.slides || [];
   const filename = (output.title || 'Presentation').replace(/[^a-z0-9_-]/gi, '_') + '.ppt';
+  const dOpts = output.designOptions || activeStudioState.designOptions || {};
+  const theme = dOpts.theme || 'academic-indigo';
+  const primary = dOpts.customPrimaryColor || '#4F46E5';
+  const secondary = dOpts.customSecondaryColor || '#14B8A6';
+
+  let bg = '#0F172A';
+  let slideBg = '#1E293B';
+  let titleColor = '#818CF8';
+  let accentColor = '#14B8A6';
+  let textColor = '#FFFFFF';
+  let bulletColor = '#E2E8F0';
+
+  if (theme === 'custom') {
+    titleColor = primary;
+    accentColor = secondary;
+    if (dOpts.customBackgroundColor === 'light') {
+      bg = '#F1F5F9';
+      slideBg = '#FFFFFF';
+      textColor = '#0F172A';
+      bulletColor = '#334155';
+    } else if (dOpts.customBackgroundColor === 'warm-parchment') {
+      bg = '#F5F0E6';
+      slideBg = '#FAF7F2';
+      textColor = '#1E293B';
+      bulletColor = '#475569';
+    } else if (dOpts.customBackgroundColor === 'custom-hex' && dOpts.customBgHex) {
+      bg = dOpts.customBgHex;
+      slideBg = dOpts.customBgHex;
+    }
+  } else if (theme === 'modern-stem') {
+    titleColor = '#2DD4BF';
+    accentColor = '#34D399';
+    bg = '#022C22';
+    slideBg = '#064E3B';
+  } else if (theme === 'humanities-serif') {
+    titleColor = '#F59E0B';
+    accentColor = '#FB923C';
+    bg = '#1C1917';
+    slideBg = '#292524';
+  } else if (theme === 'clean-minimal') {
+    titleColor = '#0F172A';
+    accentColor = '#475569';
+    bg = '#F8FAFC';
+    slideBg = '#FFFFFF';
+    textColor = '#0F172A';
+    bulletColor = '#1E293B';
+  }
 
   const pptHtml = `<!DOCTYPE html>
 <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:p='urn:schemas-microsoft-com:office:powerpoint' xmlns='http://www.w3.org/TR/REC-html40'>
@@ -2475,31 +2782,31 @@ function downloadPowerPointPresentation(output) {
   <xml>
     <p:Presentation>
       <p:SlideMaster>
-        <p:ColorPalette background='#0F172A' text='#FFFFFF' accent='#14B8A6' />
+        <p:ColorPalette background='${bg}' text='${textColor}' accent='${accentColor}' />
       </p:SlideMaster>
     </p:Presentation>
   </xml>
   <![endif]-->
   <style>
-    body { font-family: 'Calibri', Arial, sans-serif; background-color: #0F172A; color: #FFFFFF; }
+    body { font-family: 'Calibri', Arial, sans-serif; background-color: ${bg}; color: ${textColor}; }
     .slide {
       page-break-after: always;
       width: 960px;
       height: 540px;
       padding: 40px;
       margin: 20px auto;
-      background: #1E293B;
-      border: 2px solid #312E81;
+      background: ${slideBg};
+      border: 2px solid ${titleColor};
       border-radius: 12px;
       box-sizing: border-box;
       position: relative;
     }
-    h1 { color: #818CF8; font-size: 28pt; margin-bottom: 8pt; }
-    h2 { color: #14B8A6; font-size: 14pt; text-transform: uppercase; letter-spacing: 2pt; margin-bottom: 20pt; }
-    ul { font-size: 18pt; line-height: 1.6; color: #E2E8F0; }
+    h1 { color: ${titleColor}; font-size: 28pt; margin-bottom: 8pt; }
+    h2 { color: ${accentColor}; font-size: 14pt; text-transform: uppercase; letter-spacing: 2pt; margin-bottom: 20pt; }
+    ul { font-size: 18pt; line-height: 1.6; color: ${bulletColor}; }
     li { margin-bottom: 12pt; }
     .footer { position: absolute; bottom: 20px; left: 40px; right: 40px; font-size: 10pt; color: #94A3B8; border-top: 1px solid #334155; padding-top: 10px; display: flex; justify-content: space-between; }
-    .notes { background: #0F172A; color: #CBD5E1; padding: 12px; border-left: 4px solid #14B8A6; font-size: 11pt; margin-top: 20pt; }
+    .notes { background: ${bg}; color: #CBD5E1; padding: 12px; border-left: 4px solid ${accentColor}; font-size: 11pt; margin-top: 20pt; }
   </style>
 </head>
 <body>
@@ -2537,6 +2844,31 @@ function openInteractiveSlideDeckWindow(output) {
   const slideWin = window.open('', '_blank');
   if (!slideWin) return;
 
+  const dOpts = output.designOptions || activeStudioState.designOptions || {};
+  const theme = dOpts.theme || 'academic-indigo';
+  const primary = dOpts.customPrimaryColor || '#818CF8';
+  const secondary = dOpts.customSecondaryColor || '#14B8A6';
+
+  let bg = '#0F172A';
+  let cardBg = '#1E293B';
+  let titleColor = primary;
+  let accentColor = secondary;
+  let text = '#CBD5E1';
+
+  if (theme === 'custom') {
+    titleColor = primary;
+    accentColor = secondary;
+    if (dOpts.customBackgroundColor === 'light') {
+      bg = '#F1F5F9';
+      cardBg = '#FFFFFF';
+      text = '#334155';
+    } else if (dOpts.customBackgroundColor === 'warm-parchment') {
+      bg = '#F5F0E6';
+      cardBg = '#FAF7F2';
+      text = '#475569';
+    }
+  }
+
   const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -2544,17 +2876,17 @@ function openInteractiveSlideDeckWindow(output) {
   <title>${escapeHtml(output.title)} — Slide Deck Presentation</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: #0F172A; color: #FFFFFF; font-family: 'Inter', system-ui, sans-serif; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+    body { background: ${bg}; color: #FFFFFF; font-family: 'Inter', system-ui, sans-serif; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
     #slide-stage { flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px; }
-    .slide-card { width: 100%; max-width: 1080px; aspect-ratio: 16/9; background: #1E293B; border: 2px solid #312E81; border-radius: 20px; padding: 60px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); }
-    h1 { font-size: 2.5rem; color: #FFFFFF; line-height: 1.2; margin-bottom: 24px; font-family: serif; }
-    .eyebrow { font-size: 0.85rem; font-family: monospace; text-transform: uppercase; letter-spacing: 0.15em; color: #14B8A6; font-weight: bold; margin-bottom: 12px; }
-    ul { list-style: none; font-size: 1.35rem; line-height: 1.6; color: #CBD5E1; }
+    .slide-card { width: 100%; max-width: 1080px; aspect-ratio: 16/9; background: ${cardBg}; border: 2px solid ${titleColor}; border-radius: 20px; padding: 60px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); }
+    h1 { font-size: 2.5rem; color: ${titleColor}; line-height: 1.2; margin-bottom: 24px; font-family: serif; }
+    .eyebrow { font-size: 0.85rem; font-family: monospace; text-transform: uppercase; letter-spacing: 0.15em; color: ${accentColor}; font-weight: bold; margin-bottom: 12px; }
+    ul { list-style: none; font-size: 1.35rem; line-height: 1.6; color: ${text}; }
     li { margin-bottom: 16px; display: flex; align-items: flex-start; gap: 12px; }
-    li::before { content: "•"; color: #14B8A6; font-size: 1.8rem; line-height: 1; }
-    #toolbar { height: 60px; background: #1E293B; border-top: 1px solid #334155; display: flex; align-items: center; justify-content: space-between; px: 30px; padding: 0 30px; }
-    button { background: #312E81; color: white; border: none; padding: 8px 18px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 13px; }
-    button:hover { background: #4338CA; }
+    li::before { content: "•"; color: ${accentColor}; font-size: 1.8rem; line-height: 1; }
+    #toolbar { height: 60px; background: ${cardBg}; border-top: 1px solid #334155; display: flex; align-items: center; justify-content: space-between; px: 30px; padding: 0 30px; }
+    button { background: ${primary}; color: white; border: none; padding: 8px 18px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 13px; }
+    button:hover { opacity: 0.9; }
   </style>
 </head>
 <body>
@@ -2601,12 +2933,24 @@ function openInteractiveSlideDeckWindow(output) {
       document.getElementById('nav-count').textContent = (cur + 1) + ' / ' + slides.length;
     }
 
-    function prev() { if (cur > 0) { cur--; render(); } }
-    function next() { if (cur < slides.length - 1) { cur++; render(); } }
+    function next() {
+      if (cur < slides.length - 1) {
+        cur++;
+        render();
+      }
+    }
 
-    window.addEventListener('keydown', e => {
+    function prev() {
+      if (cur > 0) {
+        cur--;
+        render();
+      }
+    }
+
+    document.addEventListener('keydown', (e) => {
       if (e.key === 'ArrowRight' || e.key === ' ') next();
       if (e.key === 'ArrowLeft') prev();
+      if (e.key === 'f' || e.key === 'F') document.documentElement.requestFullscreen();
     });
 
     render();

@@ -1,5 +1,5 @@
 // PEDAIA Module 1: AI Lesson Planner with Dynamic Pedagogical Alignment & 5-State Workspace
-import { renderGlobalContextForm } from './sharedContext.js';
+import { renderGlobalContextForm, setupGlobalContextListeners } from './sharedContext.js';
 import { buildLessonPlannerPrompt } from '../promptEngine.js';
 import { store } from '../state.js';
 import { aiService } from '../aiService.js';
@@ -900,9 +900,10 @@ export function setupLessonPlannerListeners(container, navigateToWorkspace, show
     });
   });
 
-  // Teaching Strategies Chips
+  // Teaching Strategies Chips (In-place interactive selection)
   container.querySelectorAll('#lp-strategies-group .strategy-chip').forEach(btn => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
       const val = btn.getAttribute('data-val');
       const list = currentState.teachingStrategies || [];
       if (list.includes(val)) {
@@ -910,14 +911,20 @@ export function setupLessonPlannerListeners(container, navigateToWorkspace, show
       } else {
         currentState.teachingStrategies = [...list, val];
       }
-      container.innerHTML = renderLessonPlannerView();
-      setupLessonPlannerListeners(container, navigateToWorkspace, showToast, openSettings);
+      const isSelected = (currentState.teachingStrategies || []).includes(val);
+      btn.className = `strategy-chip text-xs px-2.5 py-1 rounded-full border transition-all ${
+        isSelected
+          ? 'bg-indigo-600 text-white border-indigo-600 font-semibold'
+          : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-750'
+      }`;
+      updatePromptDisplay();
     });
   });
 
-  // Assessment Strategies Chips
+  // Assessment Strategies Chips (In-place interactive selection)
   container.querySelectorAll('#lp-assessments-group .assessment-chip').forEach(btn => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
       const val = btn.getAttribute('data-val');
       const list = currentState.assessmentTypes || [];
       if (list.includes(val)) {
@@ -925,8 +932,13 @@ export function setupLessonPlannerListeners(container, navigateToWorkspace, show
       } else {
         currentState.assessmentTypes = [...list, val];
       }
-      container.innerHTML = renderLessonPlannerView();
-      setupLessonPlannerListeners(container, navigateToWorkspace, showToast, openSettings);
+      const isSelected = (currentState.assessmentTypes || []).includes(val);
+      btn.className = `assessment-chip text-xs px-2.5 py-1 rounded-full border transition-all ${
+        isSelected
+          ? 'bg-indigo-600 text-white border-indigo-600 font-semibold'
+          : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-750'
+      }`;
+      updatePromptDisplay();
     });
   });
 
@@ -967,31 +979,14 @@ export function setupLessonPlannerListeners(container, navigateToWorkspace, show
     updatePromptDisplay();
   });
 
-  // Context Bindings
-  const bindInput = (id, prop) => {
-    const el = container.querySelector(`#${id}`);
-    if (el) {
-      el.addEventListener('input', (e) => {
-        currentState[prop] = e.target.value;
-        updatePromptDisplay();
-      });
-      el.addEventListener('change', (e) => {
-        currentState[prop] = e.target.value;
-        updatePromptDisplay();
-      });
-    }
-  };
+  // Shared Global Context Listeners (Duration buttons, Modality cards, Resource chips, Inputs)
+  setupGlobalContextListeners(container, currentState, 'lp', updatePromptDisplay);
 
-  bindInput('lp-subject', 'subject');
-  bindInput('lp-customSubject', 'customSubject');
-  bindInput('lp-educationalLevel', 'educationalLevel');
-  bindInput('lp-gradeLevel', 'gradeLevel');
-  bindInput('lp-topic', 'topic');
-  bindInput('lp-competency', 'competency');
-  bindInput('lp-learnerProfile', 'learnerProfile');
-  bindInput('lp-customDuration', 'customDuration');
-  bindInput('lp-customResources', 'customResources');
-  bindInput('lp-customInstructionalModel', 'customInstructionalModel');
+  // Custom instructional model input if 'Custom Instructional Model' is active
+  container.querySelector('#lp-customInstructionalModel')?.addEventListener('input', (e) => {
+    currentState.customInstructionalModel = e.target.value;
+    updatePromptDisplay();
+  });
 
   // Re-render if subject changes to/from 'Other'
   container.querySelector('#lp-subject')?.addEventListener('change', () => {

@@ -1,5 +1,5 @@
 // PEDAIA Module 3: AI Questioning Studio with Precision Question Distribution Builder & 5-State Workspace
-import { renderGlobalContextForm } from './sharedContext.js';
+import { renderGlobalContextForm, setupGlobalContextListeners } from './sharedContext.js';
 import { buildQuestioningStudioPrompt } from '../promptEngine.js';
 import { store } from '../state.js';
 import { aiService } from '../aiService.js';
@@ -727,24 +727,29 @@ export function setupQuestioningStudioListeners(container, navigateToWorkspace, 
     showToast(`Balanced ${total} questions evenly across 6 Bloom levels.`, 'success');
   });
 
-  // Steppers for Bloom Levels
+  // Steppers for Bloom Levels (In-place numeric adjustment)
   container.querySelectorAll('#q-blooms-inputs-container .bloom-inc-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
       const lvl = btn.getAttribute('data-level');
-      currentState.bloomsDistribution[lvl] = (parseInt(currentState.bloomsDistribution[lvl], 10) || 0) + 1;
-      container.innerHTML = renderQuestioningStudioView();
-      setupQuestioningStudioListeners(container, navigateToWorkspace, showToast, openSettings);
+      const cur = parseInt(currentState.bloomsDistribution[lvl], 10) || 0;
+      currentState.bloomsDistribution[lvl] = cur + 1;
+      const input = container.querySelector(`#q-blooms-inputs-container .bloom-count-input[data-level="${lvl}"]`);
+      if (input) input.value = currentState.bloomsDistribution[lvl];
+      updatePromptDisplay();
     });
   });
 
   container.querySelectorAll('#q-blooms-inputs-container .bloom-dec-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
       const lvl = btn.getAttribute('data-level');
       const cur = parseInt(currentState.bloomsDistribution[lvl], 10) || 0;
       if (cur > 0) {
         currentState.bloomsDistribution[lvl] = cur - 1;
-        container.innerHTML = renderQuestioningStudioView();
-        setupQuestioningStudioListeners(container, navigateToWorkspace, showToast, openSettings);
+        const input = container.querySelector(`#q-blooms-inputs-container .bloom-count-input[data-level="${lvl}"]`);
+        if (input) input.value = currentState.bloomsDistribution[lvl];
+        updatePromptDisplay();
       }
     });
   });
@@ -754,14 +759,14 @@ export function setupQuestioningStudioListeners(container, navigateToWorkspace, 
       const lvl = e.target.getAttribute('data-level');
       const val = Math.max(0, parseInt(e.target.value, 10) || 0);
       currentState.bloomsDistribution[lvl] = val;
-      container.innerHTML = renderQuestioningStudioView();
-      setupQuestioningStudioListeners(container, navigateToWorkspace, showToast, openSettings);
+      updatePromptDisplay();
     });
   });
 
-  // Question Types Chips
+  // Question Types Chips (In-place multi-select)
   container.querySelectorAll('#q-types-group .q-type-chip').forEach(btn => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
       const val = btn.getAttribute('data-val');
       const list = currentState.questionTypes || [];
       if (list.includes(val)) {
@@ -769,17 +774,31 @@ export function setupQuestioningStudioListeners(container, navigateToWorkspace, 
       } else {
         currentState.questionTypes = [...list, val];
       }
-      container.innerHTML = renderQuestioningStudioView();
-      setupQuestioningStudioListeners(container, navigateToWorkspace, showToast, openSettings);
+      const isSelected = (currentState.questionTypes || []).includes(val);
+      btn.textContent = `${isSelected ? '✓ ' : '+ '}${val}`;
+      btn.className = `q-type-chip text-xs px-2.5 py-1 rounded-full border transition-all ${
+        isSelected
+          ? 'bg-amber-600 text-white border-amber-600 font-semibold'
+          : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-750'
+      }`;
+      updatePromptDisplay();
     });
   });
 
-  // Distractor Quality Selection
+  // Distractor Quality Selection (In-place single select)
   container.querySelectorAll('#q-distractor-group .distractor-card').forEach(btn => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
       currentState.distractorQuality = btn.getAttribute('data-val');
-      container.innerHTML = renderQuestioningStudioView();
-      setupQuestioningStudioListeners(container, navigateToWorkspace, showToast, openSettings);
+      container.querySelectorAll('#q-distractor-group .distractor-card').forEach(b => {
+        const isCurrent = b === btn;
+        b.className = `distractor-card p-2.5 text-left rounded-xl border transition-all ${
+          isCurrent
+            ? 'border-amber-600 bg-amber-50/70 dark:bg-amber-950/60 text-amber-950 dark:text-amber-200 ring-2 ring-amber-500'
+            : 'border-slate-200 dark:border-slate-750 bg-white dark:bg-slate-850 text-slate-700 dark:text-slate-200 hover:border-slate-300 dark:hover:border-slate-650'
+        }`;
+      });
+      updatePromptDisplay();
     });
   });
 
@@ -800,36 +819,8 @@ export function setupQuestioningStudioListeners(container, navigateToWorkspace, 
     updatePromptDisplay();
   });
 
-  // Context field bindings
-  const bindInput = (id, prop) => {
-    const el = container.querySelector(`#${id}`);
-    if (el) {
-      el.addEventListener('input', (e) => {
-        currentState[prop] = e.target.value;
-        updatePromptDisplay();
-      });
-      el.addEventListener('change', (e) => {
-        currentState[prop] = e.target.value;
-        updatePromptDisplay();
-      });
-    }
-  };
-
-  bindInput('q-subject', 'subject');
-  bindInput('q-customSubject', 'customSubject');
-  bindInput('q-educationalLevel', 'educationalLevel');
-  bindInput('q-gradeLevel', 'gradeLevel');
-  bindInput('q-topic', 'topic');
-  bindInput('q-competency', 'competency');
-  bindInput('q-learnerProfile', 'learnerProfile');
-  bindInput('q-customDuration', 'customDuration');
-  bindInput('q-customResources', 'customResources');
-
-  // Re-render if subject changes to/from 'Other'
-  container.querySelector('#q-subject')?.addEventListener('change', () => {
-    container.innerHTML = renderQuestioningStudioView();
-    setupQuestioningStudioListeners(container, navigateToWorkspace, showToast, openSettings);
-  });
+  // Shared Global Context Listeners (Duration buttons, Modality cards, Resource chips, Inputs)
+  setupGlobalContextListeners(container, currentState, 'q', updatePromptDisplay);
 
   // Toggle Edit Prompt
   container.querySelector('#q-toggle-edit-prompt-btn')?.addEventListener('click', () => {

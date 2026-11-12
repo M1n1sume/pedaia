@@ -1,5 +1,5 @@
 // PEDAIA Module 2: AI Activity Designer with Progressive Facilitation Controls & 5-State Workspace
-import { renderGlobalContextForm } from './sharedContext.js';
+import { renderGlobalContextForm, setupGlobalContextListeners } from './sharedContext.js';
 import { buildActivityDesignerPrompt } from '../promptEngine.js';
 import { store } from '../state.js';
 import { aiService } from '../aiService.js';
@@ -756,18 +756,27 @@ export function setupActivityDesignerListeners(container, navigateToWorkspace, s
     });
   });
 
-  // Activity Type Selection
+  // Activity Type Selection (In-place interactive selection)
   container.querySelectorAll('#act-types-group .act-type-card').forEach(btn => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
       currentState.activityType = btn.getAttribute('data-val');
-      container.innerHTML = renderActivityDesignerView();
-      setupActivityDesignerListeners(container, navigateToWorkspace, showToast, openSettings);
+      container.querySelectorAll('#act-types-group .act-type-card').forEach(b => {
+        const isCurrent = b === btn;
+        b.className = `act-type-card p-3 text-left rounded-xl border transition-all ${
+          isCurrent
+            ? 'border-teal-600 bg-teal-50/70 dark:bg-teal-950/60 text-teal-950 dark:text-teal-200 ring-2 ring-teal-500 shadow-xs'
+            : 'border-slate-200 dark:border-slate-750 bg-white dark:bg-slate-850 text-slate-700 dark:text-slate-200 hover:border-slate-300'
+        }`;
+      });
+      updatePromptDisplay();
     });
   });
 
-  // Purposes Chips
+  // Purposes Chips (In-place multi-select)
   container.querySelectorAll('#act-purposes-group .purpose-chip').forEach(btn => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
       const val = btn.getAttribute('data-val');
       const list = currentState.learningPurpose || [];
       if (list.includes(val)) {
@@ -775,8 +784,14 @@ export function setupActivityDesignerListeners(container, navigateToWorkspace, s
       } else {
         currentState.learningPurpose = [...list, val];
       }
-      container.innerHTML = renderActivityDesignerView();
-      setupActivityDesignerListeners(container, navigateToWorkspace, showToast, openSettings);
+      const isSelected = (currentState.learningPurpose || []).includes(val);
+      btn.textContent = `${isSelected ? '✓ ' : '+ '}${val}`;
+      btn.className = `purpose-chip text-xs px-2.5 py-1 rounded-full border transition-all ${
+        isSelected
+          ? 'bg-teal-600 text-white border-teal-600 font-semibold'
+          : 'bg-white dark:bg-slate-850 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-50'
+      }`;
+      updatePromptDisplay();
     });
   });
 
@@ -836,36 +851,8 @@ export function setupActivityDesignerListeners(container, navigateToWorkspace, s
     updatePromptDisplay();
   });
 
-  // Context field bindings
-  const bindInput = (id, prop) => {
-    const el = container.querySelector(`#${id}`);
-    if (el) {
-      el.addEventListener('input', (e) => {
-        currentState[prop] = e.target.value;
-        updatePromptDisplay();
-      });
-      el.addEventListener('change', (e) => {
-        currentState[prop] = e.target.value;
-        updatePromptDisplay();
-      });
-    }
-  };
-
-  bindInput('act-subject', 'subject');
-  bindInput('act-customSubject', 'customSubject');
-  bindInput('act-educationalLevel', 'educationalLevel');
-  bindInput('act-gradeLevel', 'gradeLevel');
-  bindInput('act-topic', 'topic');
-  bindInput('act-competency', 'competency');
-  bindInput('act-learnerProfile', 'learnerProfile');
-  bindInput('act-customDuration', 'customDuration');
-  bindInput('act-customResources', 'customResources');
-
-  // Re-render if subject changes to/from 'Other'
-  container.querySelector('#act-subject')?.addEventListener('change', () => {
-    container.innerHTML = renderActivityDesignerView();
-    setupActivityDesignerListeners(container, navigateToWorkspace, showToast, openSettings);
-  });
+  // Shared Global Context Listeners (Duration buttons, Modality cards, Resource chips, Inputs)
+  setupGlobalContextListeners(container, currentState, 'act', updatePromptDisplay);
 
   // Toggle Edit Prompt
   container.querySelector('#act-toggle-edit-prompt-btn')?.addEventListener('click', () => {

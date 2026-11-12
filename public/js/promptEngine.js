@@ -945,6 +945,29 @@ ${includeKey ? `- Teacher Answer Key: Provide correct answers, point distributio
     }
   }
 
+  // Visual Design & Custom Art Direction Directives
+  const theme = opts.theme || 'academic-indigo';
+  const customPrimary = opts.customPrimaryColor || '#4F46E5';
+  const customSecondary = opts.customSecondaryColor || '#06B6D4';
+  const customBg = opts.customBackgroundColor || 'light';
+  const customBgHex = opts.customBgHex || '#F8FAFC';
+  const typography = opts.typographyStyle || 'scholarly-serif';
+  const density = opts.layoutDensity || 'balanced';
+  const visualStyle = opts.visualStyle || 'modern-flat';
+  const visualDirectives = opts.customVisualDirectives ? `\n- Teacher Art Direction & Custom Style: "${opts.customVisualDirectives}"` : '';
+
+  const themeDescription = theme === 'custom'
+    ? `Custom Palette (Primary Brand: ${customPrimary}, Secondary Accent: ${customSecondary}, Canvas Tone: ${customBg === 'custom-hex' ? customBgHex : customBg})`
+    : `${theme} Theme`;
+
+  const visualDesignDirectives = `[CUSTOM VISUAL DESIGN & AESTHETIC SPECIFICATIONS]
+- Color Palette / Theme: ${themeDescription}
+- Primary Accent: ${customPrimary} | Secondary Accent: ${customSecondary}
+- Typography & Hierarchy: ${typography}
+- Layout Spacing & Density: ${density}
+- Container & Visual Element Style: ${visualStyle}${visualDirectives}
+- Aesthetic Directive: Ensure all visual layouts, color accents, slide cards, callouts, tables, and graphic elements strictly reflect these design specifications.`;
+
   return `[ROLE & PEDAGOGICAL PERSONA]
 You are PEDAIA's Master Educational Deliverable Architect. Synthesize a complete, publication-ready ${typeLabel} designed for immediate instructional use.
 
@@ -959,6 +982,8 @@ ${objectives}
 - Content Requirements: ${contentRequirements}
 
 ${specificDirectives}
+
+${visualDesignDirectives}
 
 [OUTPUT QUALITY DIRECTIVES]
 - Provide authentic, academically rigorous, and ready-to-teach materials.
