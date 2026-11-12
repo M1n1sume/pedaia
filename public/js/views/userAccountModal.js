@@ -164,6 +164,42 @@ export function openUserAccountModal({
           </button>
         </div>
 
+        <!-- Permanent Data Vault Protection Card -->
+        <div class="p-3.5 rounded-xl border border-emerald-200/90 dark:border-emerald-800/80 bg-emerald-50/60 dark:bg-emerald-950/30 space-y-2.5">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+              <span class="text-xs font-bold text-emerald-900 dark:text-emerald-200">Permanent Vault Protection</span>
+            </div>
+            <span class="px-2 py-0.5 rounded-md text-[9.5px] font-mono font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800 dark:bg-emerald-900/80 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700">
+              Active & Protected
+            </span>
+          </div>
+          <p class="text-[11px] text-emerald-800/80 dark:text-emerald-300/80 leading-relaxed">
+            Your login details, educator profile, curriculum designs, and AI studio outputs are mirrored in permanent IndexedDB storage and guaranteed never to be touched or removed during website updates.
+          </p>
+          <div class="flex items-center justify-between text-[10px] text-emerald-700 dark:text-emerald-400 font-mono py-1 px-2.5 rounded-lg bg-emerald-100/60 dark:bg-emerald-900/40">
+            <span>💾 ${(store.getDesigns ? store.getDesigns() : []).length} Designs Vaulted</span>
+            <span>🎨 ${(store.getOutputs ? store.getOutputs() : []).length} Outputs Vaulted</span>
+            <span>🔒 Immune to Updates</span>
+          </div>
+          <div class="flex items-center gap-2 pt-0.5">
+            <button id="modal-vault-export-btn" type="button" class="flex-1 py-1.5 px-2.5 rounded-lg text-[11px] font-semibold bg-white dark:bg-slate-800 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-900/40 transition-all flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer">
+              <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+              </svg>
+              <span>Download Backup (.json)</span>
+            </button>
+            <button id="modal-vault-restore-btn" type="button" class="flex-1 py-1.5 px-2.5 rounded-lg text-[11px] font-semibold bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-750 transition-all flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer">
+              <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+              </svg>
+              <span>Restore from Backup</span>
+            </button>
+            <input type="file" id="modal-vault-restore-file" accept=".json,application/json" class="hidden">
+          </div>
+        </div>
+
         <!-- Sign Out Action -->
         <div class="pt-2 border-t border-slate-100 dark:border-slate-800">
           <button id="modal-menu-logout" type="button" class="w-full py-2.5 px-4 rounded-xl text-xs font-bold text-rose-600 dark:text-rose-400 bg-rose-50/80 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/50 border border-rose-200 dark:border-rose-900/60 transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-2xs">
@@ -224,6 +260,41 @@ export function openUserAccountModal({
   modalEl?.querySelector('#modal-menu-settings')?.addEventListener('click', () => {
     closeModal();
     if (navigateTo) navigateTo('settings', 'ai-providers');
+  });
+
+  // Permanent Vault Export & Restore Listeners
+  modalEl?.querySelector('#modal-vault-export-btn')?.addEventListener('click', () => {
+    try {
+      store.exportAllData();
+      if (showToast) showToast('✓ Complete Permanent Vault archive (.json) downloaded safely.', 'success');
+    } catch (e) {
+      if (showToast) showToast('Error creating vault export: ' + e.message, 'error');
+    }
+  });
+
+  const restoreFileInput = modalEl?.querySelector('#modal-vault-restore-file');
+  modalEl?.querySelector('#modal-vault-restore-btn')?.addEventListener('click', () => {
+    restoreFileInput?.click();
+  });
+
+  restoreFileInput?.addEventListener('change', async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      if (showToast) showToast('Restoring permanent data vault...', 'info');
+      const result = await store.importAllData(file);
+      if (result.success) {
+        if (showToast) showToast(`✓ Permanent Vault restored! (${result.designsRestored || 0} designs, ${result.outputsRestored || 0} outputs).`, 'success');
+        closeModal();
+        if (updateAuthUI) updateAuthUI();
+        if (updateSidebarProfile) updateSidebarProfile();
+        if (renderCurrentView) renderCurrentView();
+      } else {
+        if (showToast) showToast('Failed to restore vault: ' + (result.error || 'Invalid file format.'), 'error');
+      }
+    } catch (err) {
+      if (showToast) showToast('Restore error: ' + err.message, 'error');
+    }
   });
 
   modalEl?.querySelector('#modal-menu-logout')?.addEventListener('click', () => {

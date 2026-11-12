@@ -364,6 +364,66 @@ const server = http.createServer(async (req, res) => {
       return;
     }
 
+    // =========================================================================
+    // Permanent Data Vault & Disaster Recovery API Endpoints
+    // =========================================================================
+
+    // Vault: User Account Rehydration (Self-healing across server redeployments)
+    if (pathname === '/api/vault/rehydrate-user' && req.method === 'POST') {
+      try {
+        const body = await parseJsonBody(req);
+        const result = db.restoreOrSyncUser(body);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(result));
+      } catch (err) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'REHYDRATION_FAILED', message: err.message }));
+      }
+      return;
+    }
+
+    // Vault: Full Non-Destructive Sync (Designs, Outputs & Profile)
+    if (pathname === '/api/vault/sync-all' && req.method === 'POST') {
+      if (!authUser) {
+        res.writeHead(401, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'UNAUTHORIZED', message: 'Authentication required for vault sync.' }));
+        return;
+      }
+      try {
+        const body = await parseJsonBody(req);
+        const result = db.syncAllVaultData({
+          userId: authUser.id,
+          designs: body.designs || [],
+          outputs: body.outputs || [],
+          profile: body.profile || null
+        });
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(result));
+      } catch (err) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'SYNC_FAILED', message: err.message }));
+      }
+      return;
+    }
+
+    // Vault: Full Archive Export
+    if (pathname === '/api/vault/export' && req.method === 'GET') {
+      if (!authUser) {
+        res.writeHead(401, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'UNAUTHORIZED', message: 'Authentication required.' }));
+        return;
+      }
+      try {
+        const data = db.exportVaultData(authUser.id);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(data));
+      } catch (err) {
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'EXPORT_FAILED', message: err.message }));
+      }
+      return;
+    }
+
     // Admin User Directory: GET
     if (pathname === '/api/admin/users' && req.method === 'GET') {
       if (!authUser || authUser.role !== 'admin') {

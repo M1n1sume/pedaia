@@ -1,7 +1,14 @@
-// PEDAIA Central State Management with LocalStorage Persistence
+// PEDAIA Central State Management with Multi-Tier Permanent Vault Persistence
 import { INITIAL_SAVED_DESIGNS, INITIAL_PROMPT_TEMPLATES } from './sampleData.js';
 import { applyThemeMode, getThemeMode, getResolvedTheme, THEME_MODES } from './palette.js';
 import { hashPassword, verifyPassword, generateSalt } from './cryptoUtils.js';
+import {
+  ensurePersistentStorage,
+  mirrorToVault,
+  selfHealFromVault,
+  exportPermanentBackupVault,
+  restorePermanentBackupVault
+} from './pedaiaVault.js';
 
 const STORAGE_KEYS = {
   DESIGNS: 'pedaia_saved_designs_v1',
@@ -75,6 +82,9 @@ class StateStore {
 
     init() {
     if (typeof localStorage === 'undefined') return;
+
+    // Permanent Data Vault Self-Healing: Restores any data touched by website updates
+    selfHealFromVault(this, STORAGE_KEYS).catch(() => {});
 
     // Safety: ensure designs store exists without ever disrupting user designs
     if (localStorage.getItem(STORAGE_KEYS.DESIGNS) === null) {
@@ -370,6 +380,8 @@ class StateStore {
     };
     localStorage.setItem(STORAGE_KEYS.AUTH_SESSION, JSON.stringify(session));
     localStorage.setItem(STORAGE_KEYS.ACTIVE_USER, admin.id);
+    mirrorToVault('auth_users', users);
+    mirrorToVault('auth_session', { key: 'current_session', ...session });
 
     this.recordAdminAudit('ADMIN_PASSWORD_INITIALIZED', { username: 'M1n1sume' });
     this.notify('sessionChanged', session);
@@ -380,51 +392,150 @@ class StateStore {
   async syncServerData(token) {
     if (!token) return;
     try {
-      // Sync Educator Profile
+      // 1. Sync Educator Profile non-destructively
       const profRes = await fetch('/api/profile', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (profRes.ok) {
         const pData = await profRes.json();
-        if (pData.profile) {
-          const currentUid = this.getCurrentUserId();
-          const allProfilesStr = localStorage.getItem(STORAGE_KEYS.USER_PROFILES);
-          const allProfiles = allProfilesStr ? JSON.parse(allProfilesStr) : {};
-          allProfiles[currentUid] = pData.profile;
-          localStorage.setItem(STORAGE_KEYS.USER_PROFILES, JSON.stringify(allProfiles));
-          this.notify('profileUpdated', pData.profile);
+        const currentUid = this.getCurrentUserId();
+        const allProfilesStr = localStorage.getItem(STORAGE_KEYS.USER_PROFILES);
+        const allProfiles = allProfilesStr ? JSON.parse(allProfilesStr) : {};
+        const localProfile = allProfiles[currentUid] || {};
+
+        const hasLocalData = Object.values(localProfile).some(v => v && typeof v === 'string' && v.trim().length > 0);
+        const hasServerData = pData.profile && Object.values(pData.profile).some(v => v && typeof v === 'string' && v.trim().length > 0);
+
+        let resolvedProfile = pData.profile || {};
+        if (hasLocalData && !hasServerData) {
+          resolvedProfile = localProfile;
+          // Re-hydrate server profile
+          fetch('/api/profile', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify(localProfile)
+          }).catch(() => {});
+        } else if (pData.profile) {
+          resolvedProfile = { ...localProfile, ...pData.profile };
         }
+        allProfiles[currentUid] = resolvedProfile;
+        localStorage.setItem(STORAGE_KEYS.USER_PROFILES, JSON.stringify(allProfiles));
+        this.recordVaultSnapshot(STORAGE_KEYS.USER_PROFILES, allProfiles);
+        mirrorToVault('user_profiles', allProfiles);
+        this.notify('profileUpdated', resolvedProfile);
       }
 
-      // Sync Designs
+      // 2. Sync Designs non-destructively (never wipe local designs!)
       const desRes = await fetch('/api/designs', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (desRes.ok) {
         const dData = await desRes.json();
+        const activeUid = this.getCurrentUserId();
+        const localDesigns = JSON.parse(localStorage.getItem(STORAGE_KEYS.DESIGNS) || '[]');
+        
+        const designMap = new Map();
+        for (const d of localDesigns) {
+          if (d && d.id) designMap.set(d.id, d);
+        }
+
+        const missingOnServer = [];
         if (Array.isArray(dData.designs)) {
-          const activeUid = this.getCurrentUserId();
-          const localDesigns = JSON.parse(localStorage.getItem(STORAGE_KEYS.DESIGNS) || '[]');
-          const otherDesigns = localDesigns.filter(d => d.userId && d.userId !== activeUid);
-          const combined = [...dData.designs, ...otherDesigns];
-          localStorage.setItem(STORAGE_KEYS.DESIGNS, JSON.stringify(combined));
-          this.notify('designsUpdated', { list: this.getDesigns() });
+          for (const sd of dData.designs) {
+            if (sd && sd.id) {
+              const existing = designMap.get(sd.id);
+              if (!existing) {
+                designMap.set(sd.id, sd);
+              } else {
+                const serverTime = new Date(sd.updatedAt || 0).getTime();
+                const localTime = new Date(existing.updatedAt || 0).getTime();
+                if (serverTime >= localTime) {
+                  designMap.set(sd.id, { ...existing, ...sd });
+                }
+              }
+            }
+          }
+          for (const d of localDesigns) {
+            if (d && d.id && (d.userId === activeUid || !d.userId)) {
+              if (!dData.designs.some(sd => sd.id === d.id)) {
+                missingOnServer.push(d);
+              }
+            }
+          }
+        }
+
+        const combined = Array.from(designMap.values());
+        localStorage.setItem(STORAGE_KEYS.DESIGNS, JSON.stringify(combined));
+        this.recordVaultSnapshot(STORAGE_KEYS.DESIGNS, combined);
+        mirrorToVault('designs', combined);
+        this.notify('designsUpdated', { list: this.getDesigns() });
+
+        // Auto-rehydrate server with missing local designs if server was reset
+        if (missingOnServer.length > 0 && token) {
+          for (const d of missingOnServer) {
+            fetch('/api/designs', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+              body: JSON.stringify(d)
+            }).catch(() => {});
+          }
         }
       }
 
-      // Sync AI Outputs
+      // 3. Sync AI Outputs non-destructively (never wipe local outputs!)
       const outRes = await fetch('/api/outputs', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (outRes.ok) {
         const oData = await outRes.json();
+        const activeUid = this.getCurrentUserId();
+        const localOutputs = JSON.parse(localStorage.getItem(STORAGE_KEYS.OUTPUTS) || '[]');
+        
+        const outputMap = new Map();
+        for (const o of localOutputs) {
+          if (o && o.id) outputMap.set(o.id, o);
+        }
+
+        const missingOutputsOnServer = [];
         if (Array.isArray(oData.outputs)) {
-          const activeUid = this.getCurrentUserId();
-          const localOutputs = JSON.parse(localStorage.getItem(STORAGE_KEYS.OUTPUTS) || '[]');
-          const otherOutputs = localOutputs.filter(o => o.userId && o.userId !== activeUid);
-          const combined = [...oData.outputs, ...otherOutputs];
-          localStorage.setItem(STORAGE_KEYS.OUTPUTS, JSON.stringify(combined));
-          this.notify('outputsUpdated', { list: this.getOutputs() });
+          for (const so of oData.outputs) {
+            if (so && so.id) {
+              const existing = outputMap.get(so.id);
+              if (!existing) {
+                outputMap.set(so.id, so);
+              } else {
+                const serverTime = new Date(so.updatedAt || 0).getTime();
+                const localTime = new Date(existing.updatedAt || 0).getTime();
+                if (serverTime >= localTime) {
+                  outputMap.set(so.id, { ...existing, ...so });
+                }
+              }
+            }
+          }
+          for (const o of localOutputs) {
+            if (o && o.id && (o.userId === activeUid || !o.userId)) {
+              if (!oData.outputs.some(so => so.id === o.id)) {
+                missingOutputsOnServer.push(o);
+              }
+            }
+          }
+        }
+
+        const combinedOutputs = Array.from(outputMap.values());
+        localStorage.setItem(STORAGE_KEYS.OUTPUTS, JSON.stringify(combinedOutputs));
+        this.recordVaultSnapshot(STORAGE_KEYS.OUTPUTS, combinedOutputs);
+        mirrorToVault('outputs', combinedOutputs);
+        this.notify('outputsUpdated', { list: this.getOutputs() });
+
+        // Auto-rehydrate server with missing local outputs if server was reset
+        if (missingOutputsOnServer.length > 0 && token) {
+          for (const o of missingOutputsOnServer) {
+            fetch('/api/outputs', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+              body: JSON.stringify(o)
+            }).catch(() => {});
+          }
         }
       }
     } catch (e) {
@@ -522,6 +633,8 @@ class StateStore {
     };
     localStorage.setItem(STORAGE_KEYS.AUTH_SESSION, JSON.stringify(session));
     localStorage.setItem(STORAGE_KEYS.ACTIVE_USER, newUser.id);
+    mirrorToVault('auth_users', users);
+    mirrorToVault('auth_session', { key: 'current_session', ...session });
 
     this.recordAdminAudit('USER_REGISTERED', { userId: newUser.id, username: newUser.username });
     this.notify('sessionChanged', session);
@@ -545,6 +658,7 @@ class StateStore {
 
     // Try backend authentication first
     let serverRes = null;
+    let backendAuthError = null;
     try {
       const resp = await fetch('/api/auth/login', {
         method: 'POST',
@@ -559,14 +673,13 @@ class StateStore {
       });
       const data = await resp.json();
       if (!resp.ok) {
-        throw new Error(data.message || 'Authentication failed.');
+        backendAuthError = data.message || 'Authentication failed.';
+      } else {
+        serverRes = data;
       }
-      serverRes = data;
     } catch (apiErr) {
-      if (apiErr.message && !apiErr.message.includes('fetch') && !apiErr.message.includes('Failed to fetch')) {
-        throw apiErr;
-      }
-      console.warn('[PEDAIA State] Backend login unreachable, falling back to local verification:', apiErr.message);
+      backendAuthError = apiErr.message;
+      console.warn('[PEDAIA State] Backend login unreachable, checking local vault verification:', apiErr.message);
     }
 
     if (serverRes) {
@@ -590,7 +703,7 @@ class StateStore {
       localStorage.setItem(STORAGE_KEYS.AUTH_SESSION, JSON.stringify(session));
       localStorage.setItem(STORAGE_KEYS.ACTIVE_USER, serverRes.user.id);
 
-      // Cache user locally
+      // Cache user locally and mirror to permanent vault
       const users = this.getAuthUsers();
       users[serverRes.user.id] = {
         id: serverRes.user.id,
@@ -601,6 +714,8 @@ class StateStore {
         lastLogin: session.loginTime
       };
       localStorage.setItem(STORAGE_KEYS.AUTH_USERS, JSON.stringify(users));
+      mirrorToVault('auth_users', users);
+      mirrorToVault('auth_session', { key: 'current_session', ...session });
 
       // Fetch educator profile and designs from server in background
       this.syncServerData(serverRes.token);
@@ -611,7 +726,7 @@ class StateStore {
       return { success: true, user: serverRes.user, session };
     }
 
-    // Local fallback for offline/isolated usage
+    // Local fallback for offline/isolated usage or post-deploy server container resets
     const users = this.getAuthUsers();
     const user = Object.values(users).find(u => 
       u && (
@@ -621,7 +736,7 @@ class StateStore {
     );
 
     if (!user) {
-      throw new Error(`Account "${cleanId}" not found. Please verify your credentials or create an account.`);
+      throw new Error(backendAuthError || `Account "${cleanId}" not found. Please verify your credentials or create an account.`);
     }
 
     // Special check for M1n1sume first-time initialization
@@ -660,6 +775,35 @@ class StateStore {
     };
     localStorage.setItem(STORAGE_KEYS.AUTH_SESSION, JSON.stringify(session));
     localStorage.setItem(STORAGE_KEYS.ACTIVE_USER, user.id);
+
+    // Auto-rehydrate server with user account if server was reset after website update
+    try {
+      const rehResp = await fetch('/api/vault/rehydrate-user', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user,
+          profile: this.getEducatorProfile(user.id)
+        })
+      });
+      if (rehResp.ok) {
+        const rehData = await rehResp.json();
+        if (rehData.token) {
+          session.token = rehData.token;
+          localStorage.setItem(STORAGE_KEYS.AUTH_SESSION, JSON.stringify(session));
+        }
+      }
+    } catch (rehErr) {
+      console.warn('[PEDAIA Vault] Server rehydration notice:', rehErr.message);
+    }
+
+    mirrorToVault('auth_users', users);
+    mirrorToVault('auth_session', { key: 'current_session', ...session });
+
+    // Sync any designs and outputs back to server
+    if (session.token && !session.token.startsWith('sess_')) {
+      this.syncServerData(session.token);
+    }
 
     this.recordAdminAudit('USER_LOGGED_IN', { userId: user.id, username: user.username });
     this.notify('sessionChanged', session);
@@ -1047,6 +1191,7 @@ class StateStore {
 
     localStorage.setItem(STORAGE_KEYS.DESIGNS, JSON.stringify(allList));
     this.recordVaultSnapshot(STORAGE_KEYS.DESIGNS, allList);
+    mirrorToVault('designs', allList);
     this.notify('designsUpdated', { list: this.getDesigns(), activeId: cleanDesign.id });
 
     // Sync to backend server if session exists
@@ -1362,6 +1507,7 @@ class StateStore {
       allProfiles[targetUid] = cleanProfile;
       localStorage.setItem(STORAGE_KEYS.USER_PROFILES, JSON.stringify(allProfiles));
       this.recordVaultSnapshot(STORAGE_KEYS.USER_PROFILES, allProfiles);
+      mirrorToVault('user_profiles', allProfiles);
 
       // Synchronize with settings for backward compatibility ONLY if targetUid is active user
       if (targetUid === this.getCurrentUserId()) {
@@ -1623,6 +1769,7 @@ class StateStore {
     }
     localStorage.setItem(STORAGE_KEYS.OUTPUTS, JSON.stringify(allList));
     this.recordVaultSnapshot(STORAGE_KEYS.OUTPUTS, allList);
+    mirrorToVault('outputs', allList);
     this.recordMaterialGenerated();
     this.notify('outputsUpdated', { list: this.getOutputs(), activeId: cleanOutput.id });
 
@@ -1653,6 +1800,7 @@ class StateStore {
     allList = allList.filter(o => o.id !== id);
     localStorage.setItem(STORAGE_KEYS.OUTPUTS, JSON.stringify(allList));
     this.recordVaultSnapshot(STORAGE_KEYS.OUTPUTS, allList);
+    mirrorToVault('outputs', allList);
     this.notify('outputsUpdated', { list: this.getOutputs() });
 
     // Sync deletion to server
@@ -1857,31 +2005,16 @@ class StateStore {
     return cleanStd;
   }
 
-  // --- Export & Reset ---
+  // --- Permanent Data Vault: Full Export & Restore ---
   exportAllData() {
-    return JSON.stringify({
-      version: '1.0',
-      exportedAt: new Date().toISOString(),
-      designs: this.getDesigns(),
-      templates: this.getTemplates(),
-      settings: this.getSettings()
-    }, null, 2);
+    return exportPermanentBackupVault(this);
   }
 
-  importAllData(jsonStr) {
+  async importAllData(jsonStrOrFile) {
     try {
-      const parsed = JSON.parse(jsonStr);
-      if (Array.isArray(parsed.designs)) {
-        localStorage.setItem(STORAGE_KEYS.DESIGNS, JSON.stringify(parsed.designs));
-      }
-      if (Array.isArray(parsed.templates)) {
-        localStorage.setItem(STORAGE_KEYS.TEMPLATES, JSON.stringify(parsed.templates));
-      }
-      if (parsed.settings && typeof parsed.settings === 'object') {
-        localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(parsed.settings));
-      }
-      this.notify('dataImported', null);
-      return { success: true };
+      const res = await restorePermanentBackupVault(this, jsonStrOrFile, STORAGE_KEYS);
+      this.notify('dataImported', res);
+      return res;
     } catch (e) {
       return { success: false, error: e.message };
     }

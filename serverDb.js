@@ -1001,3 +1001,184 @@ export function saveProjectNotificationSettings(userId, designId, settings = {})
   writeJson('designs.json', designs);
   return design;
 }
+
+// ============================================================================
+// PERMANENT DATA VAULT & RE-HYDRATION SYSTEM
+// ============================================================================
+
+/**
+ * Re-hydrates or synchronizes a user account from client vault.
+ * Ensures that if a server was redeployed or wiped, user accounts are restored.
+ */
+export function restoreOrSyncUser({ user, profile }) {
+  if (!user || !user.username) {
+    throw new Error('User data required for vault restoration.');
+  }
+  const users = readJson('users.json', []);
+  const cleanUsername = user.username.trim();
+  let existingIndex = users.findIndex(u => 
+    (u.id && user.id && u.id === user.id) ||
+    (u.username && u.username.toLowerCase() === cleanUsername.toLowerCase())
+  );
+
+  let targetUser = null;
+  const now = new Date().toISOString();
+
+  if (existingIndex >= 0) {
+    users[existingIndex] = {
+      ...users[existingIndex],
+      lastLogin: now,
+      ...(user.passwordHash ? { passwordHash: user.passwordHash } : {}),
+      ...(user.salt ? { salt: user.salt } : {}),
+      ...(user.role ? { role: user.role } : {})
+    };
+    targetUser = users[existingIndex];
+  } else {
+    targetUser = {
+      id: user.id || ('usr_' + Date.now() + '_' + crypto.randomBytes(3).toString('hex')),
+      username: cleanUsername,
+      email: user.email ? user.email.trim().toLowerCase() : '',
+      role: user.role || 'educator',
+      passwordHash: user.passwordHash || null,
+      salt: user.salt || generateSalt(),
+      isInitialized: user.isInitialized !== false,
+      createdAt: user.createdAt || now,
+      lastLogin: now
+    };
+    users.push(targetUser);
+  }
+
+  writeJson('users.json', users);
+
+  if (profile && typeof profile === 'object') {
+    saveUserProfile(targetUser.id, profile);
+  }
+
+  const token = generateToken();
+  const sessions = readJson('sessions.json', {});
+  sessions[token] = {
+    userId: targetUser.id,
+    username: targetUser.username,
+    email: targetUser.email || '',
+    role: targetUser.role,
+    createdAt: now
+  };
+  writeJson('sessions.json', sessions);
+
+  recordActivity({
+    type: 'USER_RESTORED_FROM_VAULT',
+    userId: targetUser.id,
+    username: targetUser.username,
+    details: { reason: 'Permanent vault re-hydration after website update' }
+  });
+
+  return {
+    success: true,
+    token,
+    user: {
+      id: targetUser.id,
+      username: targetUser.username,
+      email: targetUser.email || '',
+      role: targetUser.role
+    }
+  };
+}
+
+/**
+ * Non-destructive bidirectional sync for designs and outputs.
+ * Never deletes any user records. Merges preserving all items.
+ */
+export function syncAllVaultData({ userId, designs = [], outputs = [], profile = null }) {
+  if (!userId) throw new Error('Authentication required for vault synchronization.');
+
+  let designsMerged = 0;
+  let outputsMerged = 0;
+
+  // 1. Merge Designs
+  if (Array.isArray(designs) && designs.length > 0) {
+    const serverDesigns = readJson('designs.json', []);
+    const designMap = new Map();
+    for (const d of serverDesigns) if (d && d.id) designMap.set(d.id, d);
+
+    for (const d of designs) {
+      if (d && d.id) {
+        if (d.userId && d.userId !== userId && !designMap.has(d.id)) {
+          continue;
+        }
+        const existing = designMap.get(d.id);
+        if (!existing) {
+          designMap.set(d.id, { ...d, userId: d.userId || userId });
+          designsMerged++;
+        } else if (existing.userId === userId || !existing.userId) {
+          const incomingTime = new Date(d.updatedAt || 0).getTime();
+          const serverTime = new Date(existing.updatedAt || 0).getTime();
+          if (incomingTime >= serverTime) {
+            designMap.set(d.id, { ...existing, ...d, userId });
+            designsMerged++;
+          }
+        }
+      }
+    }
+    writeJson('designs.json', Array.from(designMap.values()));
+  }
+
+  // 2. Merge Outputs
+  if (Array.isArray(outputs) && outputs.length > 0) {
+    const serverOutputs = readJson('outputs.json', []);
+    const outputMap = new Map();
+    for (const o of serverOutputs) if (o && o.id) outputMap.set(o.id, o);
+
+    for (const o of outputs) {
+      if (o && o.id) {
+        if (o.userId && o.userId !== userId && !outputMap.has(o.id)) {
+          continue;
+        }
+        const existing = outputMap.get(o.id);
+        if (!existing) {
+          outputMap.set(o.id, { ...o, userId: o.userId || userId });
+          outputsMerged++;
+        } else if (existing.userId === userId || !existing.userId) {
+          const incomingTime = new Date(o.updatedAt || 0).getTime();
+          const serverTime = new Date(existing.updatedAt || 0).getTime();
+          if (incomingTime >= serverTime) {
+            outputMap.set(o.id, { ...existing, ...o, userId });
+            outputsMerged++;
+          }
+        }
+      }
+    }
+    writeJson('outputs.json', Array.from(outputMap.values()));
+  }
+
+  // 3. Merge Profile
+  if (profile && typeof profile === 'object') {
+    saveUserProfile(userId, profile);
+  }
+
+  return {
+    success: true,
+    designsMerged,
+    outputsMerged
+  };
+}
+
+/**
+ * Export all data belonging to an authenticated user
+ */
+export function exportVaultData(userId) {
+  if (!userId) throw new Error('Authentication required.');
+  const profile = getUserProfile(userId);
+  const designs = getUserDesigns(userId);
+  const outputs = getUserOutputs(userId);
+  const users = readJson('users.json', []);
+  const user = users.find(u => u && u.id === userId);
+
+  return {
+    vaultFormat: 'PEDAIA_SERVER_VAULT_v2',
+    exportedAt: new Date().toISOString(),
+    user: user ? { id: user.id, username: user.username, email: user.email, role: user.role } : null,
+    profile,
+    designs,
+    outputs
+  };
+}
