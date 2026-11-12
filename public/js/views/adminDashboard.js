@@ -446,8 +446,8 @@ export function renderAdminDashboardView() {
                   <tr class="hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors">
                     <td class="py-3.5 px-4 font-mono font-bold text-slate-900 dark:text-white">
                       <div class="flex items-center gap-2">
-                        <span class="w-6 h-6 rounded-lg ${isAdminRow ? 'bg-amber-600 text-white' : 'bg-indigo-600 text-white'} flex items-center justify-center text-[10px] font-bold">
-                          ${isAdminRow ? '👑' : u.username.charAt(0).toUpperCase()}
+                        <span class="w-6 h-6 rounded-lg overflow-hidden ${isAdminRow ? 'border border-indigo-400/40 bg-indigo-950 flex items-center justify-center' : 'bg-indigo-600 text-white flex items-center justify-center text-[10px] font-bold'}">
+                          ${isAdminRow ? '<img src="./favicon.svg" alt="Admin" class="w-full h-full object-cover">' : u.username.charAt(0).toUpperCase()}
                         </span>
                         <span>${escapeHtml(u.username)}</span>
                       </div>

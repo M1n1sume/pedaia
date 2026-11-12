@@ -130,8 +130,8 @@ function renderAuthCredentialsBanner() {
       <div class="bg-white dark:bg-slate-850 rounded-2xl border border-slate-200/80 dark:border-slate-750 p-5 shadow-2xs space-y-3">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl ${isAdmin ? 'bg-amber-600 text-white' : 'bg-indigo-600 text-white'} flex items-center justify-center font-bold text-sm shadow-xs shrink-0">
-              ${isAdmin ? '👑' : currentUser.username.charAt(0).toUpperCase()}
+            <div class="w-10 h-10 rounded-xl overflow-hidden shadow-xs shrink-0 ${isAdmin ? 'border border-indigo-400/40 bg-indigo-950 flex items-center justify-center' : 'bg-indigo-600 text-white flex items-center justify-center font-bold text-sm'}">
+              ${isAdmin ? '<img src="./favicon.svg" alt="PEDAIA Administrator" class="w-full h-full object-cover">' : (currentUser.avatarUrl ? `<img src="${currentUser.avatarUrl}" alt="${escapeHtml(currentUser.username)}" class="w-full h-full object-cover">` : currentUser.username.charAt(0).toUpperCase())}
             </div>
             <div>
               <div class="flex items-center gap-2">
