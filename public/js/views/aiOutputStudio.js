@@ -17,6 +17,248 @@ export function buildAiOutputPrompt(state = activeStudioState) {
   });
 }
 
+// --- Universal Pedagogical Visual Design & Color Theme Resolver ---
+export function resolveDesignTheme(options = {}) {
+  const theme = options.theme || 'academic-indigo';
+  const customPrimary = options.customPrimaryColor || '#4F46E5';
+  const customSecondary = options.customSecondaryColor || '#06B6D4';
+  const customBg = options.customBackgroundColor || 'light';
+  const customBgHex = options.customBgHex || '#F8FAFC';
+  const typography = options.typographyStyle || 'scholarly-serif';
+  const density = options.layoutDensity || 'balanced';
+  const visualStyle = options.visualStyle || 'modern-flat';
+
+  let fontFamily = "'Inter', system-ui, -apple-system, sans-serif";
+  if (typography === 'scholarly-serif') fontFamily = "'Newsreader', Georgia, serif";
+  else if (typography === 'technical-mono') fontFamily = "'JetBrains Mono', 'Courier New', monospace";
+  else if (typography === 'friendly-humanist') fontFamily = "'Calibri', 'Segoe UI', system-ui, sans-serif";
+  else if (typography === 'classic-editorial') fontFamily = "'Merriweather', Georgia, serif";
+  else if (typography === 'bold-minimalist') fontFamily = "'Impact', 'Arial Black', sans-serif";
+
+  const presets = {
+    'academic-indigo': {
+      name: 'Academic Indigo',
+      primary: '#4F46E5',
+      secondary: '#06B6D4',
+      bgDark: '#0F172A',
+      cardDark: '#1E293B',
+      bgLight: '#F8FAFC',
+      cardLight: '#FFFFFF',
+      gradient: 'linear-gradient(135deg, #1E1B4B 0%, #0F172A 50%, #1E1B4B 100%)',
+      accentText: '#818CF8',
+      secondaryText: '#22D3EE',
+      textColor: '#FFFFFF',
+      mutedTextColor: '#CBD5E1',
+      isDark: true
+    },
+    'modern-stem': {
+      name: 'Modern STEM',
+      primary: '#0D9488',
+      secondary: '#10B981',
+      bgDark: '#022C22',
+      cardDark: '#064E3B',
+      bgLight: '#F0FDF4',
+      cardLight: '#FFFFFF',
+      gradient: 'linear-gradient(135deg, #022C22 0%, #064E3B 50%, #042F2E 100%)',
+      accentText: '#2DD4BF',
+      secondaryText: '#34D399',
+      textColor: '#FFFFFF',
+      mutedTextColor: '#A7F3D0',
+      isDark: true
+    },
+    'humanities-serif': {
+      name: 'Warm Humanities',
+      primary: '#B45309',
+      secondary: '#C2410C',
+      bgDark: '#1C1917',
+      cardDark: '#292524',
+      bgLight: '#FDFBF7',
+      cardLight: '#FFFFFF',
+      gradient: 'linear-gradient(135deg, #292524 0%, #1C1917 50%, #44403C 100%)',
+      accentText: '#FBBF24',
+      secondaryText: '#FB923C',
+      textColor: '#FFFFFF',
+      mutedTextColor: '#E7E5E4',
+      isDark: true
+    },
+    'clean-minimal': {
+      name: 'Clean Minimalist',
+      primary: '#0F172A',
+      secondary: '#475569',
+      bgDark: '#1E293B',
+      cardDark: '#334155',
+      bgLight: '#F8FAFC',
+      cardLight: '#FFFFFF',
+      gradient: 'linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 50%, #E2E8F0 100%)',
+      accentText: '#0F172A',
+      secondaryText: '#475569',
+      textColor: '#0F172A',
+      mutedTextColor: '#334155',
+      isDark: false
+    },
+    'vibrant-primary': {
+      name: 'Vibrant Primary',
+      primary: '#2563EB',
+      secondary: '#EA580C',
+      bgDark: '#0B192C',
+      cardDark: '#1E3E62',
+      bgLight: '#EFF6FF',
+      cardLight: '#FFFFFF',
+      gradient: 'linear-gradient(135deg, #1E3E62 0%, #0B192C 100%)',
+      accentText: '#60A5FA',
+      secondaryText: '#FB923C',
+      textColor: '#FFFFFF',
+      mutedTextColor: '#DBEAFE',
+      isDark: true
+    },
+    'botanical-sage': {
+      name: 'Botanical Sage',
+      primary: '#059669',
+      secondary: '#65A30D',
+      bgDark: '#064E3B',
+      cardDark: '#022C22',
+      bgLight: '#ECFDF5',
+      cardLight: '#FFFFFF',
+      gradient: 'linear-gradient(135deg, #064E3B 0%, #042F2E 100%)',
+      accentText: '#6EE7B7',
+      secondaryText: '#A3E635',
+      textColor: '#FFFFFF',
+      mutedTextColor: '#D1FAE5',
+      isDark: true
+    },
+    'cyber-midnight': {
+      name: 'Cyber Midnight',
+      primary: '#8B5CF6',
+      secondary: '#06B6D4',
+      bgDark: '#090D16',
+      cardDark: '#131B2E',
+      bgLight: '#F5F3FF',
+      cardLight: '#FFFFFF',
+      gradient: 'linear-gradient(135deg, #090D16 0%, #1E1B4B 50%, #050B14 100%)',
+      accentText: '#A78BFA',
+      secondaryText: '#22D3EE',
+      textColor: '#FFFFFF',
+      mutedTextColor: '#EDE9FE',
+      isDark: true
+    },
+    'sunset-terracotta': {
+      name: 'Sunset Terracotta',
+      primary: '#E11D48',
+      secondary: '#F59E0B',
+      bgDark: '#4C0519',
+      cardDark: '#881337',
+      bgLight: '#FFF1F2',
+      cardLight: '#FFFFFF',
+      gradient: 'linear-gradient(135deg, #881337 0%, #4C0519 100%)',
+      accentText: '#FB7185',
+      secondaryText: '#FCD34D',
+      textColor: '#FFFFFF',
+      mutedTextColor: '#FFE4E6',
+      isDark: true
+    },
+    'nordic-frost': {
+      name: 'Nordic Frost',
+      primary: '#0284C7',
+      secondary: '#6366F1',
+      bgDark: '#082F49',
+      cardDark: '#0C4A6E',
+      bgLight: '#F0F9FF',
+      cardLight: '#FFFFFF',
+      gradient: 'linear-gradient(135deg, #0C4A6E 0%, #082F49 100%)',
+      accentText: '#38BDF8',
+      secondaryText: '#818CF8',
+      textColor: '#FFFFFF',
+      mutedTextColor: '#E0F2FE',
+      isDark: true
+    },
+    'corporate-executive': {
+      name: 'Corporate Executive',
+      primary: '#1E3A8A',
+      secondary: '#475569',
+      bgDark: '#0F172A',
+      cardDark: '#1E293B',
+      bgLight: '#F8FAFC',
+      cardLight: '#FFFFFF',
+      gradient: 'linear-gradient(135deg, #1E293B 0%, #0F172A 100%)',
+      accentText: '#60A5FA',
+      secondaryText: '#94A3B8',
+      textColor: '#FFFFFF',
+      mutedTextColor: '#E2E8F0',
+      isDark: true
+    }
+  };
+
+  if (theme === 'custom') {
+    let isDark = customBg === 'dark-slate';
+    let bg = '#0F172A';
+    let cardBg = '#1E293B';
+    let text = '#FFFFFF';
+    let mutedText = '#CBD5E1';
+
+    if (customBg === 'light') {
+      isDark = false;
+      bg = '#F8FAFC';
+      cardBg = '#FFFFFF';
+      text = '#0F172A';
+      mutedText = '#475569';
+    } else if (customBg === 'warm-parchment') {
+      isDark = false;
+      bg = '#FDFBF7';
+      cardBg = '#FAF7F2';
+      text = '#1E293B';
+      mutedText = '#64748B';
+    } else if (customBg === 'soft-pastel') {
+      isDark = false;
+      bg = '#F0FDF4';
+      cardBg = '#FFFFFF';
+      text = '#064E3B';
+      mutedText = '#047857';
+    } else if (customBg === 'custom-hex') {
+      bg = customBgHex || '#0F172A';
+      cardBg = customBgHex || '#1E293B';
+      const hex = (customBgHex || '#0F172A').replace('#', '');
+      const r = parseInt(hex.substr(0, 2), 16) || 0;
+      const g = parseInt(hex.substr(2, 2), 16) || 0;
+      const b = parseInt(hex.substr(4, 2), 16) || 0;
+      const lum = (0.299 * r + 0.587 * g + 0.114 * b);
+      isDark = lum < 140;
+      text = isDark ? '#FFFFFF' : '#0F172A';
+      mutedText = isDark ? '#CBD5E1' : '#475569';
+    }
+
+    const grad = isDark
+      ? `linear-gradient(135deg, ${customPrimary}33 0%, ${bg} 60%, ${customSecondary}22 100%)`
+      : `linear-gradient(135deg, ${bg} 0%, #FFFFFF 100%)`;
+
+    return {
+      name: 'Custom Palette',
+      primary: customPrimary,
+      secondary: customSecondary,
+      bgDark: bg,
+      cardDark: cardBg,
+      bgLight: bg,
+      cardLight: cardBg,
+      textColor: text,
+      mutedTextColor: mutedText,
+      gradient: grad,
+      accentText: customPrimary,
+      secondaryText: customSecondary,
+      isDark,
+      fontFamily,
+      density,
+      visualStyle
+    };
+  }
+
+  const p = presets[theme] || presets['academic-indigo'];
+  return {
+    ...p,
+    fontFamily,
+    density,
+    visualStyle
+  };
+}
+
 // --- Output Categories Definition ---
 export const OUTPUT_CATEGORIES = [
   {
@@ -1127,6 +1369,7 @@ function renderSlideWorkspace(output) {
   const slides = output.slides || [];
   const currentIdx = Math.min(activeStudioState.activeSlideIndex, Math.max(0, slides.length - 1));
   const activeSlide = slides[currentIdx] || { title: 'Slide Title', bullets: [], speakerNotes: '' };
+  const theme = resolveDesignTheme(output.designOptions || activeStudioState.designOptions);
 
   return `
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -1142,12 +1385,13 @@ function renderSlideWorkspace(output) {
 
         <div class="space-y-2">
           ${slides.map((s, idx) => `
-            <div data-slide-index="${idx}" class="slide-thumb p-3 rounded-xl border cursor-pointer transition-all ${idx === currentIdx ? 'bg-indigo-50 dark:bg-indigo-950/70 border-indigo-500 ring-2 ring-indigo-500/20' : 'bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-750 hover:border-slate-300'}">
-              <div class="flex items-center justify-between text-[10px] font-bold text-slate-400 mb-1">
-                <span>SLIDE ${idx + 1}</span>
-                <span class="px-1.5 rounded bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300">${s.slideType || 'Content'}</span>
+            <div data-slide-index="${idx}" class="slide-thumb p-3 rounded-xl border cursor-pointer transition-all ${idx === currentIdx ? 'ring-2 ring-indigo-500/30' : 'bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-750 hover:border-slate-300'}"
+                 style="${idx === currentIdx ? `background: ${theme.primary}15; border-color: ${theme.primary};` : ''}">
+              <div class="flex items-center justify-between text-[10px] font-bold mb-1">
+                <span style="color: ${theme.primary};">SLIDE ${idx + 1}</span>
+                <span class="px-1.5 rounded bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300">${escapeHtml(s.slideType || 'Content')}</span>
               </div>
-              <h4 class="text-xs font-bold text-slate-800 dark:text-slate-200 truncate">${escapeHtml(s.title || `Slide ${idx + 1}`)}</h4>
+              <h4 class="text-xs font-bold text-slate-800 dark:text-slate-200 truncate" style="font-family: ${theme.fontFamily};">${escapeHtml(s.title || `Slide ${idx + 1}`)}</h4>
               <p class="text-[10px] text-slate-500 dark:text-slate-400 truncate mt-0.5">${escapeHtml((s.bullets && s.bullets[0]) || 'No bullets')}</p>
             </div>
           `).join('')}
@@ -1157,32 +1401,37 @@ function renderSlideWorkspace(output) {
       <!-- Slide Preview Canvas (6 cols) -->
       <div class="lg:col-span-6 flex flex-col justify-between">
         
-        <!-- Live Slide Canvas -->
-        <div class="aspect-video w-full rounded-2xl bg-gradient-to-br from-indigo-950 via-slate-900 to-indigo-900 text-white p-6 sm:p-8 flex flex-col justify-between shadow-xl relative overflow-hidden border border-indigo-800/50">
-          <div class="absolute right-4 top-4 text-xs font-mono px-2 py-0.5 rounded-full bg-white/10 text-indigo-200">
+        <!-- Live Slide Canvas with Theme & Color Integration -->
+        <div class="aspect-video w-full rounded-2xl p-6 sm:p-8 flex flex-col justify-between shadow-xl relative overflow-hidden border"
+             style="background: ${theme.gradient}; border-color: ${theme.primary}55; color: ${theme.textColor}; font-family: ${theme.fontFamily};">
+          <div class="absolute right-4 top-4 text-xs font-mono px-2.5 py-0.5 rounded-full"
+               style="background: ${theme.primary}33; color: ${theme.accentText}; border: 1px solid ${theme.primary}66;">
             ${currentIdx + 1} / ${slides.length}
           </div>
           
           <div>
-            <span class="text-[11px] font-mono uppercase tracking-widest text-teal-300 font-bold block mb-1">
+            <span class="text-[11px] font-mono uppercase tracking-widest font-bold block mb-1"
+                  style="color: ${theme.secondaryText};">
               ${escapeHtml(output.subject || 'PEDAIA Instructional Deck')} • ${escapeHtml(activeSlide.slideType || 'Lecture Core')}
             </span>
-            <h2 class="text-xl sm:text-2xl font-bold font-scholarly leading-snug tracking-tight text-white mb-4">
+            <h2 class="text-xl sm:text-2xl font-bold leading-snug tracking-tight mb-4"
+                style="color: ${theme.textColor}; font-family: ${theme.fontFamily};">
               ${escapeHtml(activeSlide.title || 'Slide Title')}
             </h2>
             
             <ul class="space-y-2.5 max-w-xl">
               ${(activeSlide.bullets || []).map(b => `
-                <li class="flex items-start gap-2 text-xs sm:text-sm text-slate-200 leading-relaxed">
-                  <span class="text-teal-400 text-base leading-none">•</span>
+                <li class="flex items-start gap-2 text-xs sm:text-sm leading-relaxed" style="color: ${theme.mutedTextColor};">
+                  <span class="text-base leading-none font-bold" style="color: ${theme.secondary};">•</span>
                   <span>${escapeHtml(b)}</span>
                 </li>
               `).join('')}
             </ul>
           </div>
 
-          <div class="pt-4 border-t border-white/10 flex items-center justify-between text-[10px] text-slate-400">
-            <span>PEDAIA Academic Slides</span>
+          <div class="pt-4 border-t flex items-center justify-between text-[10px]"
+               style="border-color: ${theme.primary}33; color: ${theme.mutedTextColor};">
+            <span style="color: ${theme.accentText}; font-weight: 600;">Theme: ${escapeHtml(theme.name)}</span>
             <span>${escapeHtml(output.topic || '')}</span>
           </div>
         </div>
@@ -1223,7 +1472,8 @@ function renderSlideWorkspace(output) {
           <textarea id="edit-slide-notes" rows="3" class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-850 text-slate-900 dark:text-white outline-none leading-relaxed text-[11px]">${escapeHtml(activeSlide.speakerNotes || '')}</textarea>
         </div>
 
-        <button id="apply-slide-edit-btn" class="w-full py-2 px-3 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs transition-colors shadow-2xs">
+        <button id="apply-slide-edit-btn" class="w-full py-2 px-3 rounded-lg text-white font-semibold text-xs transition-colors shadow-2xs"
+                style="background: ${theme.primary};">
           Update Active Slide
         </button>
       </div>
@@ -1236,30 +1486,24 @@ function renderSlideWorkspace(output) {
 // Educational Poster / Infographic Canvas Workspace
 // -------------------------------------------------------------------------
 function renderPosterWorkspace(output) {
-  const p = output.posterData || {
-    headline: output.title,
-    subtitle: 'Core Mechanisms & Conceptual Framework',
-    cards: [
-      { title: 'Core Principle', desc: 'Solar photons excite thylakoid chlorophyll complexes, releasing ATP and NADPH.' },
-      { title: 'Dark Reactions', desc: 'Calvin cycle in the stroma fixes carbon dioxide into high-energy glucose molecules.' },
-      { title: 'Ecological Significance', desc: 'Generates atmospheric diatomic oxygen sustaining aerobic biosphere life.' }
-    ],
-    statistics: ['6CO₂ + 6H₂O → C₆H₁₂O₆ + 6O₂', 'Chloroplast: Double-Membrane Organelle', 'Optimal Range: 25°C - 35°C'],
-    takeaways: 'Photosynthesis bridges radiant solar energy into chemical bonds powering global food chains.'
-  };
+  const theme = resolveDesignTheme(output.designOptions || activeStudioState.designOptions);
+  const p = output.posterData || parsePosterData(output.output, output);
 
   return `
-    <div class="max-w-3xl mx-auto rounded-2xl bg-gradient-to-b from-indigo-950 via-slate-900 to-indigo-900 text-white p-8 sm:p-12 shadow-2xl border border-indigo-800/60 relative overflow-hidden">
+    <div class="max-w-3xl mx-auto rounded-2xl p-8 sm:p-12 shadow-2xl border relative overflow-hidden"
+         style="background: ${theme.gradient}; border-color: ${theme.primary}66; color: ${theme.textColor}; font-family: ${theme.fontFamily};">
       
       <!-- Top Scholarly Header -->
-      <div class="text-center pb-6 border-b border-indigo-500/30">
-        <span class="inline-block px-3 py-1 rounded-full text-xs font-mono font-bold tracking-widest bg-teal-400/20 text-teal-300 mb-2">
-          ${escapeHtml(output.subject || 'SCIENCE')} • GRADE 8 INSTRUCTIONAL POSTER
+      <div class="text-center pb-6 border-b" style="border-color: ${theme.primary}44;">
+        <span class="inline-block px-3 py-1 rounded-full text-xs font-mono font-bold tracking-widest mb-2"
+              style="background: ${theme.secondary}22; color: ${theme.secondaryText}; border: 1px solid ${theme.secondary}55;">
+          ${escapeHtml(output.subject || 'INSTRUCTIONAL RESOURCE')} • ${escapeHtml(output.gradeLevel || output.educationalLevel || 'ALL LEVELS')} POSTER
         </span>
-        <h1 class="text-2xl sm:text-3xl font-bold font-scholarly text-white tracking-tight leading-snug">
+        <h1 class="text-2xl sm:text-3xl font-bold tracking-tight leading-snug"
+            style="color: ${theme.textColor}; font-family: ${theme.fontFamily};">
           ${escapeHtml(p.headline)}
         </h1>
-        <p class="text-xs sm:text-sm text-indigo-200 mt-2 max-w-xl mx-auto">
+        <p class="text-xs sm:text-sm mt-2 max-w-xl mx-auto" style="color: ${theme.mutedTextColor};">
           ${escapeHtml(p.subtitle)}
         </p>
       </div>
@@ -1267,35 +1511,48 @@ function renderPosterWorkspace(output) {
       <!-- Main Infographic 3-Card Grid -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4 my-8">
         ${p.cards.map((c, i) => `
-          <div class="p-5 rounded-xl bg-white/5 border border-white/10 backdrop-blur-xs flex flex-col justify-between">
+          <div class="p-5 rounded-xl border flex flex-col justify-between"
+               style="background: ${theme.cardDark}cc; border-color: ${theme.primary}44;">
             <div>
-              <span class="w-7 h-7 rounded-lg bg-teal-500/20 text-teal-300 font-mono font-bold text-xs flex items-center justify-center mb-3">0${i+1}</span>
-              <h3 class="text-sm font-bold text-white mb-1.5">${escapeHtml(c.title)}</h3>
-              <p class="text-xs text-slate-300 leading-relaxed">${escapeHtml(c.desc)}</p>
+              <span class="w-7 h-7 rounded-lg font-mono font-bold text-xs flex items-center justify-center mb-3"
+                    style="background: ${theme.primary}33; color: ${theme.accentText}; border: 1px solid ${theme.primary}66;">
+                0${i+1}
+              </span>
+              <h3 class="text-sm font-bold mb-1.5" style="color: ${theme.textColor}; font-family: ${theme.fontFamily};">${escapeHtml(c.title)}</h3>
+              <p class="text-xs leading-relaxed" style="color: ${theme.mutedTextColor};">${escapeHtml(c.desc)}</p>
             </div>
           </div>
         `).join('')}
       </div>
 
       <!-- Empirical Statistics & Equation Bar -->
-      <div class="p-4 rounded-xl bg-teal-950/40 border border-teal-500/30 text-center mb-8">
-        <span class="text-[10px] font-mono uppercase tracking-wider text-teal-400 font-bold block mb-1">Governing Biochemical Formula</span>
-        <div class="text-sm sm:text-base font-mono font-bold text-white tracking-wide">
-          ${escapeHtml(p.statistics[0] || '6CO₂ + 6H₂O → C₆H₁₂O₆ + 6O₂')}
+      <div class="p-4 rounded-xl border text-center mb-8"
+           style="background: ${theme.secondary}15; border-color: ${theme.secondary}44;">
+        <span class="text-[10px] font-mono uppercase tracking-wider font-bold block mb-1"
+              style="color: ${theme.secondaryText};">
+          Governing Principle & Core Formula
+        </span>
+        <div class="text-sm sm:text-base font-mono font-bold tracking-wide" style="color: ${theme.textColor};">
+          ${escapeHtml((p.statistics && p.statistics[0]) || `${output.topic}: Fundamental Law`)}
         </div>
       </div>
 
       <!-- Bottom Classroom Takeaway -->
-      <div class="p-4 rounded-xl bg-white/5 border border-white/10 text-center">
-        <span class="text-[10px] font-mono uppercase tracking-wider text-indigo-300 font-bold block mb-1">Key Instructional Takeaway</span>
-        <p class="text-xs text-slate-200 max-w-2xl mx-auto leading-relaxed">
+      <div class="p-4 rounded-xl border text-center"
+           style="background: ${theme.cardDark}cc; border-color: ${theme.primary}44;">
+        <span class="text-[10px] font-mono uppercase tracking-wider font-bold block mb-1"
+              style="color: ${theme.accentText};">
+          Key Instructional Takeaway
+        </span>
+        <p class="text-xs max-w-2xl mx-auto leading-relaxed" style="color: ${theme.mutedTextColor};">
           ${escapeHtml(p.takeaways)}
         </p>
       </div>
 
-      <div class="pt-6 mt-8 border-t border-white/10 flex items-center justify-between text-[10px] text-slate-400">
-        <span>PEDAIA Educational Poster Atelier</span>
-        <span>Standard Classroom Alignment (CS-08)</span>
+      <div class="pt-6 mt-8 border-t flex items-center justify-between text-[10px]"
+           style="border-color: ${theme.primary}33; color: ${theme.mutedTextColor};">
+        <span>Theme: ${escapeHtml(theme.name)}</span>
+        <span>${escapeHtml(output.topic || '')}</span>
       </div>
 
     </div>
@@ -1307,36 +1564,41 @@ function renderPosterWorkspace(output) {
 // -------------------------------------------------------------------------
 function renderWorksheetWorkspace(output) {
   const isAnswerKey = activeStudioState.activeTab === 'editor';
+  const theme = resolveDesignTheme(output.designOptions || activeStudioState.designOptions);
 
   return `
     <div class="space-y-4">
       
       <!-- Sub-tabs: Student Edition vs Teacher Answer Key -->
       <div class="flex items-center justify-center gap-2 pb-3 border-b border-slate-200 dark:border-slate-800">
-        <button id="worksheet-student-tab" class="px-4 py-2 rounded-xl text-xs font-bold transition-all ${!isAnswerKey ? 'bg-indigo-600 text-white shadow-xs' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'}">
+        <button id="worksheet-student-tab" class="px-4 py-2 rounded-xl text-xs font-bold transition-all ${!isAnswerKey ? 'text-white shadow-xs' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'}"
+                style="${!isAnswerKey ? `background: ${theme.primary};` : ''}">
           📄 Student Worksheet Edition
         </button>
-        <button id="worksheet-teacher-tab" class="px-4 py-2 rounded-xl text-xs font-bold transition-all ${isAnswerKey ? 'bg-indigo-600 text-white shadow-xs' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'}">
+        <button id="worksheet-teacher-tab" class="px-4 py-2 rounded-xl text-xs font-bold transition-all ${isAnswerKey ? 'text-white shadow-xs' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'}"
+                style="${isAnswerKey ? `background: ${theme.primary};` : ''}">
           🔑 Teacher Key & Rubric Edition
         </button>
       </div>
 
       <!-- Formatted Paper Canvas -->
-      <div class="max-w-3xl mx-auto bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-750 p-8 sm:p-12 rounded-2xl shadow-sm text-slate-900 dark:text-slate-100 space-y-6">
+      <div class="max-w-3xl mx-auto bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-750 p-8 sm:p-12 rounded-2xl shadow-sm text-slate-900 dark:text-slate-100 space-y-6"
+           style="font-family: ${theme.fontFamily};">
         
         <!-- Worksheet Header Block -->
-        <div class="border-b-2 border-slate-900 dark:border-slate-100 pb-4">
+        <div class="pb-4" style="border-bottom: 2px solid ${theme.primary};">
           <div class="flex justify-between items-start mb-3">
             <div>
-              <span class="text-xs font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
+              <span class="text-xs font-bold uppercase tracking-wider" style="color: ${theme.primary};">
                 ${escapeHtml(output.subject || 'General')} • ${escapeHtml(output.gradeLevel || output.educationalLevel || '')}
               </span>
-              <h1 class="text-xl sm:text-2xl font-bold font-scholarly text-slate-900 dark:text-white">
+              <h1 class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white" style="font-family: ${theme.fontFamily};">
                 ${escapeHtml(output.title)}
               </h1>
             </div>
             ${isAnswerKey ? `
-              <span class="px-2.5 py-1 rounded-md bg-amber-100 text-amber-900 font-mono text-xs font-bold border border-amber-300">
+              <span class="px-2.5 py-1 rounded-md font-mono text-xs font-bold border"
+                    style="background: ${theme.secondary}22; color: ${theme.secondary}; border-color: ${theme.secondary}66;">
                 TEACHER KEY
               </span>
             ` : ''}
@@ -1346,15 +1608,16 @@ function renderWorksheetWorkspace(output) {
           <div class="grid grid-cols-3 gap-4 pt-3 text-xs border-t border-slate-200 dark:border-slate-800">
             <div><strong>Student:</strong> ____________________</div>
             <div><strong>Date:</strong> _______________</div>
-            <div><strong>Score:</strong> ______ / 25</div>
+            <div><strong>Score:</strong> ______ / 30</div>
           </div>
         </div>
 
         <!-- Rendered Document Prose -->
         <div class="prose-academic text-xs sm:text-sm leading-relaxed space-y-4">
           ${isAnswerKey && output.answerKeyOutput ? `
-            <div class="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-amber-900 dark:text-amber-200 text-xs font-medium mb-4">
-              📌 Teacher Notice: Complete model answers and scoring rationales are rendered below.
+            <div class="p-3 rounded-xl border text-xs font-medium mb-4"
+                 style="background: ${theme.secondary}15; border-color: ${theme.secondary}55; color: ${theme.secondary};">
+              📌 Teacher Notice: Model solutions and scoring rationales for ${escapeHtml(output.topic || 'the topic')} are rendered below.
             </div>
             ${renderMarkdownToHtml(output.answerKeyOutput)}
           ` : `
@@ -1364,7 +1627,7 @@ function renderWorksheetWorkspace(output) {
 
         <div class="pt-6 border-t border-slate-200 dark:border-slate-800 flex justify-between text-[11px] text-slate-400">
           <span>PEDAIA Instructional Materials Studio</span>
-          <span>Verified Curriculum Alignment</span>
+          <span>Theme: ${escapeHtml(theme.name)} • Verified Alignment</span>
         </div>
 
       </div>
@@ -1377,51 +1640,55 @@ function renderWorksheetWorkspace(output) {
 // Visual Learning Diagram / Mindmap Workspace
 // -------------------------------------------------------------------------
 function renderDiagramWorkspace(output) {
+  const theme = resolveDesignTheme(output.designOptions || activeStudioState.designOptions);
+  const d = output.diagramData || parseDiagramData(output.output, output);
+
   return `
     <div class="max-w-4xl mx-auto space-y-6">
       
       <!-- Diagram Graphic Canvas -->
       <div class="bg-white dark:bg-slate-900 p-8 rounded-2xl border border-slate-200 dark:border-slate-750 shadow-sm text-center">
-        <h2 class="text-lg font-bold font-scholarly text-slate-900 dark:text-white mb-2">${escapeHtml(output.title)}</h2>
-        <p class="text-xs text-slate-500 dark:text-slate-400 mb-6 max-w-xl mx-auto">Interactive Visual Concept Map & System Diagram</p>
+        <h2 class="text-lg font-bold text-slate-900 dark:text-white mb-2" style="font-family: ${theme.fontFamily};">${escapeHtml(output.title)}</h2>
+        <p class="text-xs text-slate-500 dark:text-slate-400 mb-6 max-w-xl mx-auto">Interactive Visual Concept Map & System Architecture</p>
 
-        <!-- Dynamic SVG Flow Representation -->
-        <div class="p-6 rounded-xl bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-750 flex flex-col items-center justify-center min-h-[300px]">
-          <svg class="w-full max-w-2xl h-64" viewBox="0 0 600 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Dynamic SVG Flow Representation with Theme Colors & Topic Information -->
+        <div class="p-6 rounded-xl border flex flex-col items-center justify-center min-h-[300px]"
+             style="background: ${theme.bgDark}; border-color: ${theme.primary}44;">
+          <svg class="w-full max-w-2xl h-64" viewBox="0 0 640 240" fill="none" xmlns="http://www.w3.org/2000/svg">
             <!-- Node 1: Primary Input -->
-            <rect x="20" y="80" width="140" height="70" rx="12" fill="#312E81" />
-            <text x="90" y="112" fill="#FFFFFF" font-size="12" font-weight="bold" text-anchor="middle">Solar Photons + H₂O</text>
-            <text x="90" y="130" fill="#CBD5E1" font-size="10" text-anchor="middle">Light-Dependent Input</text>
+            <rect x="20" y="80" width="160" height="75" rx="12" fill="${theme.primary}" />
+            <text x="100" y="112" fill="#FFFFFF" font-size="12" font-weight="bold" text-anchor="middle" font-family="${theme.fontFamily.replace(/'/g, '')}">${escapeHtml(d.node1.title)}</text>
+            <text x="100" y="132" fill="${theme.mutedTextColor}" font-size="10" text-anchor="middle" font-family="${theme.fontFamily.replace(/'/g, '')}">${escapeHtml(d.node1.desc)}</text>
 
             <!-- Arrow 1 to 2 -->
-            <path d="M160 115 L220 115" stroke="#7C3AED" stroke-width="3" stroke-dasharray="4 4" />
-            <polygon points="220,110 230,115 220,120" fill="#7C3AED" />
+            <path d="M180 117 L230 117" stroke="${theme.secondary}" stroke-width="3" stroke-dasharray="4 4" />
+            <polygon points="230,112 240,117 230,122" fill="${theme.secondary}" />
 
-            <!-- Node 2: Core Thylakoid Engine -->
-            <rect x="230" y="60" width="160" height="110" rx="14" fill="#14B8A6" />
-            <text x="310" y="100" fill="#FFFFFF" font-size="13" font-weight="bold" text-anchor="middle">Chloroplast Thylakoids</text>
-            <text x="310" y="120" fill="#E0F2FE" font-size="10" text-anchor="middle">ATP + NADPH Synthesis</text>
-            <text x="310" y="140" fill="#042F2E" font-size="9" font-weight="bold" text-anchor="middle">Releases O₂ Byproduct</text>
+            <!-- Node 2: Core Transformation -->
+            <rect x="240" y="60" width="170" height="115" rx="14" fill="${theme.secondary}" />
+            <text x="325" y="100" fill="#FFFFFF" font-size="13" font-weight="bold" text-anchor="middle" font-family="${theme.fontFamily.replace(/'/g, '')}">${escapeHtml(d.node2.title)}</text>
+            <text x="325" y="122" fill="#FFFFFF" font-size="10" text-anchor="middle" font-family="${theme.fontFamily.replace(/'/g, '')}">${escapeHtml(d.node2.desc)}</text>
+            <text x="325" y="144" fill="#0F172A" font-size="9" font-weight="bold" text-anchor="middle" font-family="${theme.fontFamily.replace(/'/g, '')}">${escapeHtml(d.node2.note || 'Active Mechanism')}</text>
 
             <!-- Arrow 2 to 3 -->
-            <path d="M390 115 L440 115" stroke="#7C3AED" stroke-width="3" />
-            <polygon points="440,110 450,115 440,120" fill="#7C3AED" />
+            <path d="M410 117 L460 117" stroke="${theme.secondary}" stroke-width="3" />
+            <polygon points="460,112 470,117 460,122" fill="${theme.secondary}" />
 
-            <!-- Node 3: Calvin Cycle Output -->
-            <rect x="450" y="80" width="130" height="70" rx="12" fill="#312E81" />
-            <text x="515" y="112" fill="#FFFFFF" font-size="12" font-weight="bold" text-anchor="middle">Glucose (C₆H₁₂O₆)</text>
-            <text x="515" y="130" fill="#CBD5E1" font-size="10" text-anchor="middle">Stroma Sugar Stored</text>
+            <!-- Node 3: Resultant Output -->
+            <rect x="470" y="80" width="150" height="75" rx="12" fill="${theme.primary}" />
+            <text x="545" y="112" fill="#FFFFFF" font-size="12" font-weight="bold" text-anchor="middle" font-family="${theme.fontFamily.replace(/'/g, '')}">${escapeHtml(d.node3.title)}</text>
+            <text x="545" y="132" fill="${theme.mutedTextColor}" font-size="10" text-anchor="middle" font-family="${theme.fontFamily.replace(/'/g, '')}">${escapeHtml(d.node3.desc)}</text>
           </svg>
         </div>
 
         <div class="mt-4 text-xs text-slate-500 dark:text-slate-400">
-          Tip: Download as SVG for infinite scaling on worksheets, posters, or slides.
+          Tip: Download as SVG to preserve crisp vector resolution on worksheets, posters, or presentation slides.
         </div>
       </div>
 
       <!-- Explanatory Node Breakdown -->
       <div class="bg-white dark:bg-slate-850 p-6 rounded-2xl border border-slate-200 dark:border-slate-750">
-        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-3">Pedagogical Node Breakdown</h3>
+        <h3 class="text-xs font-bold uppercase tracking-wider mb-3" style="color: ${theme.primary};">Pedagogical Node Breakdown</h3>
         <div class="prose-academic text-xs leading-relaxed">
           ${renderMarkdownToHtml(output.output || '')}
         </div>
@@ -1435,46 +1702,44 @@ function renderDiagramWorkspace(output) {
 // Classroom Flashcards Workspace (Interactive Flip & Print Sheet)
 // -------------------------------------------------------------------------
 function renderFlashcardsWorkspace(output) {
-  const cards = output.cards || [
-    { front: 'Light-Dependent Reactions', back: 'Takes place in thylakoid membranes; converts light energy into ATP and NADPH.' },
-    { front: 'Calvin Cycle (Light-Independent)', back: 'Occurs in the stroma; utilizes ATP and NADPH to synthesize glucose from CO₂.' },
-    { front: 'Chlorophyll Pigment', back: 'Primary photoreceptor absorbing blue and red wavelengths while reflecting green light.' },
-    { front: 'Stomata Gas Exchange', back: 'Microscopic pores regulated by guard cells that intake carbon dioxide and release oxygen.' }
-  ];
+  const cards = output.cards || parseFlashcards(output.output, output);
+  const theme = resolveDesignTheme(output.designOptions || activeStudioState.designOptions);
 
   return `
     <div class="max-w-3xl mx-auto space-y-6">
       
       <!-- Interactive Flip Card Showcase -->
       <div class="text-center">
-        <h2 class="text-lg font-bold font-scholarly text-slate-900 dark:text-white mb-1">${escapeHtml(output.title)}</h2>
+        <h2 class="text-lg font-bold text-slate-900 dark:text-white mb-1" style="font-family: ${theme.fontFamily};">${escapeHtml(output.title)}</h2>
         <p class="text-xs text-slate-500 dark:text-slate-400 mb-6">Interactive Study Deck • Click any card to flip front / back</p>
       </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         ${cards.map((c, idx) => `
-          <div data-card-index="${idx}" class="flashcard-item h-48 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-850 p-6 shadow-sm hover:shadow-md cursor-pointer transition-all flex flex-col justify-between group">
+          <div data-card-index="${idx}" class="flashcard-item h-48 rounded-2xl border bg-white dark:bg-slate-850 p-6 shadow-sm hover:shadow-md cursor-pointer transition-all flex flex-col justify-between group"
+               style="border-color: ${theme.primary}44;">
             <div class="flex items-center justify-between text-[10px] font-bold text-slate-400">
-              <span>CARD ${idx + 1} OF ${cards.length}</span>
-              <span class="text-indigo-600 dark:text-indigo-400 group-hover:underline">Click to Flip 🔄</span>
+              <span style="color: ${theme.primary};">CARD ${idx + 1} OF ${cards.length}</span>
+              <span class="group-hover:underline" style="color: ${theme.secondary};">Click to Flip 🔄</span>
             </div>
             
             <div class="card-content-area text-center my-auto">
-              <span class="card-label text-[10px] font-mono uppercase tracking-wider text-teal-600 dark:text-teal-400 font-bold block mb-1">Concept Term</span>
-              <h3 class="card-text text-base font-bold text-slate-900 dark:text-white leading-snug">
+              <span class="card-label text-[10px] font-mono uppercase tracking-wider font-bold block mb-1" style="color: ${theme.secondary};">Concept Term</span>
+              <h3 class="card-text text-base font-bold text-slate-900 dark:text-white leading-snug" style="font-family: ${theme.fontFamily};">
                 ${escapeHtml(c.front)}
               </h3>
             </div>
 
             <div class="text-[10px] text-slate-400 text-center pt-2 border-t border-slate-100 dark:border-slate-800">
-              Grade 8 Biology Flashcard Deck
+              ${escapeHtml(output.subject || 'Academic')} • ${escapeHtml(output.topic || '')} Flashcards
             </div>
           </div>
         `).join('')}
       </div>
 
-      <div class="p-4 rounded-xl bg-indigo-50/70 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800/60 text-center">
-        <p class="text-xs text-indigo-900 dark:text-indigo-200">
+      <div class="p-4 rounded-xl border text-center"
+           style="background: ${theme.primary}15; border-color: ${theme.primary}44;">
+        <p class="text-xs" style="color: ${theme.primary};">
           Ready to print classroom physical decks? Click <strong>Print 2-Sided Cards</strong> above to generate aligned cuttable sheets.
         </p>
       </div>
@@ -1487,19 +1752,22 @@ function renderFlashcardsWorkspace(output) {
 // Assessment & Table of Specifications (TOS) Workspace
 // -------------------------------------------------------------------------
 function renderAssessmentWorkspace(output) {
+  const theme = resolveDesignTheme(output.designOptions || activeStudioState.designOptions);
+
   return `
     <div class="max-w-3xl mx-auto space-y-6">
-      <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-750 p-8 rounded-2xl shadow-sm text-slate-900 dark:text-slate-100 space-y-6">
+      <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-750 p-8 rounded-2xl shadow-sm text-slate-900 dark:text-slate-100 space-y-6"
+           style="font-family: ${theme.fontFamily};">
         
-        <div class="border-b-2 border-slate-900 dark:border-slate-100 pb-4">
-          <span class="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
+        <div class="pb-4" style="border-bottom: 2px solid ${theme.primary};">
+          <span class="text-xs font-bold uppercase tracking-wider" style="color: ${theme.secondary};">
             Summative Assessment & Table of Specifications
           </span>
-          <h1 class="text-xl sm:text-2xl font-bold font-scholarly text-slate-900 dark:text-white">
+          <h1 class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white" style="font-family: ${theme.fontFamily};">
             ${escapeHtml(output.title)}
           </h1>
           <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            Standard Table of Specifications (TOS) & 15-Item Cognitive Assessment
+            Theme: ${escapeHtml(theme.name)} • Curriculum-Aligned Cognitive Blueprint
           </p>
         </div>
 
@@ -2189,17 +2457,18 @@ async function executeOutputGeneration(container, navigateTo, showToast) {
     // Create Structured Output Entity
     const newOutput = {
       id: 'out-' + Date.now(),
-      title: `${f.topic}: ${typeObj.label}`,
+      title: `${f.topic || 'Educational'}: ${typeObj.label}`,
       category: cat.id,
       typeId: typeObj.id,
       typeLabel: typeObj.label,
       icon: cat.icon,
-      subject: f.subject,
-      educationalLevel: f.educationalLevel,
-      gradeLevel: f.gradeLevel,
-      topic: f.topic,
+      subject: f.subject || 'General Studies',
+      educationalLevel: f.educationalLevel || 'Junior High School',
+      gradeLevel: f.gradeLevel || '',
+      topic: f.topic || 'Core Concept',
       output: outputText,
       prompt: prompt,
+      designOptions: JSON.parse(JSON.stringify(activeStudioState.designOptions || {})),
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
@@ -2207,11 +2476,21 @@ async function executeOutputGeneration(container, navigateTo, showToast) {
     // Category Specific Parsing
     if (cat.id === 'presentation') {
       newOutput.slides = parsePresentationSlides(outputText, f);
+    } else if (cat.id === 'poster') {
+      newOutput.posterData = parsePosterData(outputText, f);
     } else if (cat.id === 'worksheet') {
-      newOutput.studentOutput = outputText;
-      newOutput.answerKeyOutput = generateTeacherAnswerKey(outputText, f);
+      if (outputText.includes('## [TEACHER ANSWER KEY')) {
+        const parts = outputText.split('## [TEACHER ANSWER KEY');
+        newOutput.studentOutput = parts[0].trim();
+        newOutput.answerKeyOutput = '## [TEACHER ANSWER KEY' + parts[1];
+      } else {
+        newOutput.studentOutput = outputText;
+        newOutput.answerKeyOutput = generateTeacherAnswerKey(outputText, f);
+      }
     } else if (cat.id === 'flashcards') {
       newOutput.cards = parseFlashcards(outputText, f);
+    } else if (cat.id === 'diagram') {
+      newOutput.diagramData = parseDiagramData(outputText, f);
     }
 
     activeStudioState.activeOutput = newOutput;
@@ -2493,7 +2772,11 @@ function bindExportHandlers(container, showToast) {
   container.querySelector('#print-worksheet-btn')?.addEventListener('click', () => {
     const output = activeStudioState.activeOutput;
     if (!output) return;
-    openPrintableWindow(output);
+    const isTeacherKey = activeStudioState.activeTab === 'editor';
+    const printDoc = (isTeacherKey && output.answerKeyOutput)
+      ? { ...output, output: output.answerKeyOutput, title: `${output.title} (Teacher Answer Key)` }
+      : { ...output, output: output.studentOutput || output.output, title: `${output.title} (Student Handout)` };
+    openPrintableWindow(printDoc);
   });
 
   // Print 2-Sided Flashcards
@@ -2566,14 +2849,14 @@ function refreshView(container, navigateTo, showToast) {
 // =========================================================================
 // 5. PARSERS & GENERATOR HELPERS
 // =========================================================================
-function parsePresentationSlides(rawText, formData) {
+export function parsePresentationSlides(rawText, formData) {
   const slides = [];
   const lines = (rawText || '').split('\n');
   let currentSlide = null;
 
   for (const line of lines) {
     const trimmed = line.trim();
-    if (trimmed.startsWith('# ') || trimmed.startsWith('## ') || trimmed.toLowerCase().startsWith('slide ') || trimmed.startsWith('### Slide')) {
+    if (trimmed.startsWith('# ') || trimmed.startsWith('## ') || trimmed.toLowerCase().startsWith('slide ') || trimmed.startsWith('### Slide') || /^###\s*Slide/i.test(trimmed)) {
       if (currentSlide) slides.push(currentSlide);
       currentSlide = {
         title: trimmed.replace(/^[#\s]+/, '').replace(/^Slide \d+[:\s-]*/i, ''),
@@ -2584,74 +2867,79 @@ function parsePresentationSlides(rawText, formData) {
     } else if (trimmed.startsWith('- ') || trimmed.startsWith('* ') || /^\d+\.\s/.test(trimmed)) {
       if (!currentSlide) {
         currentSlide = {
-          title: `${formData.topic}: Introduction`,
+          title: `${formData?.topic || 'Curriculum Concept'}: Introduction`,
           slideType: 'Title',
           bullets: [],
           speakerNotes: 'Introduce the core topic and connect to prior learning schema.'
         };
       }
       currentSlide.bullets.push(trimmed.replace(/^[-*\d.]+\s*/, ''));
-    } else if (trimmed.toLowerCase().startsWith('speaker note:') || trimmed.toLowerCase().startsWith('notes:')) {
+    } else if (trimmed.toLowerCase().startsWith('speaker note:') || trimmed.toLowerCase().startsWith('notes:') || trimmed.toLowerCase().startsWith('**notes:**')) {
       if (currentSlide) {
-        currentSlide.speakerNotes = trimmed.replace(/^[^:]+:\s*/, '');
+        currentSlide.speakerNotes = trimmed.replace(/^(\*\*notes:\*\*|notes:|speaker note:)\s*/i, '');
       }
     }
   }
 
   if (currentSlide) slides.push(currentSlide);
 
-  // Fallback default 5-slide instructional deck if parser got few slides
+  // Fallback 5-slide instructional deck if parser got few slides - dynamically constructed for user topic
   if (slides.length < 3) {
+    const topic = formData?.topic || 'Instructional Concept';
+    const subject = formData?.subject || 'Discipline';
+    const grade = formData?.gradeLevel || formData?.educationalLevel || 'Standard Level';
+    const comp = formData?.competency || 'Core Discipline Competencies';
+
     return [
       {
-        title: `${formData.topic}: Instructional Presentation`,
+        title: `${topic}: Instructional Presentation`,
         slideType: 'Title',
         bullets: [
-          `Subject: ${formData.subject} (${formData.gradeLevel})`,
-          'Pedagogical Framework: 5E Inquiry Cycle',
-          'Standard Alignment: Core Discipline Competencies'
+          `Subject: ${subject} (${grade})`,
+          'Pedagogical Framework: 5E Inquiry & Active Synthesis',
+          `Curriculum Standard: ${comp}`
         ],
-        speakerNotes: 'Introduce the unit driving question and engage student curiosity.'
+        speakerNotes: `Introduce the driving question for ${topic} and engage student prior knowledge.`
       },
       {
-        title: 'Target Learning Objectives',
+        title: 'Target Learning Objectives & Success Criteria',
         slideType: 'Objectives',
         bullets: [
-          'Examine fundamental conceptual definitions and scientific models',
-          'Model real-world transformations and empirical mechanisms',
-          'Synthesize findings with structured peer collaboration'
+          `Define core terminology and theoretical foundations of ${topic}`,
+          `Model real-world transformations and empirical mechanisms within ${subject}`,
+          'Synthesize findings through structured peer collaboration and evidence-based claims'
         ],
-        speakerNotes: 'Review the success criteria and check for student comprehension.'
+        speakerNotes: 'Review the success criteria and check for student comprehension before moving forward.'
       },
       {
-        title: 'Core Conceptual Foundations',
+        title: 'Core Conceptual Foundations & Mechanisms',
         slideType: 'Explanation',
         bullets: [
-          'Light-dependent reaction pathways transform radiant photons',
-          'Coupled energy carriers (ATP & NADPH) energize the system',
-          'Biochemical reactions maintain strict equilibrium and energy conservation'
+          `Foundational inputs and environmental parameters initiating ${topic}`,
+          'Dynamic intermediate transformations that govern system equilibrium',
+          'Primary conservation laws and qualitative relationships'
         ],
-        speakerNotes: 'Walk students through the thylakoid diagram step-by-step.'
+        speakerNotes: `Walk students through the primary workflow diagram of ${topic} step-by-step.`
       },
       {
-        title: 'Collaborative Application Task',
+        title: 'Collaborative Inquiry & Case Study Task',
         slideType: 'Activity',
         bullets: [
-          'Work in pairs to diagram the flow of carbon and water molecules',
-          'Annotate the inputs, cellular catalysts, and waste products',
-          'Be prepared to justify your claims to the classroom seminar'
+          `Work in collaborative dyads to analyze authentic scenarios involving ${topic}`,
+          'Diagram the causal sequence of inputs, catalysts, and terminal outcomes',
+          'Formulate and defend an evidence-based claim to the classroom seminar'
         ],
-        speakerNotes: 'Circulate among student dyads to provide targeted scaffolding.'
+        speakerNotes: 'Circulate among student dyads to provide targeted scaffolding and clarify questions.'
       },
       {
         title: 'Key Takeaways & Formative Exit Ticket',
         slideType: 'Summary',
         bullets: [
-          'All biological systems depend on coupled energy transformations',
-          'Complete the 2-minute 3-2-1 exit slip before dismissal',
-          'Next session: Cellular respiration and metabolic coupling'
+          `All systems in ${subject} depend on balanced, predictable transformations`,
+          'Complete the 2-minute 3-2-1 formative exit slip before dismissal',
+          `Next Unit: Advanced applications and interdisciplinary extensions in ${subject}`
         ],
-        speakerNotes: 'Administer the exit slip and collect evidence of mastery.'
+        speakerNotes: 'Administer the formative exit slip to gauge individual mastery against target objectives.'
       }
     ];
   }
@@ -2659,61 +2947,269 @@ function parsePresentationSlides(rawText, formData) {
   return slides;
 }
 
-function parseFlashcards(rawText, formData) {
+export function parsePosterData(rawText, formData) {
+  const text = rawText || '';
+  const lines = text.split('\n');
+
+  let headline = (formData?.topic || 'Curriculum Focus').toUpperCase();
+  let subtitle = `A Comprehensive Visual & Scholarly Guide to ${formData?.topic || 'Core Concept'} (${formData?.subject || 'All Subjects'})`;
   const cards = [];
-  const lines = (rawText || '').split('\n');
+  const statistics = [];
+  let takeaways = `Understanding ${formData?.topic || 'this concept'} empowers learners to analyze complex interactions, predict systemic behavior, and apply evidence-based reasoning across ${formData?.subject || 'the discipline'}.`;
+
+  // Look for Headline in text
   for (const line of lines) {
-    if (line.includes(':') && (line.includes('-') || line.includes('•') || /^\d+\./.test(line))) {
-      const clean = line.replace(/^[-*•\d.]+\s*/, '').trim();
-      const parts = clean.split(':');
-      if (parts.length >= 2 && parts[0].length < 45) {
-        cards.push({
-          front: parts[0].trim(),
-          back: parts.slice(1).join(':').trim()
-        });
+    const trimmed = line.trim();
+    if (/^#\s+([^#\n]+)/.test(trimmed)) {
+      const match = trimmed.replace(/^#\s+/, '').replace(/:?\s*Educational.*$/i, '').trim();
+      if (match && !match.toLowerCase().includes('pillar') && !match.toLowerCase().includes('section')) {
+        headline = match;
+        break;
       }
     }
   }
-  return cards.length >= 3 ? cards : [
-    { front: 'Light-Dependent Reactions', back: 'Occurs in the thylakoids; converts solar energy into ATP and NADPH while releasing oxygen.' },
-    { front: 'Calvin Cycle', back: 'Occurs in the stroma; fixes atmospheric CO₂ into carbohydrate sugars using energy from light reactions.' },
-    { front: 'Chloroplast Stroma', back: 'The fluid-filled internal space surrounding the thylakoid stacks where enzymatic sugar synthesis occurs.' },
-    { front: 'Thylakoid Membrane', back: 'Membranous sacs containing photosynthetic pigment clusters and the electron transport chain.' }
-  ];
+
+  // Look for Subtitle
+  const subMatch = text.match(/(?:Essential Understanding|Subtitle|Essential Insight):\s*([^\n]+)/i);
+  if (subMatch && subMatch[1]) {
+    subtitle = subMatch[1].trim();
+  }
+
+  // Extract Pillars / Cards
+  const pillarBlocks = text.split(/(?=###\s+Pillar|###\s+0?\d|###\s+Section)/i);
+  for (const block of pillarBlocks) {
+    const bLines = block.trim().split('\n');
+    const header = bLines[0]?.trim();
+    if (/^###\s+/i.test(header)) {
+      const title = header.replace(/^###\s+(?:Pillar\s*\d*:?\s*|0?\d:?\s*)?/i, '').trim();
+      const contentLines = bLines.slice(1)
+        .map(l => l.trim())
+        .filter(l => l && !l.startsWith('---') && !l.startsWith('#'))
+        .map(l => l.replace(/^[-*•]\s*(?:\*\*[^*]+\*\*:\s*)?/, '').trim());
+      const desc = contentLines.slice(0, 3).join(' ') || `Key conceptual mechanisms and principles regarding ${formData?.topic || 'the topic'}.`;
+      if (title) {
+        cards.push({ title, desc });
+      }
+    }
+  }
+
+  // Fallback 3 pillars if fewer than 3 were parsed
+  if (cards.length < 3) {
+    const defaults = [
+      {
+        title: 'Foundations & Core Inputs',
+        desc: `Fundamental baseline definitions, initial variables, and structural parameters initiating ${formData?.topic || 'the phenomenon'}.`
+      },
+      {
+        title: 'Active Mechanisms & Dynamics',
+        desc: `Step-by-step processes, catalytic influences, and state transformations observed within ${formData?.topic || 'this unit'}.`
+      },
+      {
+        title: 'Systemic Impact & Transfer',
+        desc: `Authentic real-world applications, societal implications, and advanced synthesis across ${formData?.subject || 'the discipline'}.`
+      }
+    ];
+    while (cards.length < 3) {
+      cards.push(defaults[cards.length]);
+    }
+  }
+
+  // Extract Formula / Principle
+  const formMatch = text.match(/(?:Governing Principle|Core Formula|Equation):\s*([^\n]+)/i) ||
+                    text.match(/```(?:\w+)?\n([\s\S]*?)```/);
+  if (formMatch && formMatch[1]) {
+    statistics.push(formMatch[1].replace(/```/g, '').trim());
+  } else {
+    statistics.push(`${formData?.topic || 'System Dynamics'}: Baseline Inputs + Active Catalysis ➔ Balanced Equilibrium`);
+  }
+
+  // Extract Key Takeaway
+  const takeMatch = text.match(/(?:Instructional Takeaway|Key Classroom Takeaway|Essential Insight):\s*([^\n]+)/i);
+  if (takeMatch && takeMatch[1]) {
+    takeaways = takeMatch[1].trim();
+  }
+
+  return {
+    headline,
+    subtitle,
+    cards: cards.slice(0, 3),
+    statistics,
+    takeaways
+  };
 }
 
-function generateTeacherAnswerKey(studentText, formData) {
-  return `# TEACHER ANSWER KEY & GRADING BLUEPRINT: ${formData.topic}
+export function parseDiagramData(rawText, formData) {
+  const text = rawText || '';
+  const topic = formData?.topic || 'Core Concept';
+  const subject = formData?.subject || 'Discipline';
 
-**Subject:** ${formData.subject} | **Grade Level:** ${formData.gradeLevel}  
-**Curriculum Competency:** ${formData.competency}
+  let node1 = {
+    title: `${topic}: Initial Inputs`,
+    desc: `Foundational baseline parameters and preconditions initiating ${topic}.`
+  };
+  let node2 = {
+    title: 'Transformational Dynamics',
+    desc: `Catalytic mechanisms and structural transitions in ${topic}.`,
+    note: 'Dynamic Mechanism'
+  };
+  let node3 = {
+    title: 'Resultant Equilibrium & Impact',
+    desc: `Systemic outcomes, observable evidence, and real-world transfer in ${subject}.`
+  };
+
+  // Check for Mermaid definitions like A["..."] --> B["..."] --> C["..."]
+  const mermaidMatches = Array.from(text.matchAll(/[A-Z]\["([^"]+)"\]/g));
+  if (mermaidMatches.length >= 3) {
+    node1.title = mermaidMatches[0][1].split(':')[0].trim();
+    node1.desc = mermaidMatches[0][1].includes(':') ? mermaidMatches[0][1].split(':').slice(1).join(':').trim() : `Foundational preconditions for ${topic}`;
+
+    node2.title = mermaidMatches[1][1].split(':')[0].trim();
+    node2.desc = mermaidMatches[1][1].includes(':') ? mermaidMatches[1][1].split(':').slice(1).join(':').trim() : `Active procedural transformations in ${topic}`;
+
+    node3.title = mermaidMatches[2][1].split(':')[0].trim();
+    node3.desc = mermaidMatches[2][1].includes(':') ? mermaidMatches[2][1].split(':').slice(1).join(':').trim() : `Observable results and applications in ${subject}`;
+  } else {
+    // Check for Node 1 / Node 2 / Node 3 sections
+    const n1Match = text.match(/###\s*Node\s*1:?\s*([^\n]+)([\s\S]*?)(?=###\s*Node\s*2|$)/i);
+    if (n1Match) {
+      node1.title = n1Match[1].replace(/^[#\s]+/, '').trim();
+      const descLine = n1Match[2].match(/(?:Description|Function):\s*([^\n]+)/i);
+      if (descLine) node1.desc = descLine[1].trim();
+    }
+
+    const n2Match = text.match(/###\s*Node\s*2:?\s*([^\n]+)([\s\S]*?)(?=###\s*Node\s*3|$)/i);
+    if (n2Match) {
+      node2.title = n2Match[1].replace(/^[#\s]+/, '').trim();
+      const descLine = n2Match[2].match(/(?:Description|Function):\s*([^\n]+)/i);
+      if (descLine) node2.desc = descLine[1].trim();
+    }
+
+    const n3Match = text.match(/###\s*Node\s*3:?\s*([^\n]+)([\s\S]*?)(?=###|---|Guiding|$)/i);
+    if (n3Match) {
+      node3.title = n3Match[1].replace(/^[#\s]+/, '').trim();
+      const descLine = n3Match[2].match(/(?:Description|Function):\s*([^\n]+)/i);
+      if (descLine) node3.desc = descLine[1].trim();
+    }
+  }
+
+  return { node1, node2, node3 };
+}
+
+export function parseFlashcards(rawText, formData) {
+  const cards = [];
+  const text = rawText || '';
+  const lines = text.split('\n');
+
+  // Match pattern: - **Card X - FRONT:** ... \n - **Card X - BACK:** ...
+  const cardRegex = /-\s*\*\*Card\s*\d+\s*-\s*FRONT:\*\*\s*([^\n]+)[\s\S]*?-\s*\*\*Card\s*\d+\s*-\s*BACK:\*\*\s*([^\n]+)/gi;
+  let match;
+  while ((match = cardRegex.exec(text)) !== null) {
+    const front = match[1].trim();
+    const back = match[2].trim();
+    if (front && back) {
+      cards.push({ front, back });
+    }
+  }
+
+  // If none matched, check bullet lines with ':'
+  if (cards.length < 3) {
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if ((trimmed.startsWith('-') || trimmed.startsWith('*') || /^\d+\./.test(trimmed)) && trimmed.includes(':')) {
+        const clean = trimmed.replace(/^[-*•\d.]+\s*/, '').replace(/\*\*/g, '').trim();
+        const parts = clean.split(':');
+        if (parts.length >= 2) {
+          const front = parts[0].trim();
+          const back = parts.slice(1).join(':').trim();
+          if (front.length > 2 && front.length < 60 && back.length > 3) {
+            cards.push({ front, back });
+          }
+        }
+      }
+    }
+  }
+
+  // Dynamic fallback based on user's topic, subject, and competency
+  if (cards.length < 3) {
+    const topic = formData?.topic || 'Core Concept';
+    const subject = formData?.subject || 'Discipline';
+    const comp = formData?.competency || `Master fundamental theories and analytical processes in ${subject}.`;
+
+    return [
+      {
+        front: `${topic}: Core Definition`,
+        back: `The primary phenomenon in ${subject} characterized by structured mechanisms, governing principles, and predictable systemic outcomes.`
+      },
+      {
+        front: 'Foundational Inputs & Preconditions',
+        back: `The essential baseline parameters and environmental conditions required to activate and sustain ${topic}.`
+      },
+      {
+        front: 'Central Operational Mechanism',
+        back: `The sequential pathway and catalytic interactions through which ${topic} transforms inputs into higher-order states.`
+      },
+      {
+        front: 'Key Academic Terminology',
+        back: `Discipline-specific vocabulary utilized by scholars to analyze, measure, and communicate phenomena related to ${topic}.`
+      },
+      {
+        front: 'Real-World Case & Application',
+        back: `Concrete contextual scenario where principles of ${topic} solve authentic challenges or sustain vital operations in society.`
+      },
+      {
+        front: 'Curriculum Competency',
+        back: comp
+      }
+    ];
+  }
+
+  return cards;
+}
+
+export function generateTeacherAnswerKey(studentText, formData) {
+  const text = studentText || '';
+  if (text.includes('## [TEACHER ANSWER KEY')) {
+    const parts = text.split('## [TEACHER ANSWER KEY');
+    return '## [TEACHER ANSWER KEY' + parts[1];
+  }
+
+  const topic = formData?.topic || 'Target Curriculum Unit';
+  const subject = formData?.subject || 'Discipline';
+  const grade = formData?.gradeLevel || formData?.educationalLevel || 'Standard Level';
+  const comp = formData?.competency || `Demonstrate comprehensive mastery and application of ${topic}.`;
+
+  return `# TEACHER ANSWER KEY & GRADING BLUEPRINT: ${topic.toUpperCase()}
+
+**Subject:** ${subject} | **Grade Level:** ${grade}  
+**Curriculum Competency:** ${comp}
 
 ---
 
-## Part 1: Diagnostic & Guided Comprehension Answers
-1. **Question 1 (Recall & Identify):**
-   - **Correct Answer:** The thylakoid membrane of the chloroplast.
-   - **Common Misconception:** Students often confuse the stroma with the thylakoids.
-   - **Award:** 2 Points for naming the thylakoid and organelle correctly.
+## Part I: Conceptual Comprehension & Guided Practice Answers
+1. **Recall & Identification Items:**
+   - **Exemplary Response:** Accurately identifies the primary input variables and governing baseline conditions of ${topic}.
+   - **Common Misconception:** Students frequently mistake secondary intermediate symptoms for foundational causative factors.
+   - **Scoring Directive:** Award full credit (2 Pts) for correct naming and classification within ${subject}.
 
-2. **Question 2 (Conceptual Explanation):**
-   - **Exemplary Response:** Solar photons excite chlorophyll electrons, facilitating water photolysis which produces diatomic oxygen and transfers protons across the membrane to generate ATP and NADPH.
-   - **Scoring Criteria:** 3 Points for mentioning light absorption, water splitting, and energy carrier creation.
-
----
-
-## Part 2: Graphic Organizer / Analysis Scoring
-- **Correct Equation:** 6CO₂ + 6H₂O + Light Energy → C₆H₁₂O₆ + 6O₂
-- **Coefficient Verification:** Verify that students balance both carbon and oxygen atoms on both sides.
+2. **Analytical Mechanism Breakdown:**
+   - **Exemplary Response:** Systematically traces the catalytic transformation from initial inputs through intermediate stages to final systemic equilibrium in ${topic}.
+   - **Scoring Directive:** Award 3 Points for explicit cause-and-effect reasoning and utilization of academic vocabulary.
 
 ---
 
-## Part 3: Formative Grading Rubric (4-Level Matrix)
+## Part II: Problem-Solving & Case Analysis Scoring Criteria
+- **Item 1 (Immediate System Response):** Award 4 Points when the student correctly predicts the parameter shift and supports their claim with discipline principles.
+- **Item 2 (Comparative Outcome):** Award 4 Points for identifying rate-limiting thresholds and equilibrium maintenance in ${topic}.
 
-| Criteria | Exemplary (4) | Proficient (3) | Developing (2) | Beginning (1) |
+---
+
+## Part III: Formative Assessment Rubric (4-Level Matrix)
+
+| Performance Dimension | Exemplary (4) | Proficient (3) | Developing (2) | Beginning (1) |
 | :--- | :--- | :--- | :--- | :--- |
-| **Scientific Accuracy** | Flawless identification of pathways, chemical formulas, and organelles. | Minor notation error but conceptual reasoning is sound. | Confuses light vs dark phase locations. | Major misconceptions regarding plant respiration and light absorption. |
-| **Application & Analysis** | Explains rate limiting factors using precise empirical claims and data. | Explains general trend with standard classroom examples. | States facts without connecting to rate variables. | Incomplete responses with no supporting data. |
+| **Conceptual Accuracy** | Flawless synthesis of ${topic}; cites exact terminology and laws. | Sound conceptual understanding with minor notation omissions. | Identifies general theme but confuses operational mechanisms. | Significant misconceptions regarding ${topic} fundamentals. |
+| **Evidence & Reasoning** | Robust justification linking empirical evidence directly to mechanistic claims. | Valid evidence cited with standard reasoning. | Claims stated without coherent supporting evidence. | Incomplete responses lacking analytical backing. |
+| **Pedagogical Transfer** | Applies ${topic} seamlessly to novel real-world scenarios in ${subject}. | Successfully addresses standard classroom examples. | Struggles to transfer concepts beyond given prompts. | Unable to demonstrate transfer. |
 `;
 }
 
@@ -2725,53 +3221,7 @@ function generateTeacherAnswerKey(studentText, formData) {
 function downloadPowerPointPresentation(output) {
   const slides = output.slides || [];
   const filename = (output.title || 'Presentation').replace(/[^a-z0-9_-]/gi, '_') + '.ppt';
-  const dOpts = output.designOptions || activeStudioState.designOptions || {};
-  const theme = dOpts.theme || 'academic-indigo';
-  const primary = dOpts.customPrimaryColor || '#4F46E5';
-  const secondary = dOpts.customSecondaryColor || '#14B8A6';
-
-  let bg = '#0F172A';
-  let slideBg = '#1E293B';
-  let titleColor = '#818CF8';
-  let accentColor = '#14B8A6';
-  let textColor = '#FFFFFF';
-  let bulletColor = '#E2E8F0';
-
-  if (theme === 'custom') {
-    titleColor = primary;
-    accentColor = secondary;
-    if (dOpts.customBackgroundColor === 'light') {
-      bg = '#F1F5F9';
-      slideBg = '#FFFFFF';
-      textColor = '#0F172A';
-      bulletColor = '#334155';
-    } else if (dOpts.customBackgroundColor === 'warm-parchment') {
-      bg = '#F5F0E6';
-      slideBg = '#FAF7F2';
-      textColor = '#1E293B';
-      bulletColor = '#475569';
-    } else if (dOpts.customBackgroundColor === 'custom-hex' && dOpts.customBgHex) {
-      bg = dOpts.customBgHex;
-      slideBg = dOpts.customBgHex;
-    }
-  } else if (theme === 'modern-stem') {
-    titleColor = '#2DD4BF';
-    accentColor = '#34D399';
-    bg = '#022C22';
-    slideBg = '#064E3B';
-  } else if (theme === 'humanities-serif') {
-    titleColor = '#F59E0B';
-    accentColor = '#FB923C';
-    bg = '#1C1917';
-    slideBg = '#292524';
-  } else if (theme === 'clean-minimal') {
-    titleColor = '#0F172A';
-    accentColor = '#475569';
-    bg = '#F8FAFC';
-    slideBg = '#FFFFFF';
-    textColor = '#0F172A';
-    bulletColor = '#1E293B';
-  }
+  const theme = resolveDesignTheme(output.designOptions || activeStudioState.designOptions);
 
   const pptHtml = `<!DOCTYPE html>
 <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:p='urn:schemas-microsoft-com:office:powerpoint' xmlns='http://www.w3.org/TR/REC-html40'>
@@ -2782,31 +3232,31 @@ function downloadPowerPointPresentation(output) {
   <xml>
     <p:Presentation>
       <p:SlideMaster>
-        <p:ColorPalette background='${bg}' text='${textColor}' accent='${accentColor}' />
+        <p:ColorPalette background='${theme.bgDark}' text='${theme.textColor}' accent='${theme.secondary}' />
       </p:SlideMaster>
     </p:Presentation>
   </xml>
   <![endif]-->
   <style>
-    body { font-family: 'Calibri', Arial, sans-serif; background-color: ${bg}; color: ${textColor}; }
+    body { font-family: ${theme.fontFamily}, 'Calibri', Arial, sans-serif; background-color: ${theme.bgDark}; color: ${theme.textColor}; }
     .slide {
       page-break-after: always;
       width: 960px;
       height: 540px;
       padding: 40px;
       margin: 20px auto;
-      background: ${slideBg};
-      border: 2px solid ${titleColor};
+      background: ${theme.cardDark};
+      border: 2px solid ${theme.primary};
       border-radius: 12px;
       box-sizing: border-box;
       position: relative;
     }
-    h1 { color: ${titleColor}; font-size: 28pt; margin-bottom: 8pt; }
-    h2 { color: ${accentColor}; font-size: 14pt; text-transform: uppercase; letter-spacing: 2pt; margin-bottom: 20pt; }
-    ul { font-size: 18pt; line-height: 1.6; color: ${bulletColor}; }
-    li { margin-bottom: 12pt; }
-    .footer { position: absolute; bottom: 20px; left: 40px; right: 40px; font-size: 10pt; color: #94A3B8; border-top: 1px solid #334155; padding-top: 10px; display: flex; justify-content: space-between; }
-    .notes { background: ${bg}; color: #CBD5E1; padding: 12px; border-left: 4px solid ${accentColor}; font-size: 11pt; margin-top: 20pt; }
+    h1 { color: ${theme.primary}; font-size: 26pt; margin-bottom: 8pt; font-family: ${theme.fontFamily}; }
+    h2 { color: ${theme.secondary}; font-size: 13pt; text-transform: uppercase; letter-spacing: 2pt; margin-bottom: 18pt; font-family: ${theme.fontFamily}; }
+    ul { font-size: 17pt; line-height: 1.5; color: ${theme.textColor}; }
+    li { margin-bottom: 10pt; }
+    .footer { position: absolute; bottom: 20px; left: 40px; right: 40px; font-size: 10pt; color: ${theme.mutedTextColor}; border-top: 1px solid ${theme.primary}44; padding-top: 10px; display: flex; justify-content: space-between; }
+    .notes { background: ${theme.bgDark}; color: ${theme.mutedTextColor}; padding: 12px; border-left: 4px solid ${theme.secondary}; font-size: 11pt; margin-top: 16pt; border-radius: 4px; }
   </style>
 </head>
 <body>
@@ -2844,30 +3294,7 @@ function openInteractiveSlideDeckWindow(output) {
   const slideWin = window.open('', '_blank');
   if (!slideWin) return;
 
-  const dOpts = output.designOptions || activeStudioState.designOptions || {};
-  const theme = dOpts.theme || 'academic-indigo';
-  const primary = dOpts.customPrimaryColor || '#818CF8';
-  const secondary = dOpts.customSecondaryColor || '#14B8A6';
-
-  let bg = '#0F172A';
-  let cardBg = '#1E293B';
-  let titleColor = primary;
-  let accentColor = secondary;
-  let text = '#CBD5E1';
-
-  if (theme === 'custom') {
-    titleColor = primary;
-    accentColor = secondary;
-    if (dOpts.customBackgroundColor === 'light') {
-      bg = '#F1F5F9';
-      cardBg = '#FFFFFF';
-      text = '#334155';
-    } else if (dOpts.customBackgroundColor === 'warm-parchment') {
-      bg = '#F5F0E6';
-      cardBg = '#FAF7F2';
-      text = '#475569';
-    }
-  }
+  const theme = resolveDesignTheme(output.designOptions || activeStudioState.designOptions);
 
   const html = `<!DOCTYPE html>
 <html lang="en">
@@ -2876,17 +3303,17 @@ function openInteractiveSlideDeckWindow(output) {
   <title>${escapeHtml(output.title)} — Slide Deck Presentation</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: ${bg}; color: #FFFFFF; font-family: 'Inter', system-ui, sans-serif; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
-    #slide-stage { flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px; }
-    .slide-card { width: 100%; max-width: 1080px; aspect-ratio: 16/9; background: ${cardBg}; border: 2px solid ${titleColor}; border-radius: 20px; padding: 60px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); }
-    h1 { font-size: 2.5rem; color: ${titleColor}; line-height: 1.2; margin-bottom: 24px; font-family: serif; }
-    .eyebrow { font-size: 0.85rem; font-family: monospace; text-transform: uppercase; letter-spacing: 0.15em; color: ${accentColor}; font-weight: bold; margin-bottom: 12px; }
-    ul { list-style: none; font-size: 1.35rem; line-height: 1.6; color: ${text}; }
+    body { background: ${theme.bgDark}; color: ${theme.textColor}; font-family: ${theme.fontFamily}, system-ui, sans-serif; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+    #slide-stage { flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px; background: ${theme.gradient}; }
+    .slide-card { width: 100%; max-width: 1080px; aspect-ratio: 16/9; background: ${theme.cardDark}; border: 2px solid ${theme.primary}; border-radius: 20px; padding: 60px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.6); }
+    h1 { font-size: 2.5rem; color: ${theme.primary}; line-height: 1.2; margin-bottom: 24px; font-family: ${theme.fontFamily}; }
+    .eyebrow { font-size: 0.85rem; font-family: monospace; text-transform: uppercase; letter-spacing: 0.15em; color: ${theme.secondary}; font-weight: bold; margin-bottom: 12px; }
+    ul { list-style: none; font-size: 1.35rem; line-height: 1.6; color: ${theme.textColor}; }
     li { margin-bottom: 16px; display: flex; align-items: flex-start; gap: 12px; }
-    li::before { content: "•"; color: ${accentColor}; font-size: 1.8rem; line-height: 1; }
-    #toolbar { height: 60px; background: ${cardBg}; border-top: 1px solid #334155; display: flex; align-items: center; justify-content: space-between; px: 30px; padding: 0 30px; }
-    button { background: ${primary}; color: white; border: none; padding: 8px 18px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 13px; }
-    button:hover { opacity: 0.9; }
+    li::before { content: "•"; color: ${theme.secondary}; font-size: 1.8rem; line-height: 1; }
+    #toolbar { height: 60px; background: ${theme.cardDark}; border-top: 1px solid ${theme.primary}44; display: flex; align-items: center; justify-content: space-between; padding: 0 30px; }
+    button { background: ${theme.primary}; color: white; border: none; padding: 8px 18px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 13px; transition: opacity 0.2s; }
+    button:hover { opacity: 0.85; }
   </style>
 </head>
 <body>
@@ -2897,7 +3324,7 @@ function openInteractiveSlideDeckWindow(output) {
         <h1 id="slide-title">Slide Title</h1>
         <ul id="slide-bullets"></ul>
       </div>
-      <div style="display:flex; justify-content:space-between; font-size:12px; color:#64748B; border-top:1px solid #334155; padding-top:16px;">
+      <div style="display:flex; justify-content:space-between; font-size:12px; color:${theme.mutedTextColor}; border-top:1px solid ${theme.primary}33; padding-top:16px;">
         <span>${escapeHtml(output.title)}</span>
         <span id="slide-counter">1 / ${slides.length}</span>
       </div>
@@ -2905,10 +3332,10 @@ function openInteractiveSlideDeckWindow(output) {
   </div>
 
   <div id="toolbar">
-    <span style="font-size:12px; color:#94A3B8;">Keys: [← Previous] [Next →] [F: Fullscreen]</span>
+    <span style="font-size:12px; color:${theme.mutedTextColor};">Keys: [← Previous] [Next →] [F: Fullscreen]</span>
     <div style="display:flex; gap:10px; align-items:center;">
       <button onclick="prev()">← Previous</button>
-      <span id="nav-count" style="font-size:13px; font-family:monospace;">1 / ${slides.length}</span>
+      <span id="nav-count" style="font-size:13px; font-family:monospace; color:${theme.textColor};">1 / ${slides.length}</span>
       <button onclick="next()">Next →</button>
       <button onclick="document.documentElement.requestFullscreen()">Fullscreen</button>
     </div>
@@ -2968,6 +3395,9 @@ function openPrintablePosterWindow(output) {
   const pWin = window.open('', '_blank');
   if (!pWin) return;
 
+  const theme = resolveDesignTheme(output.designOptions || activeStudioState.designOptions);
+  const p = output.posterData || parsePosterData(output.output, output);
+
   const html = `<!DOCTYPE html>
 <html>
 <head>
@@ -2975,44 +3405,44 @@ function openPrintablePosterWindow(output) {
   <title>${escapeHtml(output.title)} — Classroom Poster</title>
   <style>
     @page { size: letter portrait; margin: 1cm; }
-    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #FFFFFF; color: #0F172A; padding: 20px; }
-    .poster-box { border: 4px solid #312E81; border-radius: 16px; padding: 30px; }
-    h1 { font-size: 24pt; color: #312E81; text-align: center; margin-bottom: 8px; }
-    .badge { text-align: center; font-size: 11pt; color: #14B8A6; font-weight: bold; margin-bottom: 24px; }
+    body { font-family: ${theme.fontFamily}, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #FFFFFF; color: #0F172A; padding: 20px; }
+    .poster-box { border: 4px solid ${theme.primary}; border-radius: 16px; padding: 30px; background: #FFFFFF; }
+    h1 { font-size: 24pt; color: ${theme.primary}; text-align: center; margin-bottom: 8px; font-family: ${theme.fontFamily}; }
+    .badge { text-align: center; font-size: 11pt; color: ${theme.secondary}; font-weight: bold; margin-bottom: 24px; text-transform: uppercase; letter-spacing: 1px; }
     .grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin: 24px 0; }
-    .card { background: #F8FAFC; border: 1px solid #CBD5E1; border-radius: 10px; padding: 16px; }
-    .card h3 { font-size: 13pt; color: #312E81; margin-bottom: 6px; }
+    .card { background: #F8FAFC; border: 1px solid #CBD5E1; border-top: 3px solid ${theme.primary}; border-radius: 10px; padding: 16px; }
+    .card h3 { font-size: 13pt; color: ${theme.primary}; margin-bottom: 6px; font-family: ${theme.fontFamily}; }
     .card p { font-size: 10.5pt; color: #334155; line-height: 1.5; }
-    .formula-bar { background: #EEF2FF; border: 2px dashed #4F46E5; padding: 16px; text-align: center; border-radius: 10px; font-size: 14pt; font-family: monospace; font-weight: bold; color: #312E81; margin: 24px 0; }
+    .formula-bar { background: #F1F5F9; border: 2px dashed ${theme.secondary}; padding: 16px; text-align: center; border-radius: 10px; font-size: 13pt; font-family: monospace; font-weight: bold; color: ${theme.primary}; margin: 24px 0; }
+    .takeaway-bar { background: #FAF5FF; border-left: 4px solid ${theme.primary}; padding: 14px 18px; margin-top: 16px; border-radius: 6px; font-size: 11pt; color: #334155; }
     @media print { .no-print { display: none; } }
   </style>
 </head>
 <body>
-  <div class="no-print" style="margin-bottom: 20px;">
-    <button onclick="window.print()" style="background:#312E81; color:white; padding:10px 20px; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">Print Classroom Poster</button>
+  <div class="no-print" style="margin-bottom: 20px; display: flex; gap: 10px;">
+    <button onclick="window.print()" style="background:${theme.primary}; color:white; padding:10px 20px; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">Print Classroom Poster</button>
+    <button onclick="window.close()" style="background:#E2E8F0; color:#334155; padding:10px 20px; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">Close</button>
   </div>
   <div class="poster-box">
-    <div class="badge">${escapeHtml(output.subject || 'SCIENCE')} • GRADE 8 EDUCATIONAL WALL POSTER</div>
-    <h1>${escapeHtml(output.title)}</h1>
+    <div class="badge">${escapeHtml(output.subject || 'CURRICULUM RESOURCE')} • ${escapeHtml(output.gradeLevel || output.educationalLevel || 'ALL LEVELS')} EDUCATIONAL POSTER</div>
+    <h1>${escapeHtml(p.headline)}</h1>
+    <p style="text-align: center; font-size: 12pt; color: #475569; margin-bottom: 24px;">${escapeHtml(p.subtitle)}</p>
     <div class="grid">
-      <div class="card">
-        <h3>1. Thylakoid Reactions</h3>
-        <p>Photons excite chlorophyll pigments, splitting water molecules into oxygen and generating ATP/NADPH.</p>
-      </div>
-      <div class="card">
-        <h3>2. Calvin Stroma Cycle</h3>
-        <p>ATP and NADPH catalyze carbon dioxide fixation into stable hexose carbohydrate molecules.</p>
-      </div>
-      <div class="card">
-        <h3>3. Ecological Impact</h3>
-        <p>Foundational primary production sustaining terrestrial and marine aerobic organisms worldwide.</p>
-      </div>
+      ${p.cards.map((c, i) => `
+        <div class="card">
+          <h3>0${i+1}. ${escapeHtml(c.title)}</h3>
+          <p>${escapeHtml(c.desc)}</p>
+        </div>
+      `).join('')}
     </div>
     <div class="formula-bar">
-      6CO₂ + 6H₂O + Solar Photons ➔ C₆H₁₂O₆ + 6O₂
+      ${escapeHtml((p.statistics && p.statistics[0]) || `${output.topic}: Fundamental Principle`)}
     </div>
-    <div style="font-size:10pt; color:#64748B; text-align:center; margin-top:20px;">
-      PEDAIA Classroom Visual Aids • Standards Aligned Curriculum Resource
+    <div class="takeaway-bar">
+      <strong>Essential Takeaway:</strong> ${escapeHtml(p.takeaways)}
+    </div>
+    <div style="font-size:10pt; color:#64748B; text-align:center; margin-top:24px;">
+      PEDAIA Classroom Visual Aids • Theme: ${escapeHtml(theme.name)} • Standards Aligned Curriculum Resource
     </div>
   </div>
 </body>
@@ -3025,22 +3455,35 @@ function openPrintablePosterWindow(output) {
 
 // Download Vector SVG Diagram
 function downloadSvgDiagram(output) {
-  const svgData = `<svg viewBox="0 0 600 240" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="600" height="240" rx="16" fill="#0F172A" />
-  <rect x="20" y="80" width="140" height="70" rx="12" fill="#312E81" />
-  <text x="90" y="112" fill="#FFFFFF" font-size="12" font-family="Arial" font-weight="bold" text-anchor="middle">Solar Photons + H₂O</text>
-  <text x="90" y="130" fill="#CBD5E1" font-size="10" font-family="Arial" text-anchor="middle">Light-Dependent Input</text>
-  <path d="M160 115 L220 115" stroke="#7C3AED" stroke-width="3" stroke-dasharray="4 4" />
-  <polygon points="220,110 230,115 220,120" fill="#7C3AED" />
-  <rect x="230" y="60" width="160" height="110" rx="14" fill="#14B8A6" />
-  <text x="310" y="100" fill="#FFFFFF" font-size="13" font-family="Arial" font-weight="bold" text-anchor="middle">Chloroplast Thylakoids</text>
-  <text x="310" y="120" fill="#E0F2FE" font-size="10" font-family="Arial" text-anchor="middle">ATP + NADPH Synthesis</text>
-  <text x="310" y="140" fill="#042F2E" font-size="9" font-family="Arial" font-weight="bold" text-anchor="middle">Releases O₂ Byproduct</text>
-  <path d="M390 115 L440 115" stroke="#7C3AED" stroke-width="3" />
-  <polygon points="440,110 450,115 440,120" fill="#7C3AED" />
-  <rect x="450" y="80" width="130" height="70" rx="12" fill="#312E81" />
-  <text x="515" y="112" fill="#FFFFFF" font-size="12" font-family="Arial" font-weight="bold" text-anchor="middle">Glucose (C₆H₁₂O₆)</text>
-  <text x="515" y="130" fill="#CBD5E1" font-size="10" font-family="Arial" text-anchor="middle">Stroma Sugar Stored</text>
+  const theme = resolveDesignTheme(output.designOptions || activeStudioState.designOptions);
+  const d = output.diagramData || parseDiagramData(output.output, output);
+  const font = theme.fontFamily.replace(/['"]/g, '');
+
+  const svgData = `<svg viewBox="0 0 640 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="640" height="240" rx="16" fill="${theme.bgDark}" />
+  <!-- Node 1: Primary Input -->
+  <rect x="20" y="80" width="160" height="75" rx="12" fill="${theme.primary}" />
+  <text x="100" y="112" fill="#FFFFFF" font-size="12" font-family="${font}" font-weight="bold" text-anchor="middle">${escapeHtml(d.node1.title)}</text>
+  <text x="100" y="132" fill="${theme.mutedTextColor}" font-size="10" font-family="${font}" text-anchor="middle">${escapeHtml(d.node1.desc)}</text>
+
+  <!-- Arrow 1 to 2 -->
+  <path d="M180 117 L230 117" stroke="${theme.secondary}" stroke-width="3" stroke-dasharray="4 4" />
+  <polygon points="230,112 240,117 230,122" fill="${theme.secondary}" />
+
+  <!-- Node 2: Core Transformation -->
+  <rect x="240" y="60" width="170" height="115" rx="14" fill="${theme.secondary}" />
+  <text x="325" y="100" fill="#FFFFFF" font-size="13" font-family="${font}" font-weight="bold" text-anchor="middle">${escapeHtml(d.node2.title)}</text>
+  <text x="325" y="122" fill="#FFFFFF" font-size="10" font-family="${font}" text-anchor="middle">${escapeHtml(d.node2.desc)}</text>
+  <text x="325" y="144" fill="#0F172A" font-size="9" font-family="${font}" font-weight="bold" text-anchor="middle">${escapeHtml(d.node2.note || 'Active Mechanism')}</text>
+
+  <!-- Arrow 2 to 3 -->
+  <path d="M410 117 L460 117" stroke="${theme.secondary}" stroke-width="3" />
+  <polygon points="460,112 470,117 460,122" fill="${theme.secondary}" />
+
+  <!-- Node 3: Resultant Output -->
+  <rect x="470" y="80" width="150" height="75" rx="12" fill="${theme.primary}" />
+  <text x="545" y="112" fill="#FFFFFF" font-size="12" font-family="${font}" font-weight="bold" text-anchor="middle">${escapeHtml(d.node3.title)}</text>
+  <text x="545" y="132" fill="${theme.mutedTextColor}" font-size="10" font-family="${font}" text-anchor="middle">${escapeHtml(d.node3.desc)}</text>
 </svg>`;
 
   const blob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
@@ -3056,7 +3499,8 @@ function downloadSvgDiagram(output) {
 
 // Opens printable 2-sided flashcard sheets for cutting
 function openPrintableFlashcardsWindow(output) {
-  const cards = output.cards || [];
+  const cards = output.cards || parseFlashcards(output.output, output);
+  const theme = resolveDesignTheme(output.designOptions || activeStudioState.designOptions);
   const fWin = window.open('', '_blank');
   if (!fWin) return;
 
@@ -3067,34 +3511,35 @@ function openPrintableFlashcardsWindow(output) {
   <title>${escapeHtml(output.title)} — Printable Flashcards</title>
   <style>
     @page { size: letter portrait; margin: 1cm; }
-    body { font-family: 'Segoe UI', Arial, sans-serif; background: #FFF; color: #000; padding: 20px; }
+    body { font-family: ${theme.fontFamily}, 'Segoe UI', Arial, sans-serif; background: #FFF; color: #000; padding: 20px; }
     .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     .card-print { border: 2px dashed #94A3B8; padding: 20px; height: 180px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; page-break-inside: avoid; }
-    .term { font-size: 14pt; font-weight: bold; color: #312E81; }
+    .term { font-size: 13pt; font-weight: bold; color: ${theme.primary}; font-family: ${theme.fontFamily}; }
     .def { font-size: 10.5pt; color: #334155; line-height: 1.4; }
     .label { font-size: 8pt; font-family: monospace; color: #64748B; text-transform: uppercase; }
     @media print { .no-print { display: none; } }
   </style>
 </head>
 <body>
-  <div class="no-print" style="margin-bottom: 20px;">
-    <button onclick="window.print()" style="background:#312E81; color:white; padding:10px 20px; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">Print Cuttable Flashcards</button>
+  <div class="no-print" style="margin-bottom: 20px; display: flex; gap: 10px;">
+    <button onclick="window.print()" style="background:${theme.primary}; color:white; padding:10px 20px; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">Print Cuttable Flashcards</button>
+    <button onclick="window.close()" style="background:#E2E8F0; color:#334155; padding:10px 20px; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">Close</button>
   </div>
   <div style="text-align:center; margin-bottom: 20px;">
-    <h2>${escapeHtml(output.title)}</h2>
-    <p style="font-size:10pt; color:#64748B;">Print, fold or cut along dashed lines for classroom study rotations.</p>
+    <h2 style="color:${theme.primary}; font-family:${theme.fontFamily};">${escapeHtml(output.title)}</h2>
+    <p style="font-size:10pt; color:#64748B;">Print, fold or cut along dashed lines for classroom study rotations • Theme: ${escapeHtml(theme.name)}</p>
   </div>
   <div class="grid">
     ${cards.map((c, i) => `
       <div class="card-print">
         <span class="label">CARD ${i+1} • CONCEPT TERM</span>
         <div class="term">${escapeHtml(c.front)}</div>
-        <span class="label">PEDAIA Flashcard Series</span>
+        <span class="label">PEDAIA Flashcard Series • ${escapeHtml(output.subject || 'Studies')}</span>
       </div>
       <div class="card-print" style="background:#F8FAFC;">
         <span class="label">CARD ${i+1} • DEFINITION & ANSWER</span>
         <div class="def">${escapeHtml(c.back)}</div>
-        <span class="label">Reverse Side</span>
+        <span class="label">Reverse Side • ${escapeHtml(output.topic || '')}</span>
       </div>
     `).join('')}
   </div>
