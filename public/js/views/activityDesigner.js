@@ -178,14 +178,14 @@ export function renderActivityDesignerView() {
 
             <!-- Activity Type Selection Cards -->
             <div>
-              <label class="pedaia-label block text-slate-700 dark:text-slate-300 mb-1.5">Activity Methodology</label>
-              <div class="grid grid-cols-2 sm:grid-cols-3 gap-2" id="act-types-group">
+              <label class="pedaia-label block text-slate-700 dark:text-slate-300 mb-2">Activity Methodology</label>
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5" id="act-types-group">
                 ${ACTIVITY_TYPES.map(t => {
                   const isSelected = currentState.activityType === t.id;
                   return `
-                    <button type="button" data-val="${t.id}" class="act-type-card p-3 text-left rounded-xl border transition-all ${isSelected ? 'border-teal-600 bg-teal-50/70 dark:bg-teal-950/60 text-teal-950 dark:text-teal-200 ring-2 ring-teal-500 shadow-xs' : 'border-slate-200 dark:border-slate-750 bg-white dark:bg-slate-850 text-slate-700 dark:text-slate-200 hover:border-slate-300'}">
+                    <button type="button" data-val="${t.id}" class="act-type-card p-4 text-left rounded-xl border transition-all cursor-pointer shadow-2xs hover:shadow-xs hover:-translate-y-0.5 ${isSelected ? 'border-teal-600 bg-teal-50/70 dark:bg-teal-950/60 text-teal-950 dark:text-teal-200 ring-2 ring-teal-500 shadow-xs' : 'border-slate-200 dark:border-slate-750 bg-white dark:bg-slate-850 text-slate-700 dark:text-slate-200 hover:border-slate-300 dark:hover:border-slate-650'}">
                       <div class="text-xs font-bold">${t.name}</div>
-                      <div class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-2">${t.desc}</div>
+                      <div class="text-[11px] text-slate-500 dark:text-slate-400 mt-1 line-clamp-2 leading-relaxed">${t.desc}</div>
                     </button>
                   `;
                 }).join('')}
@@ -359,7 +359,7 @@ export function renderActivityDesignerView() {
         <!-- ================================================================= -->
         <!-- RIGHT PANEL: AI WORKSPACE (5 Distinct States) (5 Cols Sticky)      -->
         <!-- ================================================================= -->
-        <div class="lg:col-span-5 space-y-4 lg:sticky lg:top-20">
+        <div class="lg:col-span-5 space-y-5 lg:sticky lg:top-24">
           <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-2xs overflow-hidden flex flex-col transition-colors">
             
             <!-- Panel Header with State Pill -->
@@ -369,19 +369,19 @@ export function renderActivityDesignerView() {
               </div>
               
               <!-- Tab Switcher -->
-              <div class="flex items-center gap-1">
+              <div class="flex items-center gap-1.5 p-1 bg-slate-100/90 dark:bg-slate-800/90 rounded-xl border border-slate-200/80 dark:border-slate-700/80 shadow-2xs">
                 ${generatedOutput ? `
-                  <button id="act-tab-output-btn" class="px-2.5 py-1 text-xs font-semibold rounded-lg transition-colors ${workspaceState === 'output' || workspaceState === 'editing' ? 'bg-teal-600 text-white' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'}">
+                  <button id="act-tab-output-btn" class="px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors cursor-pointer ${workspaceState === 'output' || workspaceState === 'editing' ? 'bg-teal-600 text-white shadow-2xs' : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-white/60 dark:hover:bg-slate-700/60'}">
                     Output
                   </button>
-                  <button id="act-tab-preview-btn" class="px-2.5 py-1 text-xs font-semibold rounded-lg transition-colors ${workspaceState === 'preview' ? 'bg-teal-600 text-white' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'}">
+                  <button id="act-tab-preview-btn" class="px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors cursor-pointer ${workspaceState === 'preview' ? 'bg-teal-600 text-white shadow-2xs' : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-white/60 dark:hover:bg-slate-700/60'}">
                     Prompt
                   </button>
                 ` : `
-                  <button id="act-toggle-edit-prompt-btn" class="px-2.5 py-1 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white bg-white dark:bg-slate-850 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-50 transition-colors">
+                  <button id="act-toggle-edit-prompt-btn" class="px-3 py-1.5 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white bg-white dark:bg-slate-850 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-750 transition-colors cursor-pointer">
                     ${isPromptEditable ? 'Done Editing' : 'Edit Prompt'}
                   </button>
-                  <button id="act-copy-prompt-btn" class="px-2.5 py-1 text-xs font-semibold text-teal-700 dark:text-teal-400 hover:text-teal-900 bg-teal-50 dark:bg-teal-950/60 rounded-lg hover:bg-teal-100 transition-colors flex items-center gap-1">
+                  <button id="act-copy-prompt-btn" class="px-3 py-1.5 text-xs font-semibold text-teal-700 dark:text-teal-400 hover:text-teal-900 bg-teal-50 dark:bg-teal-950/60 rounded-lg hover:bg-teal-100 transition-colors flex items-center gap-1 cursor-pointer">
                     <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
                     </svg>

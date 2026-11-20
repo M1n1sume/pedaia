@@ -56,35 +56,35 @@ export function renderSettingsView() {
       </div>
 
       <!-- Settings Navigation Tabs -->
-      <div class="flex items-center gap-1.5 overflow-x-auto pb-1 border-b border-slate-200 dark:border-slate-800 text-xs">
-        <button class="settings-tab-nav px-3.5 py-2 rounded-xl font-bold whitespace-nowrap transition-all flex items-center gap-1.5 ${activeSettingsTab === 'general' ? 'bg-indigo-600 text-white shadow-2xs' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'}" data-tab="general">
+      <div class="flex items-center gap-2 overflow-x-auto p-1.5 rounded-2xl bg-slate-100/90 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 shadow-2xs text-xs scrollbar-none">
+        <button class="settings-tab-nav px-4 py-2.5 rounded-xl font-semibold whitespace-nowrap transition-all flex items-center gap-2 cursor-pointer ${activeSettingsTab === 'general' ? 'bg-indigo-600 text-white shadow-xs font-bold' : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-white/70 dark:hover:bg-slate-700/70'}" data-tab="general">
           <span>Account Profile</span>
           ${!store.isAuthenticated() ? '<span class="text-[11px] opacity-75" title="Requires Log In or Sign Up">🔒</span>' : ''}
         </button>
         ${isAdmin ? `
-          <button class="settings-tab-nav px-3.5 py-2 rounded-xl font-bold whitespace-nowrap transition-all ${activeSettingsTab === 'admin' ? 'bg-amber-600 text-white shadow-2xs' : 'text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/60'}" data-tab="admin">
+          <button class="settings-tab-nav px-4 py-2.5 rounded-xl font-semibold whitespace-nowrap transition-all cursor-pointer ${activeSettingsTab === 'admin' ? 'bg-amber-600 text-white shadow-xs font-bold' : 'text-amber-700 dark:text-amber-400 hover:bg-amber-100/70 dark:hover:bg-amber-950/70'}" data-tab="admin">
             👑 Admin Console
           </button>
         ` : ''}
-        <button class="settings-tab-nav px-3.5 py-2 rounded-xl font-bold whitespace-nowrap transition-all ${activeSettingsTab === 'ai-providers' ? 'bg-indigo-600 text-white shadow-2xs' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'}" data-tab="ai-providers">
+        <button class="settings-tab-nav px-4 py-2.5 rounded-xl font-semibold whitespace-nowrap transition-all cursor-pointer ${activeSettingsTab === 'ai-providers' ? 'bg-indigo-600 text-white shadow-xs font-bold' : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-white/70 dark:hover:bg-slate-700/70'}" data-tab="ai-providers">
           AI Providers & Models (15)
         </button>
-        <button class="settings-tab-nav px-3.5 py-2 rounded-xl font-bold whitespace-nowrap transition-all ${activeSettingsTab === 'lms' ? 'bg-indigo-600 text-white shadow-2xs' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'}" data-tab="lms">
+        <button class="settings-tab-nav px-4 py-2.5 rounded-xl font-semibold whitespace-nowrap transition-all cursor-pointer ${activeSettingsTab === 'lms' ? 'bg-indigo-600 text-white shadow-xs font-bold' : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-white/70 dark:hover:bg-slate-700/70'}" data-tab="lms">
           LMS & Classrooms
         </button>
-        <button class="settings-tab-nav px-3.5 py-2 rounded-xl font-bold whitespace-nowrap transition-all ${activeSettingsTab === 'prompt-preferences' ? 'bg-indigo-600 text-white shadow-2xs' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'}" data-tab="prompt-preferences">
+        <button class="settings-tab-nav px-4 py-2.5 rounded-xl font-semibold whitespace-nowrap transition-all cursor-pointer ${activeSettingsTab === 'prompt-preferences' ? 'bg-indigo-600 text-white shadow-xs font-bold' : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-white/70 dark:hover:bg-slate-700/70'}" data-tab="prompt-preferences">
           Prompt Preferences
         </button>
-        <button class="settings-tab-nav px-3.5 py-2 rounded-xl font-bold whitespace-nowrap transition-all ${activeSettingsTab === 'appearance' ? 'bg-indigo-600 text-white shadow-2xs' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'}" data-tab="appearance">
+        <button class="settings-tab-nav px-4 py-2.5 rounded-xl font-semibold whitespace-nowrap transition-all cursor-pointer ${activeSettingsTab === 'appearance' ? 'bg-indigo-600 text-white shadow-xs font-bold' : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-white/70 dark:hover:bg-slate-700/70'}" data-tab="appearance">
           Appearance & Brand System
         </button>
-        <button class="settings-tab-nav px-3.5 py-2 rounded-xl font-bold whitespace-nowrap transition-all ${activeSettingsTab === 'privacy' ? 'bg-indigo-600 text-white shadow-2xs' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'}" data-tab="privacy">
+        <button class="settings-tab-nav px-4 py-2.5 rounded-xl font-semibold whitespace-nowrap transition-all cursor-pointer ${activeSettingsTab === 'privacy' ? 'bg-indigo-600 text-white shadow-xs font-bold' : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-white/70 dark:hover:bg-slate-700/70'}" data-tab="privacy">
           Data & Privacy
         </button>
-        <button class="settings-tab-nav px-3.5 py-2 rounded-xl font-bold whitespace-nowrap transition-all ${activeSettingsTab === 'import-export' ? 'bg-indigo-600 text-white shadow-2xs' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'}" data-tab="import-export">
+        <button class="settings-tab-nav px-4 py-2.5 rounded-xl font-semibold whitespace-nowrap transition-all cursor-pointer ${activeSettingsTab === 'import-export' ? 'bg-indigo-600 text-white shadow-xs font-bold' : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-white/70 dark:hover:bg-slate-700/70'}" data-tab="import-export">
           Import & Export Backup
         </button>
-        <button class="settings-tab-nav px-3.5 py-2 rounded-xl font-bold whitespace-nowrap transition-all ${activeSettingsTab === 'extension' ? 'bg-indigo-600 text-white shadow-2xs' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'}" data-tab="extension">
+        <button class="settings-tab-nav px-4 py-2.5 rounded-xl font-semibold whitespace-nowrap transition-all cursor-pointer ${activeSettingsTab === 'extension' ? 'bg-indigo-600 text-white shadow-xs font-bold' : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-white/70 dark:hover:bg-slate-700/70'}" data-tab="extension">
           🧩 Browser Extension
         </button>
       </div>
@@ -201,30 +201,30 @@ function renderAiProvidersSettings({ activeProvider, activeProviderId, activeApi
           <label class="pedaia-label text-slate-700 dark:text-slate-300">Filter AI Engines by Category</label>
           <span class="text-[11px] text-slate-400">Click any card to activate and configure</span>
         </div>
-        <div class="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs" id="settings-category-tabs">
-          <button class="settings-cat-btn px-2.5 py-1 rounded-lg font-semibold whitespace-nowrap transition-colors ${settingsActiveCategory === 'all' ? 'bg-indigo-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}" data-category="all">
+        <div class="flex items-center gap-1.5 overflow-x-auto p-1.5 rounded-xl bg-slate-100/80 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 text-xs scrollbar-none" id="settings-category-tabs">
+          <button class="settings-cat-btn px-3 py-1.5 rounded-lg font-semibold whitespace-nowrap transition-colors cursor-pointer ${settingsActiveCategory === 'all' ? 'bg-indigo-600 text-white shadow-2xs font-bold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}" data-category="all">
             All (15)
           </button>
-          <button class="settings-cat-btn px-2.5 py-1 rounded-lg font-medium whitespace-nowrap transition-colors ${settingsActiveCategory === 'frontier' ? 'bg-indigo-600 text-white font-semibold' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}" data-category="frontier">
+          <button class="settings-cat-btn px-3 py-1.5 rounded-lg font-semibold whitespace-nowrap transition-colors cursor-pointer ${settingsActiveCategory === 'frontier' ? 'bg-indigo-600 text-white shadow-2xs font-bold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}" data-category="frontier">
             Frontier Labs (4)
           </button>
-          <button class="settings-cat-btn px-2.5 py-1 rounded-lg font-medium whitespace-nowrap transition-colors ${settingsActiveCategory === 'reasoning' ? 'bg-indigo-600 text-white font-semibold' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}" data-category="reasoning">
+          <button class="settings-cat-btn px-3 py-1.5 rounded-lg font-semibold whitespace-nowrap transition-colors cursor-pointer ${settingsActiveCategory === 'reasoning' ? 'bg-indigo-600 text-white shadow-2xs font-bold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}" data-category="reasoning">
             Reasoning & Search (2)
           </button>
-          <button class="settings-cat-btn px-2.5 py-1 rounded-lg font-medium whitespace-nowrap transition-colors ${settingsActiveCategory === 'fast' ? 'bg-indigo-600 text-white font-semibold' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}" data-category="fast">
+          <button class="settings-cat-btn px-3 py-1.5 rounded-lg font-semibold whitespace-nowrap transition-colors cursor-pointer ${settingsActiveCategory === 'fast' ? 'bg-indigo-600 text-white shadow-2xs font-bold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}" data-category="fast">
             Ultra-Fast LPUs (3)
           </button>
-          <button class="settings-cat-btn px-2.5 py-1 rounded-lg font-medium whitespace-nowrap transition-colors ${settingsActiveCategory === 'local' ? 'bg-indigo-600 text-white font-semibold' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}" data-category="local">
+          <button class="settings-cat-btn px-3 py-1.5 rounded-lg font-semibold whitespace-nowrap transition-colors cursor-pointer ${settingsActiveCategory === 'local' ? 'bg-indigo-600 text-white shadow-2xs font-bold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}" data-category="local">
             100% Free & Local (2)
           </button>
-          <button class="settings-cat-btn px-2.5 py-1 rounded-lg font-medium whitespace-nowrap transition-colors ${settingsActiveCategory === 'aggregator' ? 'bg-indigo-600 text-white font-semibold' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}" data-category="aggregator">
+          <button class="settings-cat-btn px-3 py-1.5 rounded-lg font-semibold whitespace-nowrap transition-colors cursor-pointer ${settingsActiveCategory === 'aggregator' ? 'bg-indigo-600 text-white shadow-2xs font-bold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}" data-category="aggregator">
             Aggregators (4)
           </button>
         </div>
       </div>
 
       <!-- 15 Provider Selection Grid -->
-      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5" id="provider-cards-grid">
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-3.5 sm:gap-4" id="provider-cards-grid">
         ${Object.values(AI_PROVIDERS).map(p => {
           const isSelected = p.id === activeProviderId;
           const hasCustom = aiService.hasCustomKey(p.id);
@@ -240,18 +240,18 @@ function renderAiProvidersSettings({ activeProvider, activeProviderId, activeApi
           }
 
           return `
-            <button type="button" class="provider-select-card p-3 rounded-xl border text-left transition-all flex flex-col justify-between ${isSelected ? 'border-indigo-600 bg-indigo-50/70 dark:bg-indigo-950/50 ring-2 ring-indigo-500' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/80 hover:border-slate-300'} ${matchesCat ? '' : 'hidden'}" data-provider-id="${p.id}" data-category="${p.category}">
-              <div class="flex items-center justify-between w-full mb-2">
-                <div class="w-7 h-7 rounded-lg flex items-center justify-center ${p.accentClass} text-white shadow-2xs">
+            <button type="button" class="provider-select-card p-4 rounded-2xl border text-left transition-all flex flex-col justify-between cursor-pointer shadow-2xs hover:shadow-xs hover:-translate-y-0.5 ${isSelected ? 'border-indigo-600 bg-indigo-50/70 dark:bg-indigo-950/50 ring-2 ring-indigo-500' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/80 hover:border-slate-300 dark:hover:border-slate-600'} ${matchesCat ? '' : 'hidden'}" data-provider-id="${p.id}" data-category="${p.category}">
+              <div class="flex items-center justify-between w-full mb-3">
+                <div class="w-8 h-8 rounded-xl flex items-center justify-center ${p.accentClass} text-white shadow-2xs">
                   ${getProviderIcon(p.id, 'w-4 h-4')}
                 </div>
                 ${statusIndicator}
               </div>
               <div>
-                <div class="text-xs font-bold text-slate-900 dark:text-white truncate">
+                <div class="text-xs sm:text-sm font-bold text-slate-900 dark:text-white truncate">
                   ${p.name}
                 </div>
-                <div class="text-[10px] text-slate-500 dark:text-slate-400 truncate mt-0.5">${p.company}</div>
+                <div class="text-[11px] text-slate-500 dark:text-slate-400 truncate mt-0.5">${p.company}</div>
               </div>
             </button>
           `;

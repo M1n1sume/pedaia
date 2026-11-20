@@ -136,12 +136,12 @@ export function renderQuestioningStudioView() {
       </div>
 
       <!-- Main Two-Column Layout -->
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
         
         <!-- ================================================================= -->
         <!-- LEFT PANEL: QUESTION BUILDER (7 Cols)                             -->
         <!-- ================================================================= -->
-        <div class="lg:col-span-7 space-y-5">
+        <div class="lg:col-span-7 space-y-6">
           
           <!-- Shared Context Form -->
           ${renderGlobalContextForm(currentState, 'q')}
@@ -194,11 +194,11 @@ export function renderQuestioningStudioView() {
               </div>
 
               <!-- 6 Bloom Level Sliders / Numerical Steppers -->
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="q-blooms-inputs-container">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4" id="q-blooms-inputs-container">
                 ${BLOOM_LEVELS.map(lvl => {
                   const count = dist[lvl.id] !== undefined ? dist[lvl.id] : 1;
                   return `
-                    <div class="p-3 rounded-xl border ${lvl.color} bg-slate-50/60 dark:bg-slate-850/60 flex items-center justify-between gap-3 shadow-2xs">
+                    <div class="p-3.5 sm:p-4 rounded-xl border ${lvl.color} bg-slate-50/60 dark:bg-slate-850/60 flex items-center justify-between gap-3 shadow-2xs">
                       <div class="min-w-0">
                         <div class="text-xs font-bold text-slate-900 dark:text-white">${lvl.label}</div>
                         <div class="text-[11px] text-slate-500 dark:text-slate-400 truncate">${lvl.desc}</div>
@@ -309,20 +309,20 @@ export function renderQuestioningStudioView() {
                 ${getWorkspaceStateBadge(workspaceState)}
               </div>
               
-              <!-- Tab Switcher -->
-              <div class="flex items-center gap-1">
+              <!-- Tab Switcher (Segmented Capsule with Breathing Room) -->
+              <div class="flex items-center p-1 bg-slate-100/90 dark:bg-slate-800/90 rounded-xl border border-slate-200/80 dark:border-slate-700/80 shadow-2xs gap-1">
                 ${generatedOutput ? `
-                  <button id="q-tab-output-btn" class="px-2.5 py-1 text-xs font-semibold rounded-lg transition-colors ${workspaceState === 'output' || workspaceState === 'editing' ? 'bg-amber-600 text-white' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'}">
+                  <button id="q-tab-output-btn" class="px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${workspaceState === 'output' || workspaceState === 'editing' ? 'bg-amber-600 text-white shadow-2xs' : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-white/60 dark:hover:bg-slate-700/60'}">
                     Output
                   </button>
-                  <button id="q-tab-preview-btn" class="px-2.5 py-1 text-xs font-semibold rounded-lg transition-colors ${workspaceState === 'preview' ? 'bg-amber-600 text-white' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'}">
+                  <button id="q-tab-preview-btn" class="px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${workspaceState === 'preview' ? 'bg-amber-600 text-white shadow-2xs' : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-white/60 dark:hover:bg-slate-700/60'}">
                     Prompt
                   </button>
                 ` : `
-                  <button id="q-toggle-edit-prompt-btn" class="px-2.5 py-1 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-50 transition-colors">
+                  <button id="q-toggle-edit-prompt-btn" class="px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white bg-white dark:bg-slate-750 border border-slate-200/80 dark:border-slate-700 rounded-lg shadow-2xs hover:bg-slate-50 transition-all">
                     ${isPromptEditable ? 'Done Editing' : 'Edit Prompt'}
                   </button>
-                  <button id="q-copy-prompt-btn" class="px-2.5 py-1 text-xs font-semibold text-amber-700 dark:text-amber-400 hover:text-amber-900 bg-amber-50 dark:bg-amber-950/60 rounded-lg hover:bg-amber-100 transition-colors flex items-center gap-1">
+                  <button id="q-copy-prompt-btn" class="px-3 py-1.5 text-xs font-semibold text-amber-700 dark:text-amber-400 hover:text-amber-900 bg-amber-50 dark:bg-amber-950/60 rounded-lg hover:bg-amber-100 transition-all flex items-center gap-1.5">
                     <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
                     </svg>

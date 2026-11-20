@@ -25,25 +25,25 @@ export function renderDashboardView() {
       <!-- USER AUTHENTICATION & ACCESS BARRIER / BANNER                       -->
       <!-- =================================================================== -->
       ${!isAuthenticated ? `
-        <div class="p-4 rounded-2xl bg-indigo-50/80 dark:bg-indigo-950/40 border border-indigo-200/80 dark:border-indigo-800/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-2xs">
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold text-sm shrink-0">
+        <div class="p-5 sm:p-6 rounded-2xl bg-indigo-50/80 dark:bg-indigo-950/40 border border-indigo-200/80 dark:border-indigo-800/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-6 shadow-2xs">
+          <div class="flex items-center gap-3.5">
+            <div class="w-11 h-11 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold text-base shrink-0 shadow-xs">
               🔐
             </div>
             <div>
-              <div class="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <div class="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
                 <span>Account Access & Security</span>
               </div>
-              <p class="text-[11.5px] text-slate-600 dark:text-slate-400 mt-0.5">
+              <p class="text-xs text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">
                 Create an account or log in to save your personal pedagogical folios, AI outputs, and studio materials.
               </p>
             </div>
           </div>
-          <div class="flex items-center gap-2 shrink-0 w-full sm:w-auto">
-            <button id="dashboard-login-btn" class="flex-1 sm:flex-none px-3.5 py-1.5 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-750 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 text-xs font-semibold shadow-2xs transition-all cursor-pointer">
+          <div class="flex items-center gap-2.5 shrink-0 w-full sm:w-auto">
+            <button id="dashboard-login-btn" class="flex-1 sm:flex-none px-4 py-2 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-750 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 text-xs font-semibold shadow-2xs transition-all cursor-pointer">
               Log In
             </button>
-            <button id="dashboard-signup-btn" class="flex-1 sm:flex-none px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-2xs transition-all cursor-pointer">
+            <button id="dashboard-signup-btn" class="flex-1 sm:flex-none px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-xs hover:shadow-indigo-500/25 active:scale-95 transition-all cursor-pointer">
               Create Account
             </button>
           </div>
@@ -70,7 +70,7 @@ export function renderDashboardView() {
       <!-- =================================================================== -->
       <!-- 1. CREATE INSTRUCTIONAL DESIGN (Primary Hero & Quick-Start Hub)     -->
       <!-- =================================================================== -->
-      <section class="relative overflow-hidden rounded-2xl bg-white dark:bg-slate-850 border border-slate-200/90 dark:border-slate-750 p-6 sm:p-8 shadow-sm transition-colors">
+      <section class="relative overflow-hidden rounded-2xl bg-white dark:bg-slate-850 border border-slate-200/90 dark:border-slate-750 p-6 sm:p-8 lg:p-10 shadow-sm transition-colors">
         
         <!-- Subtle Scholarly Background Texture -->
         <div class="absolute right-6 -bottom-6 opacity-[0.03] dark:opacity-[0.06] pointer-events-none select-none hidden lg:block">
@@ -79,7 +79,7 @@ export function renderDashboardView() {
           </svg>
         </div>
 
-        <div class="relative z-10 max-w-4xl">
+        <div class="relative z-10 w-full">
           <div class="flex items-center gap-2 mb-3">
             <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-50 dark:bg-indigo-950/80 border border-indigo-200/70 dark:border-indigo-800/60 text-indigo-700 dark:text-indigo-300 text-xs font-semibold">
               <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -88,78 +88,103 @@ export function renderDashboardView() {
             <span class="text-xs text-slate-500 dark:text-slate-400 font-medium">Standards-Aligned • Multi-Engine AI Gateway</span>
           </div>
 
-          <h1 class="text-2xl sm:text-3xl font-bold font-scholarly text-slate-900 dark:text-white tracking-tight leading-snug mb-2">
+          <h1 class="text-2xl sm:text-3xl lg:text-4xl font-bold font-scholarly text-slate-900 dark:text-white tracking-tight leading-snug mb-3">
             Create Purpose-Driven Instructional Designs
           </h1>
 
-          <p class="text-sm sm:text-base text-slate-600 dark:text-slate-300 font-normal leading-relaxed mb-6 max-w-3xl">
+          <p class="text-sm sm:text-base text-slate-600 dark:text-slate-300 font-normal leading-relaxed mb-6 max-w-4xl">
             Translate pedagogical goals into publication-ready lesson plans, active learning experiences, Bloom's cognitive question banks, and Tomlinson-model differentiation tiers.
           </p>
 
           <!-- Create Quick-Launch Studio Buttons -->
           <div>
-            <div class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2.5">
+            <div class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-3">
               Launch Instructional Studio:
             </div>
-            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5">
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-3.5 sm:gap-4">
               
-              <button id="quick-launch-lp-btn" class="flex flex-col items-start p-3 rounded-xl bg-indigo-50/80 dark:bg-indigo-950/50 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 border border-indigo-200/80 dark:border-indigo-800/80 text-left transition-all group">
-                <div class="flex items-center gap-2 mb-1">
-                  <span class="text-lg">📖</span>
-                  <span class="text-xs font-bold text-indigo-900 dark:text-indigo-200 group-hover:text-indigo-700 dark:group-hover:text-white">Lesson Planner</span>
+              <button id="quick-launch-lp-btn" class="flex flex-col items-start p-4 sm:p-5 rounded-2xl bg-indigo-50/80 dark:bg-indigo-950/50 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 border border-indigo-200/80 dark:border-indigo-800/80 text-left transition-all group shadow-2xs hover:shadow-xs hover:-translate-y-0.5 cursor-pointer">
+                <div class="w-10 h-10 rounded-xl bg-white dark:bg-indigo-900/60 border border-indigo-200/80 dark:border-indigo-800 flex items-center justify-center text-xl mb-3 shadow-2xs group-hover:scale-105 transition-transform">
+                  📖
                 </div>
-                <span class="text-[11.5px] text-slate-600 dark:text-slate-400 leading-tight">5E, UbD, 4A's, Direct</span>
+                <span class="text-sm font-bold text-indigo-950 dark:text-indigo-200 group-hover:text-indigo-700 dark:group-hover:text-white transition-colors">Lesson Planner</span>
+                <span class="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">5E, UbD, 4A's, Direct</span>
+                <div class="mt-3.5 pt-2.5 border-t border-indigo-100 dark:border-indigo-900/60 w-full flex items-center justify-between text-[11px] font-semibold text-indigo-600 dark:text-indigo-400">
+                  <span>Open Studio</span>
+                  <span class="group-hover:translate-x-0.5 transition-transform">→</span>
+                </div>
               </button>
 
-              <button id="quick-launch-act-btn" class="flex flex-col items-start p-3 rounded-xl bg-teal-50/80 dark:bg-teal-950/50 hover:bg-teal-100 dark:hover:bg-teal-900/60 border border-teal-200/80 dark:border-teal-800/80 text-left transition-all group">
-                <div class="flex items-center gap-2 mb-1">
-                  <span class="text-lg">🔬</span>
-                  <span class="text-xs font-bold text-teal-900 dark:text-teal-200 group-hover:text-teal-700 dark:group-hover:text-white">Activity Designer</span>
+              <button id="quick-launch-act-btn" class="flex flex-col items-start p-4 sm:p-5 rounded-2xl bg-teal-50/80 dark:bg-teal-950/50 hover:bg-teal-100 dark:hover:bg-teal-900/60 border border-teal-200/80 dark:border-teal-800/80 text-left transition-all group shadow-2xs hover:shadow-xs hover:-translate-y-0.5 cursor-pointer">
+                <div class="w-10 h-10 rounded-xl bg-white dark:bg-teal-900/60 border border-teal-200/80 dark:border-teal-800 flex items-center justify-center text-xl mb-3 shadow-2xs group-hover:scale-105 transition-transform">
+                  🔬
                 </div>
-                <span class="text-[11.5px] text-slate-600 dark:text-slate-400 leading-tight">Labs, Socratic, Sims</span>
+                <span class="text-sm font-bold text-teal-950 dark:text-teal-200 group-hover:text-teal-700 dark:group-hover:text-white transition-colors">Activity Designer</span>
+                <span class="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">Labs, Socratic, Sims</span>
+                <div class="mt-3.5 pt-2.5 border-t border-teal-100 dark:border-teal-900/60 w-full flex items-center justify-between text-[11px] font-semibold text-teal-600 dark:text-teal-400">
+                  <span>Open Studio</span>
+                  <span class="group-hover:translate-x-0.5 transition-transform">→</span>
+                </div>
               </button>
 
-              <button id="quick-launch-quest-btn" class="flex flex-col items-start p-3 rounded-xl bg-amber-50/80 dark:bg-amber-950/50 hover:bg-amber-100 dark:hover:bg-amber-900/60 border border-amber-200/80 dark:border-amber-800/80 text-left transition-all group">
-                <div class="flex items-center gap-2 mb-1">
-                  <span class="text-lg">💡</span>
-                  <span class="text-xs font-bold text-amber-900 dark:text-amber-200 group-hover:text-amber-700 dark:group-hover:text-white">Question Studio</span>
+              <button id="quick-launch-quest-btn" class="flex flex-col items-start p-4 sm:p-5 rounded-2xl bg-amber-50/80 dark:bg-amber-950/50 hover:bg-amber-100 dark:hover:bg-amber-900/60 border border-amber-200/80 dark:border-amber-800/80 text-left transition-all group shadow-2xs hover:shadow-xs hover:-translate-y-0.5 cursor-pointer">
+                <div class="w-10 h-10 rounded-xl bg-white dark:bg-amber-900/60 border border-amber-200/80 dark:border-amber-800 flex items-center justify-center text-xl mb-3 shadow-2xs group-hover:scale-105 transition-transform">
+                  💡
                 </div>
-                <span class="text-[11.5px] text-slate-600 dark:text-slate-400 leading-tight">Bloom's Matrix & Distractors</span>
+                <span class="text-sm font-bold text-amber-950 dark:text-amber-200 group-hover:text-amber-700 dark:group-hover:text-white transition-colors">Question Studio</span>
+                <span class="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">Bloom's Matrix & Distractors</span>
+                <div class="mt-3.5 pt-2.5 border-t border-amber-100 dark:border-amber-900/60 w-full flex items-center justify-between text-[11px] font-semibold text-amber-600 dark:text-amber-400">
+                  <span>Open Studio</span>
+                  <span class="group-hover:translate-x-0.5 transition-transform">→</span>
+                </div>
               </button>
 
-              <button id="quick-launch-diff-btn" class="flex flex-col items-start p-3 rounded-xl bg-purple-50/80 dark:bg-purple-950/50 hover:bg-purple-100 dark:hover:bg-purple-900/60 border border-purple-200/80 dark:border-purple-800/80 text-left transition-all group">
-                <div class="flex items-center gap-2 mb-1">
-                  <span class="text-lg">⚖️</span>
-                  <span class="text-xs font-bold text-purple-900 dark:text-purple-200 group-hover:text-purple-700 dark:group-hover:text-white">Differentiation</span>
+              <button id="quick-launch-diff-btn" class="flex flex-col items-start p-4 sm:p-5 rounded-2xl bg-purple-50/80 dark:bg-purple-950/50 hover:bg-purple-100 dark:hover:bg-purple-900/60 border border-purple-200/80 dark:border-purple-800/80 text-left transition-all group shadow-2xs hover:shadow-xs hover:-translate-y-0.5 cursor-pointer">
+                <div class="w-10 h-10 rounded-xl bg-white dark:bg-purple-900/60 border border-purple-200/80 dark:border-purple-800 flex items-center justify-center text-xl mb-3 shadow-2xs group-hover:scale-105 transition-transform">
+                  ⚖️
                 </div>
-                <span class="text-[11.5px] text-slate-600 dark:text-slate-400 leading-tight">Tiered Scaffolding & ELL</span>
+                <span class="text-sm font-bold text-purple-950 dark:text-purple-200 group-hover:text-purple-700 dark:group-hover:text-white transition-colors">Differentiation</span>
+                <span class="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">Tiered Scaffolding & ELL</span>
+                <div class="mt-3.5 pt-2.5 border-t border-purple-100 dark:border-purple-900/60 w-full flex items-center justify-between text-[11px] font-semibold text-purple-600 dark:text-purple-400">
+                  <span>Open Studio</span>
+                  <span class="group-hover:translate-x-0.5 transition-transform">→</span>
+                </div>
               </button>
 
-              <button id="quick-launch-output-btn" class="flex flex-col items-start p-3 rounded-xl bg-violet-50/80 dark:bg-violet-950/50 hover:bg-violet-100 dark:hover:bg-violet-900/60 border border-violet-200/80 dark:border-violet-800/80 text-left transition-all group">
-                <div class="flex items-center gap-1.5 mb-1 w-full">
-                  <span class="text-lg">🎨</span>
-                  <span class="text-xs font-bold text-violet-900 dark:text-violet-200 group-hover:text-violet-700 dark:group-hover:text-white">AI Output Studio</span>
-                  <span class="ml-auto px-1.5 py-0.2 rounded-full text-[9px] font-mono font-bold bg-indigo-600 text-white uppercase">New</span>
+              <button id="quick-launch-output-btn" class="flex flex-col items-start p-4 sm:p-5 rounded-2xl bg-violet-50/80 dark:bg-violet-950/50 hover:bg-violet-100 dark:hover:bg-violet-900/60 border border-violet-200/80 dark:border-violet-800/80 text-left transition-all group shadow-2xs hover:shadow-xs hover:-translate-y-0.5 cursor-pointer">
+                <div class="w-10 h-10 rounded-xl bg-white dark:bg-violet-900/60 border border-violet-200/80 dark:border-violet-800 flex items-center justify-center text-xl mb-3 shadow-2xs group-hover:scale-105 transition-transform">
+                  🎨
                 </div>
-                <span class="text-[11.5px] text-slate-600 dark:text-slate-400 leading-tight">Slides, Posters, Cards</span>
+                <div class="flex items-center gap-1.5 w-full">
+                  <span class="text-sm font-bold text-violet-950 dark:text-violet-200 group-hover:text-violet-700 dark:group-hover:text-white transition-colors">AI Output Studio</span>
+                  <span class="ml-auto px-1.5 py-0.5 rounded-full text-[9px] font-mono font-bold bg-indigo-600 text-white uppercase shadow-2xs">New</span>
+                </div>
+                <span class="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">Slides, Posters, Cards</span>
+                <div class="mt-3.5 pt-2.5 border-t border-violet-100 dark:border-violet-900/60 w-full flex items-center justify-between text-[11px] font-semibold text-violet-600 dark:text-violet-400">
+                  <span>Open Studio</span>
+                  <span class="group-hover:translate-x-0.5 transition-transform">→</span>
+                </div>
               </button>
 
             </div>
 
             <!-- Dedicated Output Studio Hero Callout -->
-            <div class="mt-3.5 p-3.5 rounded-xl bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-950/80 dark:to-purple-950/80 border border-indigo-200/80 dark:border-indigo-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div class="flex items-center gap-2.5">
-                <span class="text-2xl">🎨</span>
+            <div class="mt-5 p-5 sm:p-6 rounded-2xl bg-gradient-to-r from-indigo-50/90 via-purple-50/80 to-violet-50/90 dark:from-indigo-950/80 dark:via-purple-950/70 dark:to-violet-950/80 border border-indigo-200/80 dark:border-indigo-800 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-2xs">
+              <div class="flex items-center gap-3.5">
+                <div class="w-12 h-12 rounded-xl bg-white dark:bg-violet-900/50 border border-violet-200/70 dark:border-violet-800 flex items-center justify-center text-2xl shadow-2xs shrink-0">
+                  🎨
+                </div>
                 <div>
-                  <div class="flex items-center gap-2">
-                    <span class="text-xs font-bold text-indigo-950 dark:text-white">AI Output Studio</span>
-                    <span class="px-1.5 py-0.2 rounded-full text-[9px] font-mono font-bold bg-indigo-600 text-white uppercase">Dedicated</span>
+                  <div class="flex items-center gap-2 mb-0.5">
+                    <span class="text-sm font-bold text-indigo-950 dark:text-white">AI Output Studio</span>
+                    <span class="px-2 py-0.5 rounded-full text-[9px] font-mono font-bold bg-indigo-600 text-white uppercase tracking-wider">Dedicated</span>
                   </div>
-                  <span class="text-[11.5px] text-slate-600 dark:text-slate-300">Generate PowerPoint presentations, classroom posters, worksheets, flashcards & diagrams</span>
+                  <span class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">Generate PowerPoint presentations, classroom posters, worksheets, flashcards & diagrams</span>
                 </div>
               </div>
-              <button data-action="nav" data-dest="ai-output-studio" class="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white transition-colors shrink-0 shadow-2xs flex items-center gap-1.5">
-                <span>Launch Output Studio →</span>
+              <button data-action="nav" data-dest="ai-output-studio" class="px-4 py-2 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white transition-all shrink-0 shadow-xs hover:shadow-indigo-500/25 active:scale-95 flex items-center gap-2 cursor-pointer self-start md:self-auto">
+                <span>Launch Output Studio</span>
+                <span>→</span>
               </button>
             </div>
           </div>
@@ -172,7 +197,7 @@ export function renderDashboardView() {
       <!-- 2. CONTINUE WORKING (Active / In-Progress Design)                   -->
       <!-- =================================================================== -->
       ${mostRecentDesign ? `
-        <section class="rounded-2xl bg-white dark:bg-slate-850 border border-slate-200/90 dark:border-slate-750 p-6 shadow-sm transition-colors">
+        <section class="rounded-2xl bg-white dark:bg-slate-850 border border-slate-200/90 dark:border-slate-750 p-6 sm:p-8 shadow-sm transition-colors">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800 gap-3">
             <div class="flex items-center gap-2.5">
               <div class="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold text-sm">
@@ -192,7 +217,7 @@ export function renderDashboardView() {
           </div>
 
           <div class="pt-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div class="space-y-1.5 max-w-2xl">
+            <div class="space-y-1.5 max-w-3xl">
               <div class="flex items-center gap-2 flex-wrap">
                 <span class="text-xs font-bold px-2.5 py-0.5 rounded-full border ${getCategoryPillStyle(mostRecentDesign.category)}">
                   ${escapeHtml(mostRecentDesign.categoryLabel || mostRecentDesign.category)}
@@ -236,11 +261,11 @@ export function renderDashboardView() {
           </div>
         </section>
       ` : `
-        <section class="rounded-2xl bg-white dark:bg-slate-850 border border-slate-200/90 dark:border-slate-750 p-6 shadow-sm text-center">
-          <div class="max-w-md mx-auto space-y-2 py-4">
-            <span class="text-3xl">📝</span>
-            <h3 class="text-base font-bold text-slate-800 dark:text-white">Start Your First Curriculum Dossier</h3>
-            <p class="text-xs text-slate-500 dark:text-slate-400">Choose one of the specialized instructional studios above to generate your first standards-aligned plan.</p>
+        <section class="rounded-2xl bg-white dark:bg-slate-850 border border-slate-200/90 dark:border-slate-750 p-8 sm:p-12 shadow-sm text-center">
+          <div class="max-w-xl mx-auto space-y-3 py-6 sm:py-8">
+            <span class="text-4xl">📝</span>
+            <h3 class="text-lg font-bold text-slate-800 dark:text-white">Start Your First Curriculum Dossier</h3>
+            <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 leading-relaxed">Choose one of the specialized instructional studios above to generate your first standards-aligned plan.</p>
           </div>
         </section>
       `}
@@ -248,13 +273,13 @@ export function renderDashboardView() {
       <!-- =================================================================== -->
       <!-- 3. RECENT CURRICULAR DESIGNS (Dossiers List with Real Status)       -->
       <!-- =================================================================== -->
-      <section class="rounded-2xl bg-white dark:bg-slate-850 border border-slate-200/90 dark:border-slate-750 p-6 shadow-sm transition-colors">
-        <div class="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
+      <section class="rounded-2xl bg-white dark:bg-slate-850 border border-slate-200/90 dark:border-slate-750 p-6 sm:p-8 shadow-sm transition-colors">
+        <div class="flex items-center justify-between pb-5 border-b border-slate-100 dark:border-slate-800">
           <div>
-            <h2 class="text-base font-bold font-scholarly text-slate-900 dark:text-white">Recent Curricular Dossiers</h2>
-            <p class="text-xs text-slate-500 dark:text-slate-400">Your instructional designs with verified application lifecycle states</p>
+            <h2 class="text-base sm:text-lg font-bold font-scholarly text-slate-900 dark:text-white">Recent Curricular Dossiers</h2>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Your instructional designs with verified application lifecycle states</p>
           </div>
-          <button id="view-all-designs-btn" class="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1">
+          <button id="view-all-designs-btn" class="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:bg-indigo-50 dark:hover:bg-indigo-950/60 transition-colors">
             <span>View All (${designs.length})</span>
             <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
           </button>
@@ -262,20 +287,20 @@ export function renderDashboardView() {
 
         <div class="divide-y divide-slate-100 dark:divide-slate-800">
           ${recentDesigns.length === 0 ? `
-            <div class="py-10 text-center">
-              <div class="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 dark:text-slate-500 mx-auto mb-2.5">
-                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div class="py-12 text-center">
+              <div class="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 dark:text-slate-500 mx-auto mb-3 shadow-2xs">
+                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
               </div>
-              <p class="text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">No Instructional Designs Yet</p>
-              <p class="text-[11.5px] text-slate-500 dark:text-slate-400">Launch any studio above to design and save your first curriculum artifact.</p>
+              <p class="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">No Instructional Designs Yet</p>
+              <p class="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto">Launch any studio above to design and save your first curriculum artifact.</p>
             </div>
           ` : recentDesigns.map(d => `
-            <div class="py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 group">
+            <div class="py-4 sm:py-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 group">
               <div class="min-w-0 flex-1">
-                <div class="flex items-center gap-2 mb-1 flex-wrap">
-                  <span class="text-[11px] font-bold px-2 py-0.5 rounded-full border ${getCategoryPillStyle(d.category)}">
+                <div class="flex items-center gap-2 mb-1.5 flex-wrap">
+                  <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${getCategoryPillStyle(d.category)}">
                     ${escapeHtml(d.categoryLabel || d.category)}
                   </span>
                   ${renderStatusPill(d.status, d.rubricScore)}
@@ -283,7 +308,7 @@ export function renderDashboardView() {
                   <span class="text-xs text-slate-500 dark:text-slate-400">• ${escapeHtml(d.subject || 'General')}</span>
                   <span class="text-xs text-slate-500 dark:text-slate-400">• ${escapeHtml(d.educationalLevel || '')}</span>
                 </div>
-                <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100 truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors cursor-pointer recent-design-title" data-design-id="${d.id}">
+                <h3 class="text-sm sm:text-base font-bold text-slate-900 dark:text-slate-100 truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors cursor-pointer recent-design-title" data-design-id="${d.id}">
                   ${escapeHtml(d.title)}
                 </h3>
               </div>
@@ -293,12 +318,12 @@ export function renderDashboardView() {
                   ${formatDate(d.updatedAt || d.createdAt)}
                 </span>
                 
-                <button class="open-workspace-btn px-3 py-1.5 text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/60 rounded-lg transition-colors border border-indigo-200 dark:border-indigo-800/60 flex items-center gap-1" data-design-id="${d.id}">
+                <button class="open-workspace-btn px-3.5 py-2 text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/60 rounded-xl transition-colors border border-indigo-200 dark:border-indigo-800/60 flex items-center gap-1.5 shadow-2xs" data-design-id="${d.id}">
                   <span>Open</span>
                   <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                 </button>
 
-                <button class="quick-export-btn p-1.5 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" data-design-id="${d.id}" title="Export">
+                <button class="quick-export-btn p-2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors border border-slate-200/60 dark:border-slate-700/60" data-design-id="${d.id}" title="Export">
                   <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
                 </button>
               </div>

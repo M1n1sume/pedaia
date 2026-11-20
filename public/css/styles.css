@@ -284,9 +284,34 @@ html.dark body, body.dark {
   transition: max-width 0.2s ease, margin 0.2s ease, padding 0.2s ease;
 }
 
-/* Default & Left-aligned: Content anchored cleanly to the left */
-html[data-resolved-layout="left"] #main-content,
-html:not([data-resolved-layout="centered"]) #main-content {
+/* Auto / Balanced Layout: Cleanly centered with responsive max-width */
+html[data-resolved-layout="auto"] #main-content,
+html:not([data-resolved-layout="left"]):not([data-resolved-layout="compact"]):not([data-resolved-layout="centered"]) #main-content {
+  max-width: 1720px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  padding-left: 1rem !important;
+  padding-right: 1rem !important;
+}
+
+@media (min-width: 640px) {
+  html[data-resolved-layout="auto"] #main-content,
+  html:not([data-resolved-layout="left"]):not([data-resolved-layout="compact"]):not([data-resolved-layout="centered"]) #main-content {
+    padding-left: 1.5rem !important;
+    padding-right: 1.5rem !important;
+  }
+}
+
+@media (min-width: 1024px) {
+  html[data-resolved-layout="auto"] #main-content,
+  html:not([data-resolved-layout="left"]):not([data-resolved-layout="compact"]):not([data-resolved-layout="centered"]) #main-content {
+    padding-left: 2rem !important;
+    padding-right: 2rem !important;
+  }
+}
+
+/* Explicit Left-aligned: Content anchored to the left */
+html[data-resolved-layout="left"] #main-content {
   max-width: 1720px !important;
   margin-left: 0.75rem !important;
   margin-right: auto !important;
@@ -295,8 +320,7 @@ html:not([data-resolved-layout="centered"]) #main-content {
 }
 
 @media (min-width: 640px) {
-  html[data-resolved-layout="left"] #main-content,
-  html:not([data-resolved-layout="centered"]) #main-content {
+  html[data-resolved-layout="left"] #main-content {
     margin-left: 1.25rem !important;
     padding-left: 1.25rem !important;
     padding-right: 2rem !important;
@@ -304,8 +328,7 @@ html:not([data-resolved-layout="centered"]) #main-content {
 }
 
 @media (min-width: 1024px) {
-  html[data-resolved-layout="left"] #main-content,
-  html:not([data-resolved-layout="centered"]) #main-content {
+  html[data-resolved-layout="left"] #main-content {
     margin-left: 2rem !important;
     padding-left: 1.5rem !important;
     padding-right: 2.5rem !important;
@@ -315,10 +338,10 @@ html:not([data-resolved-layout="centered"]) #main-content {
 /* Compact layout for laptop / scaled screens */
 html[data-resolved-layout="compact"] #main-content {
   max-width: 1540px !important;
-  margin-left: 0.5rem !important;
+  margin-left: auto !important;
   margin-right: auto !important;
-  padding-left: 0.75rem !important;
-  padding-right: 1.25rem !important;
+  padding-left: 1rem !important;
+  padding-right: 1rem !important;
 }
 
 /* Centered layout mode (when explicitly requested) */

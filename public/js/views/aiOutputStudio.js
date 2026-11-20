@@ -630,14 +630,14 @@ export function renderAiOutputStudioView() {
             <span>+ Create New Output</span>
           </button>
 
-          <div class="flex items-center p-1 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shrink-0">
-            <button id="mode-creator-btn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${!isLibrary && !isTemplates ? 'bg-indigo-600 text-white shadow-xs' : 'text-slate-600 dark:text-slate-300 hover:text-indigo-600'}">
+          <div class="flex items-center p-1.5 rounded-2xl bg-slate-100/90 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 shadow-2xs gap-1.5 shrink-0">
+            <button id="mode-creator-btn" class="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${!isLibrary && !isTemplates ? 'bg-indigo-600 text-white shadow-xs font-bold' : 'text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-white'}">
               <span>✨ Workspace</span>
             </button>
-            <button id="mode-library-btn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${isLibrary ? 'bg-indigo-600 text-white shadow-xs' : 'text-slate-600 dark:text-slate-300 hover:text-indigo-600'}">
+            <button id="mode-library-btn" class="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${isLibrary ? 'bg-indigo-600 text-white shadow-xs font-bold' : 'text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-white'}">
               <span>🗃️ My Saved Outputs (${savedOutputs.length})</span>
             </button>
-            <button id="mode-templates-btn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${isTemplates ? 'bg-indigo-600 text-white shadow-xs' : 'text-slate-600 dark:text-slate-300 hover:text-indigo-600'}">
+            <button id="mode-templates-btn" class="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${isTemplates ? 'bg-indigo-600 text-white shadow-xs font-bold' : 'text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-white'}">
               <span>📋 Output Templates</span>
             </button>
           </div>
@@ -668,27 +668,27 @@ function renderCreatorWorkspaceView(activeCat, savedOutputs = []) {
       <!-- ================================================================= -->
       <!-- STEP 1: OUTPUT CATEGORY SELECTION CARDS                           -->
       <!-- ================================================================= -->
-      <section id="step-1-category-section" class="bg-white dark:bg-slate-850 rounded-2xl border border-slate-200/90 dark:border-slate-750 p-6 shadow-sm">
+      <section id="step-1-category-section" class="bg-white dark:bg-slate-850 rounded-2xl border border-slate-200/90 dark:border-slate-750 p-6 sm:p-8 shadow-sm space-y-5">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
           <div>
-            <div class="flex items-center gap-2">
-              <span class="w-6 h-6 rounded-full bg-indigo-600 text-white font-mono text-xs font-bold flex items-center justify-center">1</span>
-              <h2 class="text-base font-bold font-scholarly text-slate-900 dark:text-white">Choose Educational Output Type</h2>
+            <div class="flex items-center gap-2.5">
+              <span class="w-7 h-7 rounded-xl bg-indigo-600 text-white font-mono text-xs font-bold flex items-center justify-center shadow-2xs">1</span>
+              <h2 class="text-base sm:text-lg font-bold font-scholarly text-slate-900 dark:text-white">Choose Educational Output Type</h2>
             </div>
-            <p class="text-xs text-slate-500 dark:text-slate-400 ml-8">Select from 8 specialized educational artifact categories</p>
+            <p class="text-xs text-slate-500 dark:text-slate-400 ml-9 mt-0.5">Select from 8 specialized educational artifact categories</p>
           </div>
 
           <!-- Fast Search Filter for Categories -->
           <div class="relative w-full sm:w-64">
-            <input type="text" id="category-search-input" value="${escapeHtml(activeStudioState.searchQuery)}" placeholder="Search outputs (e.g. PowerPoint, Poster)..." class="w-full pl-8 pr-3 py-1.5 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none">
-            <svg class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <input type="text" id="category-search-input" value="${escapeHtml(activeStudioState.searchQuery)}" placeholder="Search outputs (e.g. PowerPoint, Poster)..." class="w-full pl-8 pr-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none">
+            <svg class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
           </div>
         </div>
 
         <!-- 8 Category Cards Grid -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
           ${OUTPUT_CATEGORIES.filter(cat => {
             if (!activeStudioState.searchQuery) return true;
             const q = activeStudioState.searchQuery.toLowerCase();
@@ -696,18 +696,18 @@ function renderCreatorWorkspaceView(activeCat, savedOutputs = []) {
           }).map(cat => {
             const isSelected = cat.id === activeStudioState.activeCategoryId;
             return `
-              <div data-category-id="${cat.id}" class="category-card p-4 rounded-xl border cursor-pointer transition-all flex flex-col justify-between ${isSelected ? 'bg-indigo-50/90 dark:bg-indigo-950/70 border-indigo-500 ring-2 ring-indigo-500/30' : 'bg-white dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 hover:border-indigo-300 dark:hover:border-indigo-700'}">
+              <div data-category-id="${cat.id}" class="category-card p-5 rounded-2xl border cursor-pointer transition-all flex flex-col justify-between shadow-2xs hover:shadow-xs hover:-translate-y-0.5 ${isSelected ? 'bg-indigo-50/90 dark:bg-indigo-950/70 border-indigo-500 ring-2 ring-indigo-500/30' : 'bg-white dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 hover:border-indigo-300 dark:hover:border-indigo-700'}">
                 <div>
-                  <div class="flex items-center justify-between mb-2">
-                    <span class="text-2xl">${cat.icon}</span>
-                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${isSelected ? 'bg-indigo-600 text-white' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'}">
+                  <div class="flex items-center justify-between mb-3">
+                    <span class="text-3xl">${cat.icon}</span>
+                    <span class="text-[10px] font-bold px-2.5 py-0.5 rounded-full ${isSelected ? 'bg-indigo-600 text-white shadow-2xs' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'}">
                       ${cat.badge}
                     </span>
                   </div>
-                  <h3 class="text-xs font-bold text-slate-900 dark:text-white mb-1">${escapeHtml(cat.name)}</h3>
-                  <p class="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed mb-3">${escapeHtml(cat.desc)}</p>
+                  <h3 class="text-sm font-bold text-slate-900 dark:text-white mb-1.5">${escapeHtml(cat.name)}</h3>
+                  <p class="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed mb-4">${escapeHtml(cat.desc)}</p>
                 </div>
-                <div class="pt-2 border-t border-slate-100 dark:border-slate-750 flex items-center justify-between text-[11px]">
+                <div class="pt-3 border-t border-slate-100 dark:border-slate-750 flex items-center justify-between text-xs">
                   <span class="text-indigo-600 dark:text-indigo-400 font-semibold">${cat.types.length} Formats</span>
                   <span class="${isSelected ? 'text-indigo-600 font-bold' : 'text-slate-400'}">${isSelected ? '✓ Selected' : 'Select →'}</span>
                 </div>
@@ -717,12 +717,12 @@ function renderCreatorWorkspaceView(activeCat, savedOutputs = []) {
         </div>
 
         <!-- Subtype Specific Selector -->
-        <div class="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 flex flex-wrap items-center gap-2">
-          <span class="text-xs font-bold text-slate-700 dark:text-slate-300 mr-1">Specific Deliverable:</span>
+        <div class="mt-5 pt-4 border-t border-slate-100 dark:border-slate-800 flex flex-wrap items-center gap-2.5">
+          <span class="text-xs font-bold text-slate-700 dark:text-slate-300 mr-1.5">Specific Deliverable:</span>
           ${activeCat.types.map(t => {
             const isSubSelected = t.id === activeStudioState.activeTypeId;
             return `
-              <button data-type-id="${t.id}" class="type-pill px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${isSubSelected ? 'bg-indigo-600 text-white border-indigo-600 shadow-2xs' : 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-indigo-400'}">
+              <button data-type-id="${t.id}" class="type-pill px-3.5 py-2 rounded-xl text-xs font-semibold border transition-all cursor-pointer ${isSubSelected ? 'bg-indigo-600 text-white border-indigo-600 shadow-2xs font-bold' : 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-indigo-400'}">
                 ${escapeHtml(t.label)}
               </button>
             `;
@@ -733,10 +733,10 @@ function renderCreatorWorkspaceView(activeCat, savedOutputs = []) {
       <!-- ================================================================= -->
       <!-- STEP 2 & 3: CONTENT DEFINITION & DESIGN CUSTOMIZATION (2 Columns) -->
       <!-- ================================================================= -->
-      <section class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <section class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
         
         <!-- Column 1: Pedagogical Content (7 Cols) -->
-        <div id="step-2-content-section" class="lg:col-span-7 bg-white dark:bg-slate-850 rounded-2xl border border-slate-200/90 dark:border-slate-750 p-6 shadow-sm space-y-4">
+        <div id="step-2-content-section" class="lg:col-span-7 bg-white dark:bg-slate-850 rounded-2xl border border-slate-200/90 dark:border-slate-750 p-6 sm:p-8 shadow-sm space-y-6">
           <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
             <div class="flex items-center gap-2">
               <span class="w-6 h-6 rounded-full bg-indigo-600 text-white font-mono text-xs font-bold flex items-center justify-center">2</span>

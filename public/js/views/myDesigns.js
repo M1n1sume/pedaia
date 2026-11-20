@@ -130,32 +130,32 @@ export function renderMyDesignsView() {
       </div>
 
       <!-- Lifecycle Status Filter Tabs -->
-      <div class="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs">
-        <button class="status-tab-btn px-3 py-1.5 rounded-xl font-semibold whitespace-nowrap transition-all ${selectedStatusFilter === 'all' ? 'bg-indigo-600 text-white shadow-2xs' : 'bg-white dark:bg-slate-850 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-750 hover:border-slate-300'}" data-status="all">
+      <div class="flex items-center gap-2 overflow-x-auto p-1.5 rounded-2xl bg-slate-100/90 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 shadow-2xs text-xs scrollbar-none">
+        <button class="status-tab-btn px-4 py-2 rounded-xl font-semibold whitespace-nowrap transition-all cursor-pointer ${selectedStatusFilter === 'all' ? 'bg-indigo-600 text-white shadow-xs font-bold' : 'text-slate-600 dark:text-slate-300 hover:bg-white/70 dark:hover:bg-slate-700/70 hover:text-slate-900 dark:hover:text-white'}" data-status="all">
           All Active (${counts.all})
         </button>
-        <button class="status-tab-btn px-3 py-1.5 rounded-xl font-medium whitespace-nowrap transition-all ${selectedStatusFilter === 'Draft' ? 'bg-slate-700 text-white font-bold' : 'bg-white dark:bg-slate-850 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-750 hover:border-slate-300'}" data-status="Draft">
+        <button class="status-tab-btn px-4 py-2 rounded-xl font-semibold whitespace-nowrap transition-all cursor-pointer ${selectedStatusFilter === 'Draft' ? 'bg-slate-700 text-white shadow-xs font-bold' : 'text-slate-600 dark:text-slate-300 hover:bg-white/70 dark:hover:bg-slate-700/70 hover:text-slate-900 dark:hover:text-white'}" data-status="Draft">
           Draft (${counts['Draft']})
         </button>
-        <button class="status-tab-btn px-3 py-1.5 rounded-xl font-medium whitespace-nowrap transition-all ${selectedStatusFilter === 'Prompt Saved' ? 'bg-indigo-600 text-white font-bold' : 'bg-white dark:bg-slate-850 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-750 hover:border-slate-300'}" data-status="Prompt Saved">
+        <button class="status-tab-btn px-4 py-2 rounded-xl font-semibold whitespace-nowrap transition-all cursor-pointer ${selectedStatusFilter === 'Prompt Saved' ? 'bg-indigo-600 text-white shadow-xs font-bold' : 'text-slate-600 dark:text-slate-300 hover:bg-white/70 dark:hover:bg-slate-700/70 hover:text-slate-900 dark:hover:text-white'}" data-status="Prompt Saved">
           Prompt Saved (${counts['Prompt Saved']})
         </button>
-        <button class="status-tab-btn px-3 py-1.5 rounded-xl font-medium whitespace-nowrap transition-all ${selectedStatusFilter === 'Output Generated' ? 'bg-emerald-600 text-white font-bold' : 'bg-white dark:bg-slate-850 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-750 hover:border-slate-300'}" data-status="Output Generated">
+        <button class="status-tab-btn px-4 py-2 rounded-xl font-semibold whitespace-nowrap transition-all cursor-pointer ${selectedStatusFilter === 'Output Generated' ? 'bg-emerald-600 text-white shadow-xs font-bold' : 'text-slate-600 dark:text-slate-300 hover:bg-white/70 dark:hover:bg-slate-700/70 hover:text-slate-900 dark:hover:text-white'}" data-status="Output Generated">
           Output Generated (${counts['Output Generated']})
         </button>
-        <button class="status-tab-btn px-3 py-1.5 rounded-xl font-medium whitespace-nowrap transition-all ${selectedStatusFilter === 'Reviewed' ? 'bg-purple-600 text-white font-bold' : 'bg-white dark:bg-slate-850 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-750 hover:border-slate-300'}" data-status="Reviewed">
+        <button class="status-tab-btn px-4 py-2 rounded-xl font-semibold whitespace-nowrap transition-all cursor-pointer ${selectedStatusFilter === 'Reviewed' ? 'bg-purple-600 text-white shadow-xs font-bold' : 'text-slate-600 dark:text-slate-300 hover:bg-white/70 dark:hover:bg-slate-700/70 hover:text-slate-900 dark:hover:text-white'}" data-status="Reviewed">
           Reviewed (${counts['Reviewed']})
         </button>
-        <button class="status-tab-btn px-3 py-1.5 rounded-xl font-medium whitespace-nowrap transition-all ${selectedStatusFilter === 'Completed' ? 'bg-amber-600 text-white font-bold' : 'bg-white dark:bg-slate-850 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-750 hover:border-slate-300'}" data-status="Completed">
+        <button class="status-tab-btn px-4 py-2 rounded-xl font-semibold whitespace-nowrap transition-all cursor-pointer ${selectedStatusFilter === 'Completed' ? 'bg-amber-600 text-white shadow-xs font-bold' : 'text-slate-600 dark:text-slate-300 hover:bg-white/70 dark:hover:bg-slate-700/70 hover:text-slate-900 dark:hover:text-white'}" data-status="Completed">
           Completed (${counts['Completed']})
         </button>
-        <button class="status-tab-btn px-3 py-1.5 rounded-xl font-medium whitespace-nowrap transition-all ${selectedStatusFilter === 'Archived' ? 'bg-slate-800 text-white font-bold' : 'bg-white dark:bg-slate-850 text-slate-400 dark:text-slate-500 border border-slate-200 dark:border-slate-750 hover:border-slate-300'}" data-status="Archived">
+        <button class="status-tab-btn px-4 py-2 rounded-xl font-semibold whitespace-nowrap transition-all cursor-pointer ${selectedStatusFilter === 'Archived' ? 'bg-slate-800 text-white shadow-xs font-bold' : 'text-slate-400 dark:text-slate-500 hover:bg-white/70 dark:hover:bg-slate-700/70 hover:text-slate-900 dark:hover:text-white'}" data-status="Archived">
           Archived (${counts['Archived']})
         </button>
       </div>
 
       <!-- Filters & Search Toolbar -->
-      <div class="bg-white dark:bg-slate-850 rounded-2xl border border-slate-200/80 dark:border-slate-750 p-4 shadow-2xs space-y-3">
+      <div class="bg-white dark:bg-slate-850 rounded-2xl border border-slate-200/80 dark:border-slate-750 p-5 sm:p-6 shadow-2xs space-y-4">
         <div class="grid grid-cols-1 sm:grid-cols-12 gap-3">
           
           <!-- Search Input (5 Cols) -->

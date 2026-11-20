@@ -195,18 +195,18 @@ export function renderLessonPlannerView() {
       </div>
 
       <!-- Main Two-Column Layout -->
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
         
         <!-- ================================================================= -->
         <!-- LEFT PANEL: INSTRUCTIONAL DESIGN BUILDER (7 Cols)                  -->
         <!-- ================================================================= -->
-        <div class="lg:col-span-7 space-y-5">
+        <div class="lg:col-span-7 space-y-6">
           
           <!-- Section 1: Global Educator Context -->
           ${renderGlobalContextForm(currentState, 'lp')}
 
           <!-- Section 2: Pedagogical Framework & Dynamic Sequence -->
-          <div class="space-y-5 bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-2xs transition-colors">
+          <div class="space-y-6 bg-white dark:bg-slate-900 p-6 sm:p-7 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-2xs transition-colors">
             
             <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
               <div class="flex items-center gap-2.5">
@@ -229,13 +229,13 @@ export function renderLessonPlannerView() {
                 <label class="pedaia-label text-slate-700 dark:text-slate-300">Select Pedagogical Framework</label>
                 <span class="text-xs text-indigo-600 dark:text-indigo-400 font-medium">Controls sequence structure</span>
               </div>
-              <div class="grid grid-cols-2 sm:grid-cols-3 gap-2" id="lp-models-group">
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5" id="lp-models-group">
                 ${INSTRUCTIONAL_MODELS.map(m => {
                   const isSelected = currentState.instructionalModel === m.id;
                   return `
-                    <button type="button" data-val="${m.id}" class="model-card p-3 text-left rounded-xl border transition-all ${isSelected ? 'border-indigo-600 bg-indigo-50/70 dark:bg-indigo-950/60 text-indigo-950 dark:text-indigo-200 ring-2 ring-indigo-500 shadow-xs' : 'border-slate-200 dark:border-slate-750 bg-white dark:bg-slate-850 text-slate-700 dark:text-slate-200 hover:border-slate-300 dark:hover:border-slate-650'}">
+                    <button type="button" data-val="${m.id}" class="model-card p-4 text-left rounded-xl border transition-all cursor-pointer shadow-2xs hover:shadow-xs hover:-translate-y-0.5 ${isSelected ? 'border-indigo-600 bg-indigo-50/70 dark:bg-indigo-950/60 text-indigo-950 dark:text-indigo-200 ring-2 ring-indigo-500 shadow-xs' : 'border-slate-200 dark:border-slate-750 bg-white dark:bg-slate-850 text-slate-700 dark:text-slate-200 hover:border-slate-300 dark:hover:border-slate-650'}">
                       <div class="text-xs font-bold">${m.name}</div>
-                      <div class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-2">${m.desc}</div>
+                      <div class="text-[11px] text-slate-500 dark:text-slate-400 mt-1 line-clamp-2 leading-relaxed">${m.desc}</div>
                     </button>
                   `;
                 }).join('')}
@@ -377,14 +377,14 @@ export function renderLessonPlannerView() {
 
             <!-- Desired Output Format Cards -->
             <div>
-              <label class="pedaia-label block text-slate-700 dark:text-slate-300 mb-1.5">Output Document Format</label>
-              <div class="grid grid-cols-2 sm:grid-cols-3 gap-2" id="lp-format-group">
+              <label class="pedaia-label block text-slate-700 dark:text-slate-300 mb-2">Output Document Format</label>
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3" id="lp-format-group">
                 ${OUTPUT_FORMATS.map(f => {
                   const isSelected = currentState.outputFormat === f.id;
                   return `
-                    <button type="button" data-val="${f.id}" class="format-card p-2.5 text-left rounded-xl border transition-all ${isSelected ? 'border-indigo-600 bg-indigo-50/70 dark:bg-indigo-950/60 text-indigo-950 dark:text-indigo-200 ring-2 ring-indigo-500' : 'border-slate-200 dark:border-slate-750 bg-white dark:bg-slate-850 text-slate-700 dark:text-slate-200 hover:border-slate-300 dark:hover:border-slate-650'}">
+                    <button type="button" data-val="${f.id}" class="format-card p-3.5 text-left rounded-xl border transition-all cursor-pointer shadow-2xs hover:shadow-xs hover:-translate-y-0.5 ${isSelected ? 'border-indigo-600 bg-indigo-50/70 dark:bg-indigo-950/60 text-indigo-950 dark:text-indigo-200 ring-2 ring-indigo-500' : 'border-slate-200 dark:border-slate-750 bg-white dark:bg-slate-850 text-slate-700 dark:text-slate-200 hover:border-slate-300 dark:hover:border-slate-650'}">
                       <div class="text-xs font-bold">${f.label}</div>
-                      <div class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">${f.desc}</div>
+                      <div class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">${f.desc}</div>
                     </button>
                   `;
                 }).join('')}
@@ -393,8 +393,8 @@ export function renderLessonPlannerView() {
 
             <!-- Additional Requirements -->
             <div>
-              <label class="pedaia-label block text-slate-700 dark:text-slate-300 mb-1">Additional Requirements, Preferences, or Institutional Notes</label>
-              <textarea id="lp-additionalRequirements" rows="2.5" class="w-full text-xs p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-850 text-slate-800 dark:text-slate-100 focus:border-indigo-500 outline-none transition-colors" placeholder="Specify any unique school guidelines, institutional rubrics, vocabulary lists, or safety precautions...">${escapeHtml(currentState.additionalRequirements || '')}</textarea>
+              <label class="pedaia-label block text-slate-700 dark:text-slate-300 mb-1.5">Additional Requirements, Preferences, or Institutional Notes</label>
+              <textarea id="lp-additionalRequirements" rows="2.5" class="w-full text-xs p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-850 text-slate-800 dark:text-slate-100 focus:border-indigo-500 outline-none transition-colors" placeholder="Specify any unique school guidelines, institutional rubrics, vocabulary lists, or safety precautions...">${escapeHtml(currentState.additionalRequirements || '')}</textarea>
             </div>
           </div>
 
@@ -403,7 +403,7 @@ export function renderLessonPlannerView() {
         <!-- ================================================================= -->
         <!-- RIGHT PANEL: AI WORKSPACE (5 Distinct States) (5 Cols Sticky)      -->
         <!-- ================================================================= -->
-        <div class="lg:col-span-5 space-y-4 lg:sticky lg:top-20">
+        <div class="lg:col-span-5 space-y-5 lg:sticky lg:top-24">
           <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-2xs overflow-hidden flex flex-col transition-colors">
             
             <!-- Panel Header with State Pill -->
@@ -413,16 +413,16 @@ export function renderLessonPlannerView() {
               </div>
               
               <!-- Tab Switcher (Prompt Preview vs Output) -->
-              <div class="flex items-center gap-1">
+              <div class="flex items-center gap-1.5 p-1 bg-slate-100/90 dark:bg-slate-800/90 rounded-xl border border-slate-200/80 dark:border-slate-700/80 shadow-2xs">
                 ${generatedOutput ? `
-                  <button id="lp-tab-output-btn" class="px-2.5 py-1 text-xs font-semibold rounded-lg transition-colors ${workspaceState === 'output' || workspaceState === 'editing' ? 'bg-indigo-600 text-white' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'}">
+                  <button id="lp-tab-output-btn" class="px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors cursor-pointer ${workspaceState === 'output' || workspaceState === 'editing' ? 'bg-indigo-600 text-white shadow-2xs' : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-white/60 dark:hover:bg-slate-700/60'}">
                     Output
                   </button>
-                  <button id="lp-tab-preview-btn" class="px-2.5 py-1 text-xs font-semibold rounded-lg transition-colors ${workspaceState === 'preview' ? 'bg-indigo-600 text-white' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'}">
+                  <button id="lp-tab-preview-btn" class="px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors cursor-pointer ${workspaceState === 'preview' ? 'bg-indigo-600 text-white shadow-2xs' : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-white/60 dark:hover:bg-slate-700/60'}">
                     Prompt
                   </button>
                 ` : `
-                  <button id="lp-toggle-edit-prompt-btn" class="px-2.5 py-1 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-750 transition-colors">
+                  <button id="lp-toggle-edit-prompt-btn" class="px-3 py-1.5 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-750 transition-colors cursor-pointer">
                     ${isPromptEditable ? 'Done Editing' : 'Edit Prompt'}
                   </button>
                   <button id="lp-copy-prompt-btn" class="px-2.5 py-1 text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 bg-indigo-50 dark:bg-indigo-950/60 rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-900/60 transition-colors flex items-center gap-1">

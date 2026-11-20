@@ -65,20 +65,20 @@ export function renderPromptLibraryView() {
       </div>
 
       <!-- Search & Category Filters Toolbar -->
-      <div class="space-y-3 bg-white dark:bg-slate-850 p-4 rounded-2xl border border-slate-200/80 dark:border-slate-750 shadow-2xs">
+      <div class="space-y-4 bg-white dark:bg-slate-850 p-5 sm:p-6 rounded-2xl border border-slate-200/80 dark:border-slate-750 shadow-2xs">
         <div class="relative">
-          <input type="text" id="lib-search-input" value="${escapeHtml(searchQuery)}" placeholder="Search templates by keyword, framework, discipline, or educational level..." class="w-full text-xs pl-8 pr-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:border-indigo-500 outline-none">
-          <svg class="w-4 h-4 text-slate-400 absolute left-2.5 top-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <input type="text" id="lib-search-input" value="${escapeHtml(searchQuery)}" placeholder="Search templates by keyword, framework, discipline, or educational level..." class="w-full text-xs pl-9 pr-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:border-indigo-500 outline-none">
+          <svg class="w-4 h-4 text-slate-400 absolute left-3 top-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
         </div>
 
         <!-- Category Horizontal Pills -->
-        <div class="flex items-center gap-1.5 overflow-x-auto pb-1 pt-1" id="lib-category-chips">
+        <div class="flex items-center gap-2 overflow-x-auto p-1.5 rounded-2xl bg-slate-100/90 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 shadow-2xs scrollbar-none" id="lib-category-chips">
           ${TEMPLATE_CATEGORIES.map(cat => {
             const isSelected = selectedCategory === cat || (selectedCategory === 'all' && cat === 'All Categories');
             return `
-              <button type="button" data-cat="${cat}" class="lib-cat-chip whitespace-nowrap text-xs px-3 py-1.5 rounded-xl border transition-all ${isSelected ? 'bg-indigo-600 text-white border-indigo-600 font-bold shadow-2xs' : 'bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-slate-300'}">
+              <button type="button" data-cat="${cat}" class="lib-cat-chip whitespace-nowrap text-xs px-4 py-2 rounded-xl border transition-all cursor-pointer ${isSelected ? 'bg-indigo-600 text-white border-indigo-600 font-bold shadow-xs' : 'bg-white dark:bg-slate-850 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-750 hover:border-slate-300 dark:hover:border-slate-600'}">
                 ${cat}
               </button>
             `;
@@ -87,7 +87,7 @@ export function renderPromptLibraryView() {
       </div>
 
       <!-- Templates Scannable Cards Grid -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         ${templates.map(t => {
           const categoryBadgeColor = {
             'Lesson Planning': 'category-pill-lp',

@@ -135,18 +135,18 @@ export function renderDifferentiationStudioView() {
       </div>
 
       <!-- Main Two-Column Layout -->
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
         
         <!-- ================================================================= -->
         <!-- LEFT PANEL: DIFFERENTIATION BUILDER (7 Cols)                      -->
         <!-- ================================================================= -->
-        <div class="lg:col-span-7 space-y-5">
+        <div class="lg:col-span-7 space-y-6">
           
           <!-- Shared Context -->
           ${renderGlobalContextForm(currentState, 'diff')}
 
           <!-- Section 2: Pedagogical Differentiation Architecture -->
-          <div class="space-y-5 bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-2xs transition-colors">
+          <div class="space-y-6 bg-white dark:bg-slate-900 p-6 sm:p-7 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-2xs transition-colors">
             
             <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
               <div class="flex items-center gap-2.5">
@@ -206,17 +206,17 @@ export function renderDifferentiationStudioView() {
 
             <!-- Differentiation Dimensions (Content, Process, Product) -->
             <div>
-              <label class="pedaia-label block text-slate-700 dark:text-slate-300 mb-1.5">Targeted Differentiation Dimensions</label>
-              <div class="grid grid-cols-1 sm:grid-cols-3 gap-2" id="diff-dimensions-group">
+              <label class="pedaia-label block text-slate-700 dark:text-slate-300 mb-2">Targeted Differentiation Dimensions</label>
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5 sm:gap-4" id="diff-dimensions-group">
                 ${DIFFERENTIATION_DIMENSIONS.slice(0, 3).map(dim => {
                   const isChecked = (currentState.differentiationDimensions || []).includes(dim.id);
                   return `
-                    <label class="p-3 rounded-xl border transition-all cursor-pointer flex flex-col justify-between ${isChecked ? 'border-purple-600 bg-purple-50/60 dark:bg-purple-950/40 text-purple-950 dark:text-purple-200' : 'border-slate-200 dark:border-slate-750 bg-white dark:bg-slate-850 text-slate-700 dark:text-slate-200'}">
-                      <div class="flex items-center justify-between mb-1">
+                    <label class="p-4 rounded-xl border transition-all cursor-pointer flex flex-col justify-between shadow-2xs ${isChecked ? 'border-purple-600 bg-purple-50/70 dark:bg-purple-950/50 text-purple-950 dark:text-purple-200 ring-1 ring-purple-500/40' : 'border-slate-200 dark:border-slate-750 bg-white dark:bg-slate-850 text-slate-700 dark:text-slate-200 hover:border-slate-300 dark:hover:border-slate-650'}">
+                      <div class="flex items-center justify-between mb-2">
                         <span class="text-xs font-bold">${dim.label}</span>
                         <input type="checkbox" data-val="${dim.id}" class="dimension-checkbox rounded text-purple-600 focus:ring-purple-500" ${isChecked ? 'checked' : ''}>
                       </div>
-                      <span class="text-[10.5px] text-slate-500 dark:text-slate-400">${dim.desc}</span>
+                      <span class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">${dim.desc}</span>
                     </label>
                   `;
                 }).join('')}
@@ -298,20 +298,20 @@ export function renderDifferentiationStudioView() {
                 ${getDiffWorkspaceBadge(workspaceState)}
               </div>
               
-              <!-- Tab Switcher -->
-              <div class="flex items-center gap-1">
+              <!-- Tab Switcher (Segmented Capsule with Breathing Room) -->
+              <div class="flex items-center p-1 bg-slate-100/90 dark:bg-slate-800/90 rounded-xl border border-slate-200/80 dark:border-slate-700/80 shadow-2xs gap-1">
                 ${generatedOutput ? `
-                  <button id="diff-tab-output-btn" class="px-2.5 py-1 text-xs font-semibold rounded-lg transition-colors ${workspaceState === 'output' || workspaceState === 'editing' ? 'bg-purple-600 text-white' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'}">
+                  <button id="diff-tab-output-btn" class="px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${workspaceState === 'output' || workspaceState === 'editing' ? 'bg-purple-600 text-white shadow-2xs' : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-white/60 dark:hover:bg-slate-700/60'}">
                     Output
                   </button>
-                  <button id="diff-tab-preview-btn" class="px-2.5 py-1 text-xs font-semibold rounded-lg transition-colors ${workspaceState === 'preview' ? 'bg-purple-600 text-white' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'}">
+                  <button id="diff-tab-preview-btn" class="px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${workspaceState === 'preview' ? 'bg-purple-600 text-white shadow-2xs' : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-white/60 dark:hover:bg-slate-700/60'}">
                     Prompt
                   </button>
                 ` : `
-                  <button id="diff-toggle-edit-prompt-btn" class="px-2.5 py-1 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white bg-white dark:bg-slate-850 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-50 transition-colors">
+                  <button id="diff-toggle-edit-prompt-btn" class="px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 rounded-lg shadow-2xs hover:bg-slate-50 transition-all">
                     ${isPromptEditable ? 'Done Editing' : 'Edit Prompt'}
                   </button>
-                  <button id="diff-copy-prompt-btn" class="px-2.5 py-1 text-xs font-semibold text-purple-700 dark:text-purple-400 hover:text-purple-900 bg-purple-50 dark:bg-purple-950/60 rounded-lg hover:bg-purple-100 transition-colors flex items-center gap-1">
+                  <button id="diff-copy-prompt-btn" class="px-3 py-1.5 text-xs font-semibold text-purple-700 dark:text-purple-400 hover:text-purple-900 bg-purple-50 dark:bg-purple-950/60 rounded-lg hover:bg-purple-100 transition-all flex items-center gap-1.5">
                     <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
                     </svg>

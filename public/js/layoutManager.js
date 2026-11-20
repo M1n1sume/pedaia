@@ -54,7 +54,7 @@ export function applyLayoutMode(mode, scale) {
     if (dev.type === 'laptop' || dev.width <= 1440) {
       resolvedLayout = 'left';
     } else {
-      resolvedLayout = 'left'; // Default to left-weighted to avoid giant centered void and right-side cutoffs
+      resolvedLayout = 'auto';
     }
   }
 
