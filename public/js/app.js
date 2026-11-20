@@ -343,21 +343,27 @@ function renderCurrentView() {
 function updateApiStatusIndicator() {
   const dot = document.getElementById('header-api-status-dot');
   const text = document.getElementById('header-api-status-text');
+  const btn = document.getElementById('header-api-status-btn');
   if (!dot || !text) return;
 
   const status = aiService.getActiveProviderStatus();
+  const badgeName = status.badge || 'AI';
+
   if (status.providerId === 'ollama' || status.providerId === 'lmstudio') {
-    dot.className = 'w-2 h-2 rounded-full bg-sky-500';
-    text.textContent = `${status.badge} Ready (Local)`;
-    text.className = 'text-sky-700 dark:text-sky-300 hidden sm:inline font-semibold';
+    dot.className = 'w-2 h-2 rounded-full bg-sky-500 shrink-0';
+    text.textContent = badgeName;
+    text.className = 'text-sky-700 dark:text-sky-300 inline font-semibold text-xs leading-none';
+    if (btn) btn.title = `${badgeName} Ready (Local AI Engine) • Click to Switch AI`;
   } else if (status.hasCustomKey) {
-    dot.className = 'w-2 h-2 rounded-full bg-emerald-500 animate-pulse';
-    text.textContent = `${status.badge} Ready (Custom Key)`;
-    text.className = 'text-emerald-700 dark:text-emerald-300 hidden sm:inline font-semibold';
+    dot.className = 'w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0';
+    text.textContent = badgeName;
+    text.className = 'text-emerald-700 dark:text-emerald-300 inline font-semibold text-xs leading-none';
+    if (btn) btn.title = `${badgeName} Ready (Custom API Key) • Click to Switch AI`;
   } else {
-    dot.className = 'w-2 h-2 rounded-full bg-emerald-500 animate-pulse';
-    text.textContent = `${status.badge} Ready`;
-    text.className = 'text-emerald-700 dark:text-emerald-300 hidden sm:inline font-semibold';
+    dot.className = 'w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0';
+    text.textContent = badgeName;
+    text.className = 'text-emerald-700 dark:text-emerald-300 inline font-semibold text-xs leading-none';
+    if (btn) btn.title = `${badgeName} Ready (Built-in Gateway) • Click to Switch AI`;
   }
 }
 
