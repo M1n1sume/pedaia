@@ -394,19 +394,39 @@ html.dark #top-masthead,
 
 /* Header interactive child controls in dark mode */
 html.dark #header-studio-switcher,
-.dark #header-studio-switcher {
+.dark #header-studio-switcher,
+html.dark #header-utility-dock,
+.dark #header-utility-dock {
   background-color: rgba(15, 23, 42, 0.7) !important;
   border-color: var(--dark-border-override, #334155) !important;
 }
 
+#header-utility-dock button {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+#header-utility-dock button:hover {
+  background-color: rgba(255, 255, 255, 0.9) !important;
+}
+
+html.dark #header-utility-dock button:hover,
+.dark #header-utility-dock button:hover {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+#header-utility-dock button.active {
+  background-color: var(--brand-primary, #312E81) !important;
+  color: #FFFFFF !important;
+}
+
 html.dark #header-file-hub-btn,
 html.dark #header-api-status-btn,
-html.dark #header-palette-btn,
 html.dark #theme-toggle-btn,
 html.dark #mobile-drawer-toggle-btn,
 .dark #header-file-hub-btn,
 .dark #header-api-status-btn,
-.dark #header-palette-btn,
 .dark #theme-toggle-btn,
 .dark #mobile-drawer-toggle-btn {
   background-color: var(--dark-header-bg, #1E293B) !important;
@@ -416,12 +436,10 @@ html.dark #mobile-drawer-toggle-btn,
 
 html.dark #header-file-hub-btn:hover,
 html.dark #header-api-status-btn:hover,
-html.dark #header-palette-btn:hover,
 html.dark #theme-toggle-btn:hover,
 html.dark #mobile-drawer-toggle-btn:hover,
 .dark #header-file-hub-btn:hover,
 .dark #header-api-status-btn:hover,
-.dark #header-palette-btn:hover,
 .dark #theme-toggle-btn:hover,
 .dark #mobile-drawer-toggle-btn:hover {
   background-color: rgba(255, 255, 255, 0.08) !important;
