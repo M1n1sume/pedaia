@@ -6,6 +6,23 @@ import { exportToDocx, exportToMarkdown, openPrintableWindow } from '../exportUt
 import { buildAiOutputStudioPrompt } from '../promptEngine.js';
 import { openShareLinkModal } from './shareLinkModal.js';
 import { openUniversalImportModal } from '../importUtils.js';
+import { generateEducationalVisual, getVisualCaption, svgToDataUri } from '../visualGenerator.js';
+
+export function formatBulletWithBold(text) {
+  if (!text) return '';
+  if (text.includes('**') || text.includes('<strong>')) {
+    return text.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+  }
+  if (text.includes(':')) {
+    const parts = text.split(':');
+    return `<strong>${parts[0]}:</strong>${parts.slice(1).join(':')}`;
+  }
+  const words = text.split(' ');
+  if (words.length > 2) {
+    return `<strong>${words.slice(0, 2).join(' ')}</strong> ${words.slice(2).join(' ')}`;
+  }
+  return text;
+}
 
 // --- Compiled Pedagogical Prompt Engine Adapter ---
 export function buildAiOutputPrompt(state = activeStudioState) {
@@ -1401,51 +1418,122 @@ function renderSlideWorkspace(output) {
       <!-- Slide Preview Canvas (6 cols) -->
       <div class="lg:col-span-6 flex flex-col justify-between">
         
-        <!-- Live Slide Canvas with Theme & Color Integration -->
-        <div class="aspect-video w-full rounded-2xl p-6 sm:p-8 flex flex-col justify-between shadow-xl relative overflow-hidden border"
+        <!-- Live Slide Canvas with Theme, Two-Column Visual Architecture & Generated Image -->
+        <div class="aspect-video w-full rounded-2xl p-5 sm:p-7 flex flex-col justify-between shadow-2xl relative overflow-hidden border"
              style="background: ${theme.gradient}; border-color: ${theme.primary}55; color: ${theme.textColor}; font-family: ${theme.fontFamily};">
-          <div class="absolute right-4 top-4 text-xs font-mono px-2.5 py-0.5 rounded-full"
-               style="background: ${theme.primary}33; color: ${theme.accentText}; border: 1px solid ${theme.primary}66;">
-            ${currentIdx + 1} / ${slides.length}
-          </div>
           
-          <div>
-            <span class="text-[11px] font-mono uppercase tracking-widest font-bold block mb-1"
-                  style="color: ${theme.secondaryText};">
-              ${escapeHtml(output.subject || 'PEDAIA Instructional Deck')} • ${escapeHtml(activeSlide.slideType || 'Lecture Core')}
-            </span>
-            <h2 class="text-xl sm:text-2xl font-bold leading-snug tracking-tight mb-4"
-                style="color: ${theme.textColor}; font-family: ${theme.fontFamily};">
-              ${escapeHtml(activeSlide.title || 'Slide Title')}
-            </h2>
-            
-            <ul class="space-y-2.5 max-w-xl">
-              ${(activeSlide.bullets || []).map(b => `
-                <li class="flex items-start gap-2 text-xs sm:text-sm leading-relaxed" style="color: ${theme.mutedTextColor};">
-                  <span class="text-base leading-none font-bold" style="color: ${theme.secondary};">•</span>
-                  <span>${escapeHtml(b)}</span>
-                </li>
-              `).join('')}
-            </ul>
+          <!-- Top Slide Header -->
+          <div class="flex items-center justify-between pb-2.5 border-b" style="border-color: ${theme.primary}33;">
+            <div class="flex items-center gap-2">
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono uppercase tracking-wider font-bold"
+                    style="background: ${theme.secondary}22; color: ${theme.secondaryText}; border: 1px solid ${theme.secondary}55;">
+                ${escapeHtml(output.subject || 'PEDAIA')} • ${escapeHtml(activeSlide.slideType || 'Content')}
+              </span>
+              <span class="text-xs font-semibold" style="color: ${theme.mutedTextColor};">
+                ${escapeHtml(output.gradeLevel || output.educationalLevel || '')}
+              </span>
+            </div>
+            <div class="text-xs font-mono px-2.5 py-0.5 rounded-full"
+                 style="background: ${theme.primary}33; color: ${theme.accentText}; border: 1px solid ${theme.primary}66;">
+              ${currentIdx + 1} / ${slides.length}
+            </div>
           </div>
 
-          <div class="pt-4 border-t flex items-center justify-between text-[10px]"
+          <!-- Slide Content: 2-Column Split (Left: Concise Bullets, Right: Generated Visual Picture) -->
+          <div class="grid grid-cols-1 md:grid-cols-12 gap-5 my-auto items-center">
+            
+            <!-- Left Column: Concise, High-Impact Text (6 cols) -->
+            <div class="md:col-span-6 space-y-3">
+              <h2 class="text-lg sm:text-xl font-bold leading-tight tracking-tight"
+                  style="color: ${theme.textColor}; font-family: ${theme.fontFamily};">
+                ${escapeHtml(activeSlide.title || 'Slide Title')}
+              </h2>
+
+              <ul class="space-y-2">
+                ${(activeSlide.bullets || []).slice(0, 3).map(b => `
+                  <li class="flex items-start gap-2 text-xs sm:text-[13px] leading-relaxed" style="color: ${theme.mutedTextColor};">
+                    <span class="text-sm leading-none font-bold shrink-0 mt-0.5" style="color: ${theme.secondary};">▸</span>
+                    <span>${formatBulletWithBold(escapeHtml(b))}</span>
+                  </li>
+                `).join('')}
+              </ul>
+
+              <!-- Concise Takeaway Pill -->
+              <div class="pt-1.5">
+                <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-[10.5px] font-semibold"
+                     style="background: ${theme.cardDark}; border: 1px solid ${theme.primary}44; color: ${theme.accentText};">
+                  <span>💡</span>
+                  <span class="truncate max-w-[220px]">Insight: ${escapeHtml(activeSlide.bullets?.[0] || activeSlide.title)}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Column: Generated Visual / Picture / Diagram (6 cols) -->
+            <div class="md:col-span-6 flex flex-col items-center justify-center">
+              <div class="w-full aspect-[5/3] rounded-xl overflow-hidden shadow-md border relative group"
+                   style="border-color: ${theme.primary}44; background: ${theme.bgDark};">
+                
+                ${activeSlide.customImage ? `
+                  <img src="${activeSlide.customImage}" alt="Custom Visual" class="w-full h-full object-cover">
+                ` : (activeSlide.visualSvg || generateEducationalVisual({
+                    topic: output.topic || activeSlide.title,
+                    subject: output.subject,
+                    slideType: activeSlide.slideType,
+                    slideIndex: currentIdx,
+                    theme
+                  }))}
+
+                <!-- Visual Badge Overlay -->
+                <div class="absolute bottom-2 right-2 px-2 py-0.5 rounded text-[8.5px] font-mono font-bold bg-black/60 text-white backdrop-blur-xs flex items-center gap-1">
+                  <span>✨</span>
+                  <span>Generated Visual</span>
+                </div>
+              </div>
+              <span class="text-[9.5px] mt-1.5 font-medium text-center truncate max-w-full" style="color: ${theme.mutedTextColor};">
+                ${escapeHtml(activeSlide.visualCaption || getVisualCaption(output.topic || activeSlide.title, activeSlide.slideType, currentIdx + 1))}
+              </span>
+            </div>
+
+          </div>
+
+          <!-- Bottom Slide Footer -->
+          <div class="pt-2.5 border-t flex items-center justify-between text-[10px]"
                style="border-color: ${theme.primary}33; color: ${theme.mutedTextColor};">
             <span style="color: ${theme.accentText}; font-weight: 600;">Theme: ${escapeHtml(theme.name)}</span>
             <span>${escapeHtml(output.topic || '')}</span>
           </div>
+
         </div>
 
-        <!-- Carousel Navigation Controls -->
-        <div class="flex items-center justify-between pt-4">
-          <button id="prev-slide-btn" class="px-3.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors disabled:opacity-40" ${currentIdx === 0 ? 'disabled' : ''}>
-            ← Previous Slide
-          </button>
-          <span class="text-xs font-mono text-slate-500">Slide ${currentIdx + 1} of ${slides.length}</span>
-          <button id="next-slide-btn" class="px-3.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors disabled:opacity-40" ${currentIdx >= slides.length - 1 ? 'disabled' : ''}>
-            Next Slide →
-          </button>
+        <!-- Carousel & Visual Toolbar Controls -->
+        <div class="space-y-2.5 pt-4">
+          <div class="flex items-center justify-between">
+            <button id="prev-slide-btn" class="px-3.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors disabled:opacity-40" ${currentIdx === 0 ? 'disabled' : ''}>
+              ← Previous Slide
+            </button>
+            <span class="text-xs font-mono text-slate-500">Slide ${currentIdx + 1} of ${slides.length}</span>
+            <button id="next-slide-btn" class="px-3.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors disabled:opacity-40" ${currentIdx >= slides.length - 1 ? 'disabled' : ''}>
+              Next Slide →
+            </button>
+          </div>
+
+          <!-- Visual Controls Row -->
+          <div class="flex items-center justify-center gap-2 pt-1 border-t border-slate-100 dark:border-slate-800">
+            <button id="regenerate-slide-visual-btn" class="px-3 py-1 rounded-lg text-[11px] font-semibold bg-violet-50 dark:bg-violet-950/50 hover:bg-violet-100 dark:hover:bg-violet-900/60 text-violet-700 dark:text-violet-300 border border-violet-200 dark:border-violet-800 transition-colors flex items-center gap-1.5 cursor-pointer" title="Regenerate this slide's visual diagram or illustration">
+              <span>🔄</span>
+              <span>Regenerate Visual</span>
+            </button>
+            <button id="download-slide-svg-btn" class="px-3 py-1 rounded-lg text-[11px] font-semibold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-750 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 transition-colors flex items-center gap-1.5 cursor-pointer" title="Download vector graphic of this slide's visual">
+              <span>📥</span>
+              <span>Download Visual (.svg)</span>
+            </button>
+            <button id="upload-slide-image-btn" class="px-3 py-1 rounded-lg text-[11px] font-semibold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-750 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 transition-colors flex items-center gap-1.5 cursor-pointer" title="Replace visual with custom image URL">
+              <span>🖼️</span>
+              <span>Custom Image</span>
+            </button>
+          </div>
         </div>
+
       </div>
 
       <!-- Active Slide Inline Editor (3 cols) -->
@@ -1463,13 +1551,18 @@ function renderSlideWorkspace(output) {
         </div>
 
         <div>
-          <label class="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">Bullet Points (1 per line)</label>
-          <textarea id="edit-slide-bullets" rows="5" class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-850 text-slate-900 dark:text-white outline-none leading-relaxed">${escapeHtml((activeSlide.bullets || []).join('\n'))}</textarea>
+          <label class="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">Concise Bullets (Max 3, 1 per line)</label>
+          <textarea id="edit-slide-bullets" rows="4" class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-850 text-slate-900 dark:text-white outline-none leading-relaxed">${escapeHtml((activeSlide.bullets || []).join('\n'))}</textarea>
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">Visual Figure Caption</label>
+          <input type="text" id="edit-slide-visual-caption" value="${escapeHtml(activeSlide.visualCaption || '')}" placeholder="e.g. Fig 1: Mechanism Flow" class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-850 text-slate-900 dark:text-white outline-none">
         </div>
 
         <div>
           <label class="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">Speaker Notes (Facilitator Script)</label>
-          <textarea id="edit-slide-notes" rows="3" class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-850 text-slate-900 dark:text-white outline-none leading-relaxed text-[11px]">${escapeHtml(activeSlide.speakerNotes || '')}</textarea>
+          <textarea id="edit-slide-notes" rows="2" class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-850 text-slate-900 dark:text-white outline-none leading-relaxed text-[11px]">${escapeHtml(activeSlide.speakerNotes || '')}</textarea>
         </div>
 
         <button id="apply-slide-edit-btn" class="w-full py-2 px-3 rounded-lg text-white font-semibold text-xs transition-colors shadow-2xs"
@@ -1494,7 +1587,7 @@ function renderPosterWorkspace(output) {
          style="background: ${theme.gradient}; border-color: ${theme.primary}66; color: ${theme.textColor}; font-family: ${theme.fontFamily};">
       
       <!-- Top Scholarly Header -->
-      <div class="text-center pb-6 border-b" style="border-color: ${theme.primary}44;">
+      <div class="text-center pb-5 border-b" style="border-color: ${theme.primary}44;">
         <span class="inline-block px-3 py-1 rounded-full text-xs font-mono font-bold tracking-widest mb-2"
               style="background: ${theme.secondary}22; color: ${theme.secondaryText}; border: 1px solid ${theme.secondary}55;">
           ${escapeHtml(output.subject || 'INSTRUCTIONAL RESOURCE')} • ${escapeHtml(output.gradeLevel || output.educationalLevel || 'ALL LEVELS')} POSTER
@@ -1508,16 +1601,64 @@ function renderPosterWorkspace(output) {
         </p>
       </div>
 
-      <!-- Main Infographic 3-Card Grid -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 my-8">
+      <!-- Prominent Hero Infographic Visual Banner -->
+      <div class="my-6 rounded-2xl overflow-hidden border shadow-lg relative group"
+           style="background: ${theme.bgDark}; border-color: ${theme.primary}55;">
+        <div class="w-full h-44 sm:h-52">
+          ${p.heroVisualSvg || generateEducationalVisual({
+            topic: output.topic || p.headline,
+            subject: output.subject,
+            slideType: 'infographic',
+            slideIndex: 0,
+            theme,
+            width: 700,
+            height: 220
+          })}
+        </div>
+        <div class="px-4 py-2 border-t flex items-center justify-between text-[11px]"
+             style="background: ${theme.cardDark}; border-color: ${theme.primary}33; color: ${theme.mutedTextColor};">
+          <span class="font-semibold text-white flex items-center gap-1.5">
+            <span style="color: ${theme.secondary};">📊</span>
+            <span>${escapeHtml(getVisualCaption(output.topic || p.headline, 'infographic', 1))}</span>
+          </span>
+          <span class="px-2 py-0.5 rounded text-[9px] font-mono font-bold"
+                style="background: ${theme.secondary}22; color: ${theme.secondaryText}; border: 1px solid ${theme.secondary}44;">
+            SYSTEM MODEL
+          </span>
+        </div>
+      </div>
+
+      <!-- Main Infographic 3-Card Grid with Pillar Diagrams -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 my-6">
         ${p.cards.map((c, i) => `
-          <div class="p-5 rounded-xl border flex flex-col justify-between"
+          <div class="p-4 rounded-xl border flex flex-col justify-between"
                style="background: ${theme.cardDark}cc; border-color: ${theme.primary}44;">
             <div>
-              <span class="w-7 h-7 rounded-lg font-mono font-bold text-xs flex items-center justify-center mb-3"
-                    style="background: ${theme.primary}33; color: ${theme.accentText}; border: 1px solid ${theme.primary}66;">
-                0${i+1}
-              </span>
+              <div class="flex items-center justify-between mb-2.5">
+                <span class="w-6 h-6 rounded-lg font-mono font-bold text-xs flex items-center justify-center"
+                      style="background: ${theme.primary}33; color: ${theme.accentText}; border: 1px solid ${theme.primary}66;">
+                  0${i+1}
+                </span>
+                <span class="text-[9px] font-mono uppercase tracking-wider px-2 py-0.5 rounded"
+                      style="background: ${theme.secondary}15; color: ${theme.secondaryText}; border: 1px solid ${theme.secondary}33;">
+                  Phase ${i+1}
+                </span>
+              </div>
+
+              <!-- Pillar Mini-Visual Diagram -->
+              <div class="w-full h-24 rounded-lg overflow-hidden mb-2.5 border"
+                   style="background: ${theme.bgDark}; border-color: ${theme.primary}33;">
+                ${c.visualSvg || generateEducationalVisual({
+                  topic: c.title || output.topic,
+                  subject: output.subject,
+                  slideType: 'pillar',
+                  slideIndex: i + 1,
+                  theme,
+                  width: 220,
+                  height: 96
+                })}
+              </div>
+
               <h3 class="text-sm font-bold mb-1.5" style="color: ${theme.textColor}; font-family: ${theme.fontFamily};">${escapeHtml(c.title)}</h3>
               <p class="text-xs leading-relaxed" style="color: ${theme.mutedTextColor};">${escapeHtml(c.desc)}</p>
             </div>
@@ -1609,6 +1750,54 @@ function renderWorksheetWorkspace(output) {
             <div><strong>Student:</strong> ____________________</div>
             <div><strong>Date:</strong> _______________</div>
             <div><strong>Score:</strong> ______ / 30</div>
+          </div>
+        </div>
+
+        <!-- Educational Visual Stimulus Section (Figure 1 & Figure 2 Analysis Diagrams) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 rounded-xl border bg-slate-50 dark:bg-slate-850/60"
+             style="border-color: ${theme.primary}33;">
+          <!-- Figure 1 -->
+          <div class="space-y-1.5 text-center">
+            <div class="w-full h-36 rounded-lg overflow-hidden border shadow-2xs"
+                 style="background: ${theme.bgDark}; border-color: ${theme.primary}44;">
+              ${generateEducationalVisual({
+                topic: output.topic || output.title,
+                subject: output.subject,
+                slideType: 'Explanation',
+                slideIndex: 0,
+                theme,
+                width: 320,
+                height: 144
+              })}
+            </div>
+            <span class="text-[10px] font-bold block" style="color: ${theme.primary};">
+              Figure 1: ${escapeHtml(output.topic || 'System')} Structural Model
+            </span>
+            <span class="text-[9px] text-slate-500 dark:text-slate-400 block">
+              Reference for Part I & Part II Analytical Questions
+            </span>
+          </div>
+
+          <!-- Figure 2 -->
+          <div class="space-y-1.5 text-center">
+            <div class="w-full h-36 rounded-lg overflow-hidden border shadow-2xs"
+                 style="background: ${theme.bgDark}; border-color: ${theme.secondary}44;">
+              ${generateEducationalVisual({
+                topic: output.topic || output.title,
+                subject: output.subject,
+                slideType: 'Mechanism',
+                slideIndex: 1,
+                theme,
+                width: 320,
+                height: 144
+              })}
+            </div>
+            <span class="text-[10px] font-bold block" style="color: ${theme.secondary};">
+              Figure 2: Empirical Mechanism & System Dynamics
+            </span>
+            <span class="text-[9px] text-slate-500 dark:text-slate-400 block">
+              Reference for Critical Thinking & Problem Solving
+            </span>
           </div>
         </div>
 
@@ -1716,16 +1905,29 @@ function renderFlashcardsWorkspace(output) {
 
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         ${cards.map((c, idx) => `
-          <div data-card-index="${idx}" class="flashcard-item h-48 rounded-2xl border bg-white dark:bg-slate-850 p-6 shadow-sm hover:shadow-md cursor-pointer transition-all flex flex-col justify-between group"
+          <div data-card-index="${idx}" class="flashcard-item min-h-[220px] rounded-2xl border bg-white dark:bg-slate-850 p-5 shadow-sm hover:shadow-md cursor-pointer transition-all flex flex-col justify-between group"
                style="border-color: ${theme.primary}44;">
             <div class="flex items-center justify-between text-[10px] font-bold text-slate-400">
               <span style="color: ${theme.primary};">CARD ${idx + 1} OF ${cards.length}</span>
               <span class="group-hover:underline" style="color: ${theme.secondary};">Click to Flip 🔄</span>
             </div>
             
-            <div class="card-content-area text-center my-auto">
-              <span class="card-label text-[10px] font-mono uppercase tracking-wider font-bold block mb-1" style="color: ${theme.secondary};">Concept Term</span>
-              <h3 class="card-text text-base font-bold text-slate-900 dark:text-white leading-snug" style="font-family: ${theme.fontFamily};">
+            <div class="card-content-area text-center my-auto w-full">
+              <!-- Visual Illustration Thumbnail for Card -->
+              <div class="w-full h-20 rounded-lg overflow-hidden border mb-2 shadow-2xs mx-auto max-w-[210px] flex items-center justify-center"
+                   style="background: ${theme.bgDark}; border-color: ${theme.primary}33;">
+                ${c.visualSvg || generateEducationalVisual({
+                  topic: c.front || output.topic,
+                  subject: output.subject,
+                  slideType: 'flashcard',
+                  slideIndex: idx,
+                  theme,
+                  width: 210,
+                  height: 80
+                })}
+              </div>
+              <span class="card-label text-[10px] font-mono uppercase tracking-wider font-bold block mb-0.5" style="color: ${theme.secondary};">Concept Term</span>
+              <h3 class="card-text text-sm sm:text-base font-bold text-slate-900 dark:text-white leading-snug" style="font-family: ${theme.fontFamily};">
                 ${escapeHtml(c.front)}
               </h3>
             </div>
@@ -2655,6 +2857,7 @@ function setupWorkspaceListeners(container, navigateTo, showToast) {
     const titleVal = container.querySelector('#edit-slide-title')?.value;
     const bulletsVal = container.querySelector('#edit-slide-bullets')?.value;
     const notesVal = container.querySelector('#edit-slide-notes')?.value;
+    const captionVal = container.querySelector('#edit-slide-visual-caption')?.value;
 
     if (activeStudioState.activeOutput?.slides) {
       const slide = activeStudioState.activeOutput.slides[activeStudioState.activeSlideIndex];
@@ -2662,8 +2865,81 @@ function setupWorkspaceListeners(container, navigateTo, showToast) {
         slide.title = titleVal || slide.title;
         slide.bullets = (bulletsVal || '').split('\n').filter(b => b.trim().length > 0);
         slide.speakerNotes = notesVal || '';
+        if (captionVal !== undefined) slide.visualCaption = captionVal;
         store.saveOutput(activeStudioState.activeOutput);
         showToast('Updated slide contents.', 'success');
+        refreshView(container, navigateTo, showToast);
+      }
+    }
+  });
+
+  // Regenerate Slide Visual
+  container.querySelector('#regenerate-slide-visual-btn')?.addEventListener('click', () => {
+    const output = activeStudioState.activeOutput;
+    const slides = output?.slides || [];
+    const currentIdx = activeStudioState.activeSlideIndex || 0;
+    const slide = slides[currentIdx];
+    if (slide) {
+      delete slide.customImage;
+      const theme = resolveDesignTheme(output.designOptions || activeStudioState.designOptions);
+      slide.visualSvg = generateEducationalVisual({
+        topic: output.topic || slide.title,
+        subject: output.subject,
+        slideType: slide.slideType,
+        slideIndex: currentIdx + Math.floor(Math.random() * 8) + 1,
+        theme,
+        width: 400,
+        height: 240
+      });
+      slide.visualCaption = getVisualCaption(output.topic || slide.title, slide.slideType, currentIdx + 1);
+      store.saveOutput(output);
+      showToast('🔄 Generated fresh visual illustration!', 'success');
+      refreshView(container, navigateTo, showToast);
+    }
+  });
+
+  // Download Slide Visual SVG
+  container.querySelector('#download-slide-svg-btn')?.addEventListener('click', () => {
+    const output = activeStudioState.activeOutput;
+    const slides = output?.slides || [];
+    const currentIdx = activeStudioState.activeSlideIndex || 0;
+    const slide = slides[currentIdx];
+    if (slide) {
+      const theme = resolveDesignTheme(output.designOptions || activeStudioState.designOptions);
+      const svgContent = slide.visualSvg || generateEducationalVisual({
+        topic: output.topic || slide.title,
+        subject: output.subject,
+        slideType: slide.slideType,
+        slideIndex: currentIdx,
+        theme,
+        width: 400,
+        height: 240
+      });
+      const blob = new Blob([svgContent], { type: 'image/svg+xml;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${(output.topic || 'slide').replace(/[^a-z0-9_-]/gi, '_')}_slide_${currentIdx + 1}_visual.svg`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast('📥 Downloaded slide vector graphic (.svg)!', 'success');
+    }
+  });
+
+  // Custom Image URL / Data URI
+  container.querySelector('#upload-slide-image-btn')?.addEventListener('click', () => {
+    const url = prompt('Enter an image URL or SVG Data URI to display on this slide:');
+    if (url && url.trim()) {
+      const output = activeStudioState.activeOutput;
+      const slides = output?.slides || [];
+      const currentIdx = activeStudioState.activeSlideIndex || 0;
+      const slide = slides[currentIdx];
+      if (slide) {
+        slide.customImage = url.trim();
+        store.saveOutput(output);
+        showToast('🖼️ Custom image applied to slide!', 'success');
         refreshView(container, navigateTo, showToast);
       }
     }
@@ -2878,19 +3154,24 @@ export function parsePresentationSlides(rawText, formData) {
       if (currentSlide) {
         currentSlide.speakerNotes = trimmed.replace(/^(\*\*notes:\*\*|notes:|speaker note:)\s*/i, '');
       }
+    } else if (trimmed.toLowerCase().startsWith('visual:') || trimmed.toLowerCase().startsWith('**visual:**') || trimmed.toLowerCase().startsWith('image:')) {
+      if (currentSlide) {
+        currentSlide.visualCaption = trimmed.replace(/^(\*\*visual:\*\*|visual:|\*\*image:\*\*|image:)\s*/i, '');
+      }
     }
   }
 
   if (currentSlide) slides.push(currentSlide);
 
+  const topic = formData?.topic || 'Instructional Concept';
+  const subject = formData?.subject || 'Discipline';
+
   // Fallback 5-slide instructional deck if parser got few slides - dynamically constructed for user topic
   if (slides.length < 3) {
-    const topic = formData?.topic || 'Instructional Concept';
-    const subject = formData?.subject || 'Discipline';
     const grade = formData?.gradeLevel || formData?.educationalLevel || 'Standard Level';
     const comp = formData?.competency || 'Core Discipline Competencies';
 
-    return [
+    const fallbackSlides = [
       {
         title: `${topic}: Instructional Presentation`,
         slideType: 'Title',
@@ -2942,7 +3223,33 @@ export function parsePresentationSlides(rawText, formData) {
         speakerNotes: 'Administer the formative exit slip to gauge individual mastery against target objectives.'
       }
     ];
+
+    fallbackSlides.forEach((s, idx) => {
+      s.visualCaption = s.visualCaption || getVisualCaption(topic, s.slideType, idx + 1);
+      s.visualSvg = s.visualSvg || generateEducationalVisual({
+        topic,
+        subject,
+        slideType: s.slideType,
+        slideIndex: idx,
+        width: 400,
+        height: 240
+      });
+    });
+
+    return fallbackSlides;
   }
+
+  slides.forEach((s, idx) => {
+    s.visualCaption = s.visualCaption || getVisualCaption(topic, s.slideType || 'Content', idx + 1);
+    s.visualSvg = s.visualSvg || generateEducationalVisual({
+      topic: topic || s.title,
+      subject,
+      slideType: s.slideType || 'Content',
+      slideIndex: idx,
+      width: 400,
+      height: 240
+    });
+  });
 
   return slides;
 }
@@ -3029,12 +3336,37 @@ export function parsePosterData(rawText, formData) {
     takeaways = takeMatch[1].trim();
   }
 
+  const topic = formData?.topic || headline || 'Core Concept';
+  const subject = formData?.subject || 'All Subjects';
+
+  const heroVisualSvg = generateEducationalVisual({
+    topic,
+    subject,
+    slideType: 'infographic',
+    slideIndex: 0,
+    width: 700,
+    height: 220
+  });
+
+  const finalCards = cards.slice(0, 3);
+  finalCards.forEach((c, i) => {
+    c.visualSvg = generateEducationalVisual({
+      topic: c.title || topic,
+      subject,
+      slideType: 'pillar',
+      slideIndex: i + 1,
+      width: 220,
+      height: 96
+    });
+  });
+
   return {
     headline,
     subtitle,
-    cards: cards.slice(0, 3),
+    cards: finalCards,
     statistics,
-    takeaways
+    takeaways,
+    heroVisualSvg
   };
 }
 
@@ -3135,7 +3467,7 @@ export function parseFlashcards(rawText, formData) {
     const subject = formData?.subject || 'Discipline';
     const comp = formData?.competency || `Master fundamental theories and analytical processes in ${subject}.`;
 
-    return [
+    const fallbackCards = [
       {
         front: `${topic}: Core Definition`,
         back: `The primary phenomenon in ${subject} characterized by structured mechanisms, governing principles, and predictable systemic outcomes.`
@@ -3161,7 +3493,34 @@ export function parseFlashcards(rawText, formData) {
         back: comp
       }
     ];
+
+    fallbackCards.forEach((c, idx) => {
+      c.visualSvg = generateEducationalVisual({
+        topic: c.front || topic,
+        subject,
+        slideType: 'flashcard',
+        slideIndex: idx,
+        width: 210,
+        height: 80
+      });
+    });
+
+    return fallbackCards;
   }
+
+  const topic = formData?.topic || 'Core Concept';
+  const subject = formData?.subject || 'Discipline';
+
+  cards.forEach((c, idx) => {
+    c.visualSvg = generateEducationalVisual({
+      topic: c.front || topic,
+      subject,
+      slideType: 'flashcard',
+      slideIndex: idx,
+      width: 210,
+      height: 80
+    });
+  });
 
   return cards;
 }
@@ -3238,12 +3597,13 @@ function downloadPowerPointPresentation(output) {
   </xml>
   <![endif]-->
   <style>
-    body { font-family: ${theme.fontFamily}, 'Calibri', Arial, sans-serif; background-color: ${theme.bgDark}; color: ${theme.textColor}; }
+    body { font-family: ${theme.fontFamily}, 'Calibri', Arial, sans-serif; background-color: ${theme.bgDark}; color: ${theme.textColor}; margin: 0; padding: 20px; }
     .slide {
       page-break-after: always;
       width: 960px;
-      height: 540px;
-      padding: 40px;
+      min-height: 540px;
+      height: auto;
+      padding: 36px 40px;
       margin: 20px auto;
       background: ${theme.cardDark};
       border: 2px solid ${theme.primary};
@@ -3251,12 +3611,17 @@ function downloadPowerPointPresentation(output) {
       box-sizing: border-box;
       position: relative;
     }
-    h1 { color: ${theme.primary}; font-size: 26pt; margin-bottom: 8pt; font-family: ${theme.fontFamily}; }
-    h2 { color: ${theme.secondary}; font-size: 13pt; text-transform: uppercase; letter-spacing: 2pt; margin-bottom: 18pt; font-family: ${theme.fontFamily}; }
-    ul { font-size: 17pt; line-height: 1.5; color: ${theme.textColor}; }
-    li { margin-bottom: 10pt; }
-    .footer { position: absolute; bottom: 20px; left: 40px; right: 40px; font-size: 10pt; color: ${theme.mutedTextColor}; border-top: 1px solid ${theme.primary}44; padding-top: 10px; display: flex; justify-content: space-between; }
-    .notes { background: ${theme.bgDark}; color: ${theme.mutedTextColor}; padding: 12px; border-left: 4px solid ${theme.secondary}; font-size: 11pt; margin-top: 16pt; border-radius: 4px; }
+    h1 { color: ${theme.primary}; font-size: 22pt; margin-bottom: 6pt; font-family: ${theme.fontFamily}; }
+    h2 { color: ${theme.secondary}; font-size: 11pt; text-transform: uppercase; letter-spacing: 2pt; margin-bottom: 14pt; font-family: ${theme.fontFamily}; }
+    .content-grid { display: flex; gap: 24px; align-items: center; margin-top: 14pt; }
+    .bullets-col { flex: 1.1; }
+    .visual-col { flex: 1; text-align: center; }
+    .visual-frame { border-radius: 10px; overflow: hidden; border: 1px solid ${theme.primary}66; background: ${theme.bgDark}; max-height: 250px; display: flex; align-items: center; justify-content: center; }
+    .visual-caption { font-size: 9pt; color: ${theme.mutedTextColor}; margin-top: 6px; font-weight: 500; }
+    ul { font-size: 14pt; line-height: 1.6; color: ${theme.textColor}; padding-left: 20px; margin: 0; }
+    li { margin-bottom: 8pt; }
+    .footer { position: relative; margin-top: 24px; font-size: 9pt; color: ${theme.mutedTextColor}; border-top: 1px solid ${theme.primary}44; padding-top: 8px; display: flex; justify-content: space-between; }
+    .notes { background: ${theme.bgDark}; color: ${theme.mutedTextColor}; padding: 10px 14px; border-left: 4px solid ${theme.secondary}; font-size: 10pt; margin-top: 14pt; border-radius: 4px; }
   </style>
 </head>
 <body>
@@ -3264,9 +3629,29 @@ function downloadPowerPointPresentation(output) {
     <div class="slide">
       <h2>${escapeHtml(output.subject || 'PEDAIA')} • SLIDE ${idx + 1}</h2>
       <h1>${escapeHtml(s.title)}</h1>
-      <ul>
-        ${(s.bullets || []).map(b => `<li>${escapeHtml(b)}</li>`).join('')}
-      </ul>
+      <div class="content-grid">
+        <div class="bullets-col">
+          <ul>
+            ${(s.bullets || []).map(b => `<li>${formatBulletWithBold(escapeHtml(b))}</li>`).join('')}
+          </ul>
+        </div>
+        <div class="visual-col">
+          <div class="visual-frame">
+            ${s.customImage ? `<img src="${s.customImage}" style="width:100%; height:auto;" alt="Visual">` : (s.visualSvg || generateEducationalVisual({
+              topic: output.topic || s.title,
+              subject: output.subject,
+              slideType: s.slideType,
+              slideIndex: idx,
+              theme,
+              width: 400,
+              height: 240
+            }))}
+          </div>
+          <div class="visual-caption">
+            ${escapeHtml(s.visualCaption || getVisualCaption(output.topic || s.title, s.slideType, idx + 1))}
+          </div>
+        </div>
+      </div>
       ${s.speakerNotes ? `<div class="notes"><strong>Speaker Notes:</strong> ${escapeHtml(s.speakerNotes)}</div>` : ''}
       <div class="footer">
         <span>${escapeHtml(output.topic || '')}</span>
@@ -3305,12 +3690,14 @@ function openInteractiveSlideDeckWindow(output) {
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { background: ${theme.bgDark}; color: ${theme.textColor}; font-family: ${theme.fontFamily}, system-ui, sans-serif; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
     #slide-stage { flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px; background: ${theme.gradient}; }
-    .slide-card { width: 100%; max-width: 1080px; aspect-ratio: 16/9; background: ${theme.cardDark}; border: 2px solid ${theme.primary}; border-radius: 20px; padding: 60px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.6); }
-    h1 { font-size: 2.5rem; color: ${theme.primary}; line-height: 1.2; margin-bottom: 24px; font-family: ${theme.fontFamily}; }
-    .eyebrow { font-size: 0.85rem; font-family: monospace; text-transform: uppercase; letter-spacing: 0.15em; color: ${theme.secondary}; font-weight: bold; margin-bottom: 12px; }
-    ul { list-style: none; font-size: 1.35rem; line-height: 1.6; color: ${theme.textColor}; }
-    li { margin-bottom: 16px; display: flex; align-items: flex-start; gap: 12px; }
-    li::before { content: "•"; color: ${theme.secondary}; font-size: 1.8rem; line-height: 1; }
+    .slide-card { width: 100%; max-width: 1100px; aspect-ratio: 16/9; background: ${theme.cardDark}; border: 2px solid ${theme.primary}; border-radius: 20px; padding: 44px 50px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.6); }
+    h1 { font-size: 2.2rem; color: ${theme.primary}; line-height: 1.2; margin-bottom: 16px; font-family: ${theme.fontFamily}; }
+    .eyebrow { font-size: 0.85rem; font-family: monospace; text-transform: uppercase; letter-spacing: 0.15em; color: ${theme.secondary}; font-weight: bold; margin-bottom: 8px; }
+    .slide-body { display: grid; grid-template-columns: 1.15fr 1fr; gap: 36px; align-items: center; flex: 1; margin: 12px 0; }
+    ul { list-style: none; font-size: 1.25rem; line-height: 1.6; color: ${theme.textColor}; }
+    li { margin-bottom: 14px; display: flex; align-items: flex-start; gap: 10px; }
+    li::before { content: "•"; color: ${theme.secondary}; font-size: 1.6rem; line-height: 1; }
+    .visual-stage-box { width: 100%; aspect-ratio: 5/3; border-radius: 14px; overflow: hidden; border: 1px solid ${theme.primary}55; background: ${theme.bgDark}; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.3); }
     #toolbar { height: 60px; background: ${theme.cardDark}; border-top: 1px solid ${theme.primary}44; display: flex; align-items: center; justify-content: space-between; padding: 0 30px; }
     button { background: ${theme.primary}; color: white; border: none; padding: 8px 18px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 13px; transition: opacity 0.2s; }
     button:hover { opacity: 0.85; }
@@ -3322,9 +3709,15 @@ function openInteractiveSlideDeckWindow(output) {
       <div>
         <div class="eyebrow" id="slide-eyebrow">SLIDE 1</div>
         <h1 id="slide-title">Slide Title</h1>
-        <ul id="slide-bullets"></ul>
       </div>
-      <div style="display:flex; justify-content:space-between; font-size:12px; color:${theme.mutedTextColor}; border-top:1px solid ${theme.primary}33; padding-top:16px;">
+      <div class="slide-body">
+        <ul id="slide-bullets"></ul>
+        <div style="display:flex; flex-direction:column; align-items:center;">
+          <div class="visual-stage-box" id="slide-visual-container"></div>
+          <div id="slide-visual-caption" style="font-size: 0.8rem; color: ${theme.mutedTextColor}; margin-top: 8px; font-weight: 500; text-align: center;"></div>
+        </div>
+      </div>
+      <div style="display:flex; justify-content:space-between; font-size:12px; color:${theme.mutedTextColor}; border-top:1px solid ${theme.primary}33; padding-top:12px;">
         <span>${escapeHtml(output.title)}</span>
         <span id="slide-counter">1 / ${slides.length}</span>
       </div>
@@ -3356,6 +3749,10 @@ function openInteractiveSlideDeckWindow(output) {
         li.textContent = b;
         bContainer.appendChild(li);
       });
+      document.getElementById('slide-visual-container').innerHTML = s.customImage ?
+        '<img src="' + s.customImage + '" style="width:100%; height:100%; object-fit:cover;">' :
+        (s.visualSvg || '');
+      document.getElementById('slide-visual-caption').textContent = s.visualCaption || '';
       document.getElementById('slide-counter').textContent = (cur + 1) + ' / ' + slides.length;
       document.getElementById('nav-count').textContent = (cur + 1) + ' / ' + slides.length;
     }
@@ -3426,7 +3823,21 @@ function openPrintablePosterWindow(output) {
   <div class="poster-box">
     <div class="badge">${escapeHtml(output.subject || 'CURRICULUM RESOURCE')} • ${escapeHtml(output.gradeLevel || output.educationalLevel || 'ALL LEVELS')} EDUCATIONAL POSTER</div>
     <h1>${escapeHtml(p.headline)}</h1>
-    <p style="text-align: center; font-size: 12pt; color: #475569; margin-bottom: 24px;">${escapeHtml(p.subtitle)}</p>
+    <p style="text-align: center; font-size: 12pt; color: #475569; margin-bottom: 20px;">${escapeHtml(p.subtitle)}</p>
+    
+    <!-- Hero Infographic Visual for Printable Poster -->
+    <div style="border-radius: 12px; overflow: hidden; border: 2px solid ${theme.primary}55; background: ${theme.bgDark}; margin-bottom: 24px; text-align: center;">
+      ${p.heroVisualSvg || generateEducationalVisual({
+        topic: output.topic || p.headline,
+        subject: output.subject,
+        slideType: 'infographic',
+        slideIndex: 0,
+        theme,
+        width: 700,
+        height: 220
+      })}
+    </div>
+
     <div class="grid">
       ${p.cards.map((c, i) => `
         <div class="card">

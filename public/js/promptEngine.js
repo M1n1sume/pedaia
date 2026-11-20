@@ -847,6 +847,10 @@ export function buildAiOutputStudioPrompt(config = {}) {
       specificDirectives = `[SLIDE DECK SPECIFICATIONS]
 - Deliverable Format: ${typeLabel} (${slideCount} slides, ${aspect} widescreen)
 - Visual Theme: ${theme}
+- Visual-First Pedagogy Mandate:
+  * Prioritize high-impact visual illustrations, diagrams, and figures over walls of text.
+  * Keep text concise and punchy: exactly 2 to 3 bite-sized bullet points per slide (max 15 words per bullet).
+  * For EVERY slide, include an explicit 'Visual:' line specifying the diagram, graphic, scientific illustration, or picture to display on the slide.
 - Structure:
   1. Title Slide with subject, grade level, and motivating inquiry hook.
   2. Clear Bloom-aligned Learning Objectives.
@@ -855,7 +859,7 @@ export function buildAiOutputStudioPrompt(config = {}) {
   5. Real-World Application & Synthetic Evaluation.
   6. Key Takeaways & Summary Slide.
 ${speakerNotes ? '- Speaker Notes: For EVERY slide, provide comprehensive word-for-word teacher narration, discussion questions, and pedagogical cues in a dedicated "Notes:" section.' : ''}
-- Formatting: Format each slide distinctly with '### Slide [N]: [Slide Title]', slide type, visual directive, bulleted content, and speaker notes.`;
+- Formatting: Format each slide distinctly with '### Slide [N]: [Slide Title]', slide type, Visual: [Visual illustration spec], 2-3 concise bullets, and speaker notes.`;
       break;
     }
 

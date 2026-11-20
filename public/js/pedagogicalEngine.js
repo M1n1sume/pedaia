@@ -506,7 +506,7 @@ function synthesizeRefinement(prompt, provider, model) {
 // -------------------------------------------------------------
 // 6. AI OUTPUT STUDIO ARTIFACT SYNTHESIS
 // -------------------------------------------------------------
-function synthesizeAiDeliverable(prompt, provider, model) {
+export function synthesizeAiDeliverable(prompt, provider, model) {
   const subject = extractField(prompt, /(?:Subject \/ Discipline|Subject):\s*(.+)/i, 'General Science');
   const level = extractField(prompt, /(?:Educational Level|Grade \/ Target Level):\s*(.+)/i, 'Junior High School');
   const grade = extractField(prompt, /(?:Specific Grade \/ Course|Grade Level|Grade):\s*(.+)/i, '');
@@ -533,76 +533,79 @@ function synthesizeAiDeliverable(prompt, provider, model) {
 ### Slide 1: ${topic}
 - **Type:** Title Slide
 - **Subject:** ${subject} • ${level} ${grade}
+- **Visual:** High-impact hero visual diagram modeling the central phenomenon of ${topic}.
 - **Driving Inquiry:** How do the underlying mechanisms of ${topic} govern real-world outcomes?
-- **Framework:** Inquiry-based instruction designed for conceptual mastery.
+- **Core Standard:** ${competency}
 **Notes:** Greet students and activate schema by posing the driving inquiry question. Allow 30 seconds for quick turn-and-talk before advancing.
 
 ---
 
 ### Slide 2: Target Learning Objectives
 - **Type:** Objectives
-- **Cognitive Domain:** Define and explain the essential principles of ${topic}.
-- **Analytical Domain:** Analyze how structural elements interact to produce key observable results.
-- **Application Domain:** Synthesize findings to solve novel problem scenarios and justify claims with evidence.
+- **Visual:** Educational blueprint diagram detailing cognitive targets and success criteria.
+- **Conceptual Mastery:** Define and explain the essential principles of ${topic}.
+- **Analytical Reasoning:** Model how structural elements interact to produce observable results.
+- **Evidence-Based Claim:** Justify claims with evidence through real-world problem scenarios.
 **Notes:** Frame the success criteria. Emphasize that by the end of today's lesson, each student will formulate an evidence-based explanation.
 
 ---
 
 ### Slide 3: Essential Prior Knowledge & Schema Activation
 - **Type:** Activation & Foundations
-- Connect ${topic} to previously mastered standards in ${subject}.
-- Contrast common initial misconceptions with empirical evidence.
-- Identify primary academic terminology and foundational definitions.
-- Establish the baseline phenomenon that requires systematic explanation.
+- **Visual:** Comparative visual chart contrasting initial misconceptions with empirical evidence.
+- **Mastered Schema:** Connect ${topic} directly to foundational principles in ${subject}.
+- **Key Distinctions:** Contrast common initial misconceptions with empirical data.
+- **Anchor Phenomenon:** Establish the baseline phenomenon requiring systematic analysis.
 **Notes:** Probe prior conceptions: "What comes to mind when you encounter ${topic}?" Have students note one initial hypothesis on their tracking sheet.
 
 ---
 
 ### Slide 4: Core Mechanisms & Conceptual Architecture
 - **Type:** Deep Explanation
-- **Primary Mechanism:** Detailed breakdown of how ${topic} operates under standard conditions.
-- **Key Intermediate States:** Progression from initial inputs through catalytic transformations to stable products.
-- **Governing Relationships:** Key equations, qualitative relationships, and structural interactions.
-- **Visual Model:** Focus on the structural nodes and functional interdependencies.
+- **Visual:** Step-by-step schematic diagram depicting inputs, intermediate catalysts, and products.
+- **Primary Mechanism:** Step-by-step progression governing ${topic} under standard conditions.
+- **Intermediate States:** Transformation sequence from initial inputs to balanced equilibrium.
+- **Governing Law:** Core qualitative relationships and governing equations.
 **Notes:** Model thinking aloud. Guide student attention to the core sequence and annotate the governing relationships directly on the whiteboard.
 
 ---
 
 ### Slide 5: Real-World Case Study & Empirical Analysis
 - **Type:** Application & Case Study
-- **Authentic Scenario:** How ${topic} is leveraged or observed in contemporary industry, nature, or society.
-- **Empirical Evidence:** Examine primary data points, experimental graphs, or contextual case evidence.
-- **Cause-and-Effect Dynamics:** Trace the consequences when core variables in ${topic} are adjusted.
-- **Discussion Prompt:** Why does understanding ${topic} matter beyond the classroom?
+- **Visual:** Empirical data graph and contextual case study infographic model.
+- **Authentic Scenario:** Contemporary industry and environmental applications of ${topic}.
+- **Data Interpretation:** Observable primary data points and cause-and-effect dynamics.
+- **Critical Inquiry:** Predict systemic shifts when core parameters are adjusted.
 **Notes:** Facilitate student analysis of the case scenario. Prompt: "If one parameter shifts, what cascaded effect do we expect?"
 
 ---
 
 ### Slide 6: Collaborative Inquiry & Problem-Solving Task
 - **Type:** Active Learning Activity
-- **Task Directive:** Work in collaborative pairs to diagram and resolve the target challenge scenario.
-- **Step 1:** Annotate the primary variables, constraints, and operational mechanisms.
-- **Step 2:** Formulate a structured claim using Claim-Evidence-Reasoning (CER) structure.
-- **Step 3:** Prepare a 60-second summary justification to share with the seminar.
+- **Visual:** Collaborative workflow diagram outlining the student dyad problem-solving protocol.
+- **Task Directive:** Work in collaborative dyads to diagram and resolve the target challenge.
+- **Protocol:** Formulate a structured Claim-Evidence-Reasoning (CER) justification.
+- **Seminar Shareout:** Deliver a 60-second evidence-based synthesis to the classroom.
 **Notes:** Circulate among student dyads. Provide targeted scaffolding for groups needing assistance linking data evidence to reasoning.
 
 ---
 
 ### Slide 7: Formative Check for Understanding
 - **Type:** Formative Assessment
-- **Diagnostic Item 1:** Rapid conceptual verification checking core distinction.
-- **Diagnostic Item 2:** Scenario analysis asking students to predict the outcome of a parameter change.
-- **Self-Assessment Criterion:** Can you articulate the "why" behind the mechanism without looking at notes?
+- **Visual:** Visual diagnostic question model testing parameter adjustment and causal logic.
+- **Diagnostic Check:** Rapid conceptual verification distinguishing core mechanisms.
+- **Scenario Prediction:** Predict how the system responds to dynamic environmental variations.
+- **Metacognitive Verification:** Articulate the causal "why" behind the mechanism independently.
 **Notes:** Conduct an in-flight comprehension check using finger votes or mini-whiteboards. Address any residual confusion immediately.
 
 ---
 
 ### Slide 8: Key Takeaways & Synthesis Exit Ticket
 - **Type:** Summary & Closure
-- **Core Principle 1:** Foundational takeaway regarding ${topic}.
-- **Core Principle 2:** Dynamic rule governing behavior and equilibrium in ${subject}.
-- **Formative Exit Slip:** Complete the 3-2-1 exit ticket before dismissal (3 key terms, 2 mechanisms, 1 remaining question).
-- **Preview:** Bridge to upcoming lesson and extended transfer problems.
+- **Visual:** Synthesis concept map linking core principles to the upcoming curricular unit.
+- **Foundational Rule:** All systems in ${subject} follow predictable transformation dynamics.
+- **Exit Ticket:** Complete the 3-2-1 formative exit slip before dismissal.
+- **Next Unit Bridge:** Advanced applications and interdisciplinary extensions in ${subject}.
 **Notes:** Collect exit tickets to assess individual mastery against today's target learning objectives and inform tomorrow's starter.
 `;
   }

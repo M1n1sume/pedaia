@@ -1,5 +1,5 @@
 // PEDAIA Universal Service Worker for Multi-Device & Offline Accessibility
-const CACHE_NAME = 'pedaia-cache-v34';
+const CACHE_NAME = 'pedaia-cache-v35';
 const APP_SHELL = [
   './',
   './index.html',
@@ -8,7 +8,8 @@ const APP_SHELL = [
   './icon-192.png',
   './icon-512.png',
   './manifest.json',
-  './css/styles.css'
+  './css/styles.css',
+  './js/visualGenerator.js'
 ];
 
 self.addEventListener('install', (event) => {
