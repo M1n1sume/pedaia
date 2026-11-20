@@ -304,49 +304,41 @@
         </button>
       </div>
 
-      <!-- Center: Atelier Studio Switcher (Unified with Home, spacious & responsive) -->
+      <!-- Center: Atelier Studio Switcher (Unified with Dashboard, spacious & responsive) -->
       <nav class="hidden lg:flex items-center p-1 rounded-xl bg-slate-100/90 dark:bg-slate-800/90 border border-slate-200/80 dark:border-slate-700/80 shadow-2xs text-xs font-semibold shrink min-w-0 gap-1" id="header-studio-switcher" aria-label="Instructional Studios">
-        <button data-nav="dashboard" class="nav-item flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-white transition-all whitespace-nowrap cursor-pointer" title="Instructional Design Studio Dashboard">
+        <button data-nav="dashboard" class="nav-item flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-white transition-all whitespace-nowrap cursor-pointer" title="Instructional Design Studio Dashboard" aria-label="Dashboard">
           <svg class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
           </svg>
-          <span>Home</span>
+          <span>Dashboard</span>
         </button>
 
-        <button data-nav="lesson-planning" class="nav-item flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-white transition-all whitespace-nowrap cursor-pointer" title="Lesson Planner (5E, UbD, 4A's, Direct Instruction)">
-          <span class="text-xs">📖</span>
-          <span>Planner</span>
+        <button data-nav="lesson-planning" class="nav-item flex items-center justify-center px-2.5 py-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-white transition-all whitespace-nowrap cursor-pointer text-sm" title="Lesson Planner (5E, UbD, 4A's, Direct Instruction)" aria-label="Lesson Planner">
+          <span class="leading-none">📖</span>
         </button>
 
-        <button data-nav="activity-design" class="nav-item flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-white transition-all whitespace-nowrap cursor-pointer" title="Activity Designer (Experiential Labs & Problem-Solving Tasks)">
-          <span class="text-xs">🔬</span>
-          <span>Activity</span>
+        <button data-nav="activity-design" class="nav-item flex items-center justify-center px-2.5 py-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-white transition-all whitespace-nowrap cursor-pointer text-sm" title="Activity Designer (Experiential Labs & Problem-Solving Tasks)" aria-label="Activity Designer">
+          <span class="leading-none">🔬</span>
         </button>
 
-        <button data-nav="questioning" class="nav-item flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-white transition-all whitespace-nowrap cursor-pointer" title="Questioning Studio (Bloom's Taxonomy Cognitive Matrix)">
-          <span class="text-xs">💡</span>
-          <span>Questions</span>
+        <button data-nav="questioning" class="nav-item flex items-center justify-center px-2.5 py-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-white transition-all whitespace-nowrap cursor-pointer text-sm" title="Questioning Studio (Bloom's Taxonomy Cognitive Matrix)" aria-label="Questioning Studio">
+          <span class="leading-none">💡</span>
         </button>
 
-        <button data-nav="differentiation" class="nav-item flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-white transition-all whitespace-nowrap cursor-pointer" title="Differentiation Studio (Tiered Scaffolding & Learner Profiles)">
-          <span class="text-xs">⚖️</span>
-          <span class="hidden xl:inline">Differentiation</span>
-          <span class="xl:hidden">Diff</span>
+        <button data-nav="differentiation" class="nav-item flex items-center justify-center px-2.5 py-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-white transition-all whitespace-nowrap cursor-pointer text-sm" title="Differentiation Studio (Tiered Scaffolding & Learner Profiles)" aria-label="Differentiation Studio">
+          <span class="leading-none">⚖️</span>
         </button>
 
         <!-- AI Output Studio with Dedicated Wrapper -->
         <div id="header-output-studio-wrapper" class="flex items-center">
-          <button data-nav="ai-output-studio" id="nav-ai-output-studio" class="nav-item flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-violet-700 dark:text-violet-300 hover:text-violet-900 dark:hover:text-white hover:bg-violet-100/50 dark:hover:bg-violet-900/40 transition-all font-bold cursor-pointer whitespace-nowrap" title="AI Output Studio — Generate PowerPoint, Posters, Worksheets, Flashcards & Diagrams">
-            <span class="text-xs">🎨</span>
-            <span>AI Output</span>
-            <span class="px-1.5 py-0.5 rounded-full text-[8.5px] font-mono bg-violet-600 text-white uppercase font-bold tracking-wider leading-none shadow-2xs">New</span>
+          <button data-nav="ai-output-studio" id="nav-ai-output-studio" class="nav-item flex items-center justify-center px-2.5 py-1.5 rounded-lg text-violet-700 dark:text-violet-300 hover:text-violet-900 dark:hover:text-white hover:bg-violet-100/50 dark:hover:bg-violet-900/40 transition-all font-bold cursor-pointer whitespace-nowrap text-sm" title="AI Output Studio — Generate PowerPoint, Posters, Worksheets, Flashcards & Diagrams" aria-label="AI Output Studio">
+            <span class="leading-none">🎨</span>
           </button>
         </div>
 
         <!-- Admin Only Tab (Strictly visible only when authenticated as Administrator) -->
-        <button data-nav="admin" id="nav-admin-tab" class="hidden nav-item flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-amber-700 dark:text-amber-300 hover:text-amber-900 dark:hover:text-white hover:bg-amber-50 dark:hover:bg-amber-950/60 transition-all font-bold cursor-pointer whitespace-nowrap" title="Admin Console & Activity Telemetry">
-          <span class="text-xs">👑</span>
-          <span>Admin</span>
+        <button data-nav="admin" id="nav-admin-tab" class="hidden nav-item flex items-center justify-center px-2.5 py-1.5 rounded-lg text-amber-700 dark:text-amber-300 hover:text-amber-900 dark:hover:text-white hover:bg-amber-50 dark:hover:bg-amber-950/60 transition-all font-bold cursor-pointer whitespace-nowrap text-sm" title="Admin Console & Activity Telemetry" aria-label="Admin Console">
+          <span class="leading-none">👑</span>
         </button>
       </nav>
 
